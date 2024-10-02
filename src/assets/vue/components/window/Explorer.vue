@@ -1,6 +1,14 @@
+<script>
+import TitleBar from '../gui/TitleBar.vue';
+export default {
+  components: { TitleBar }
+}
+</script>
 <template>
-  <!-- <div class="explorer absolute bg-white h-full w-full"> -->
-  <div class="explorer">
-    this is Explorer  
+  <div class="explorer h-full w-full border shadow-md">
+    <TitleBar />
+    <div class="mt-5 px-3 py-5">
+      this is Explorer
+    </div>
   </div>
 </template>

@@ -12,6 +12,7 @@ import { mainStore } from './MainStore';
 import ContextMenu from './gui/ContextMenu';
 import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';
 import WindowTask from './plugin/WindowTask';
+import FloatMenu from './gui/FloatMenu';
 
 window.axios = axios;
 window.auth = auth;
@@ -32,7 +33,6 @@ mainApp.use(new WindowTask());
 // use emitter
 mainApp.config.globalProperties.emitter = mitt();
 
-
 // use pinia
 const pinia = createPinia();
 mainApp.use(pinia);
@@ -45,7 +45,8 @@ const router = createRouter({
 mainApp.use(router);
 
 // use context menu
-mainApp.config.globalProperties.ContextMenu = new ContextMenu();
+// mainApp.config.globalProperties.ContextMenu = new ContextMenu();
+mainApp.config.globalProperties.FloatMenu = new FloatMenu();
 
 // check auth
 auth().check()
@@ -61,6 +62,6 @@ auth().check()
   }
   );
 
-window.main = app;
+// window.main = app;
 
 

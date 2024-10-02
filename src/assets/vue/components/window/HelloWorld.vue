@@ -20,7 +20,7 @@ export default {
 </script>
 
 <template>
-  <div class="helloworld h-full w-full border">
+  <div class="helloworld h-full w-full border shadow-md">
     <TitleBar />
     <div class="mt-5 px-3 py-5">
       <h1 class="text-center underline text-5xl font-bold tracking-widest text-blue-500">Hello World</h1>

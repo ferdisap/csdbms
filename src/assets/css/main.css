@@ -19,16 +19,16 @@ body{
 }
 
 @layer components{
-  .contextmenu {
+  .floatmenu{
     @apply border shadow-md
   }
-  .contextmenu .container {
-    @apply bg-white w-60 flex flex-col text-sm py-1 px-1 text-gray-500 shadow-lg
+  .floatmenu .container{
+    @apply bg-white w-60 flex flex-col text-xl py-1 px-1 text-gray-500 shadow-lg
   }
-  .contextmenu .list{
+  .floatmenu .list{
     @apply flex bg-white hover:bg-gray-100 py-1 px-1 cursor-pointer text-gray-900
   }
-  .contextmenu hr {
+  .floatmenu hr{
     @apply border border-gray-300 block mt-1 my-1 border-solid
   }
 }

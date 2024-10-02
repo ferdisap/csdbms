@@ -53,11 +53,12 @@ class WindowTask {
     this.unmountTask(task);
 
     const taskEl = document.getElementById(task.id);
-    this.tm.delete(taskEl);
     const windowEl = document.getElementById(window.id);
+    this.tm.delete(taskEl);
     this.em.delete(windowEl);
     this.wm.delete(task);
-    this.tm.delete(window);
+    this.tm.delete(window);    
+    this.o[this.o.indexOf(task.id)] = undefined;
   }
 
   /**
@@ -130,6 +131,7 @@ class WindowTask {
     const el = document.createElement('div');
     el.classList.add('app-window');
     el.id = Randomstring.generate({ charset: 'alphabetic' });
+    el.addEventListener('click', this.setToTop.bind(this, el));
     window.id = el.id;
     el.style.position = 'absolute';
     el.style.height = '100%';
@@ -145,6 +147,8 @@ class WindowTask {
 
   unmountWindow(window) {
     window.unmount();
+    const windowEl = document.getElementById(window.id);
+    windowEl.remove();
   }
 
   /**
@@ -169,13 +173,21 @@ class WindowTask {
       windowel.style.display = styleDisplay;
     } else {
       windowel.style.display = '';
-      // set z-index;
+      // set z-index; sama dengan @setToTop
       this.o[this.o.indexOf(task.id)] = undefined;
       this.o.push(task.id);
       windowel.style.zIndex = (this.o.length) + 80;
     }
 
-    this.setBorderBottomTask(el.task, windowel.style.display);
+    this.setBorderBottomTask(el.task ?? document.getElementById(task.id), windowel.style.display);
+  }
+
+  setToTop(windowEl){
+    const window = this.getWindowByElement(windowEl);
+    const task = this.getTask(window);
+    this.o[this.o.indexOf(task.id)] = undefined;
+    this.o.push(task.id);
+    windowEl.style.zIndex = (this.o.length) + 80;
   }
 
   /**
@@ -203,8 +215,25 @@ class WindowTask {
     setPositionAllPoints(window);    
   }
 
-  size(){
-    
+  maximize(event){
+    const window = event.target.closest(".app-window");
+    window.style.height = '100%';
+    window.style.width = '100%';
+    window.style.left = '0px';
+    window.style.top = '0px';
+  }
+
+  minimize(event){
+    const window = event.target.closest(".app-window");
+    window.style.height = '500px';
+    window.style.width = '500px';
+  }
+
+  close(windowEl,event){
+    if(event) event.stopPropagation();
+    const window = this.getWindowByElement(windowEl);
+    const task = this.getTask(window);
+    this.stopTask(task);
   }
 
 

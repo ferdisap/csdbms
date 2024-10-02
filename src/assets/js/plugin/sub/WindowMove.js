@@ -58,9 +58,8 @@ export default class WindowMove {
     if(!window){
       window = this.window;
     }
-    // bila perlu window yang fullscreen ubah menjadi eg; 500px di line ini
-    // if(window.style.height === '100%') window.style.height = '500px';
-    // if(window.style.width === '100%') window.style.width ='500px';
+
+    window.style.opacity = '50%';
 
     // create frame
     const frame = createFrameMove(window);
@@ -80,6 +79,7 @@ export default class WindowMove {
       window.style.width = frame.style.width;
       window.style.height = frame.style.height;
       frame.remove()
+      window.style.opacity = '';
     }, { once: true })
   }
 }
