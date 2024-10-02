@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @import "node_modules/tailwindcss/base.css";
+@import "node_modules/tailwindcss/components.css";
+@import "node_modules/tailwindcss/utilities.css"; */
+
+body{
+  height: 100vh;
+  width: 100vw;
+}
+
+@layer components {
+  .button-login {
+    @apply text-white py-1 px-3 font-semibold shadow-sm mx-2 bg-violet-400 hover:bg-violet-600 rounded-full
+  }
+}
+
+a {
+  color: revert;
+  text-decoration: revert;
+}
+
+
+@layer components {
+  .clc {
+    @apply top-0 left-0 h-full w-full z-50 absolute bg-[rgba(0,0,0,0.5)]
+  }
+  .error-form {
+    @apply text-sm text-red-600 text-left
+  }
+}
+
+.clc-buffer {
+  z-index: 100;
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  
+  animation: spin 2s linear infinite;
+
+  position: absolute;
+  width:20px;
+  height:20px;
+  top:calc(25% + 20px);
+  left:calc(50% - 10px);
+}
+
+@keyframes spin {
+  from {transform:rotate(0deg);}
+  to {transform:rotate(360deg);}
+}

@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @import "node_modules/tailwindcss/base.css";
+@import "node_modules/tailwindcss/components.css";
+@import "node_modules/tailwindcss/utilities.css"; */
+
+body{
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+}
+.dump_red{
+  border: 1px solid red !important;
+}
+.dump_green{
+  border: 1px solid green !important;
+}
+
+@layer components{
+  .contextmenu {
+    @apply border shadow-md
+  }
+  .contextmenu .container {
+    @apply bg-white w-60 flex flex-col text-sm py-1 px-1 text-gray-500 shadow-lg
+  }
+  .contextmenu .list{
+    @apply flex bg-white hover:bg-gray-100 py-1 px-1 cursor-pointer text-gray-900
+  }
+  .contextmenu hr {
+    @apply border border-gray-300 block mt-1 my-1 border-solid
+  }
+}
+
+@layer components {
+  .clc {
+    @apply top-0 left-0 h-full w-full z-50 absolute bg-[rgba(0,0,0,0.5)]
+  }
+  .window-size-point-satu, .window-size-point-tiga{
+    @apply hover:cursor-nwse-resize
+  }
+  .window-size-point-dua, .window-size-point-empat{
+    @apply hover:cursor-nesw-resize
+  }
+}

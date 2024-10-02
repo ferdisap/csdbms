@@ -1,0 +1,32 @@
+GET http://127.0.0.1:8000/sanctum/csrf-cookie
+
+###
+
+POST http://127.0.0.1:8000/api/login
+content-type: application/json
+
+{
+  "email": "luffy@example.com",
+  "password": "password"
+}
+
+###
+
+POST http://127.0.0.1:8000/api/user
+content-type: application/json
+X-Requested-With: XMLHttpRequest
+Authorization: Bearer 107|R2yISojn7IxEsqUki3VQLIy0KnN3v59Q83UpviyEd56d8e44
+
+###
+
+POST http://127.0.0.1:8000/api/logout
+content-type: application/json
+X-Requested-With: XMLHttpRequest
+Authorization: Bearer 107|R2yISojn7IxEsqUki3VQLIy0KnN3v59Q83UpviyEd56d8e44
+
+###
+
+POST http://127.0.0.1:8000/api/auth-check
+content-type: application/json
+X-Requested-With: XMLHttpRequest
+Authorization: Bearer 108|ppZBZEeJ7IUmrPNPZDkJqOma85aA2xshJE2YoU7X6fdf5726
