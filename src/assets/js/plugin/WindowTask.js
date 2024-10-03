@@ -7,7 +7,7 @@ import Randomstring from 'randomstring';
 import WindowMove from './sub/WindowMove';
 import { findAncestor } from '../util/helper';
 import WindowSize from './sub/WindowSize';
-import { setPositionAllPoints } from './sub/WindowSize';
+import { setDotsPosition, setLinesPosition } from './sub/WindowSize';
 
 class WindowTask {
   o = [];
@@ -212,21 +212,26 @@ class WindowTask {
     const wmove = new WindowMove();
     wmove.onPointerDown(event, window);
 
-    setPositionAllPoints(window);    
+    setDotsPosition(window);    
+    setLinesPosition(window);    
   }
 
   maximize(event){
     const window = event.target.closest(".app-window");
-    window.style.height = '100%';
-    window.style.width = '100%';
     window.style.left = '0px';
     window.style.top = '0px';
+    window.style.height = '100%';
+    window.style.width = '100%';
+    setDotsPosition(window);    
+    setLinesPosition(window);
   }
 
   minimize(event){
     const window = event.target.closest(".app-window");
     window.style.height = '500px';
     window.style.width = '500px';
+    setDotsPosition(window);    
+    setLinesPosition(window);
   }
 
   close(windowEl,event){

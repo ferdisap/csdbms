@@ -11,6 +11,7 @@ export default class FloatMenu {
 
   active = []; // contain menu id. index element refers to menu level
   menus = new WeakMap();
+  anchor; // HTMLElement
 
   constructor() {
     document.addEventListener('click', ()=> this.off())
@@ -51,6 +52,7 @@ export default class FloatMenu {
     triggerElement.addEventListener(eventName, (e) => {
       e.stopPropagation();
       e.preventDefault();
+      this.anchor = e.target;
 
       const previousId = this.active[level];
       let currentMenu = document.getElementById(triggerElement.menu[eventName]);
@@ -134,6 +136,7 @@ export default class FloatMenu {
       }
       this.active = [];
     }
+    this.anchor = undefined;
   }
 
   on(menuId) {

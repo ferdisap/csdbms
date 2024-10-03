@@ -22,14 +22,17 @@ export default {
     startMenu(){
       document.dispatchEvent(new Event('start-menu'));
     },
+    close(){
+      this.$task.stopTask(this.$task.getTaskByElement(this.FloatMenu.anchor.closest('.app-task')));
+    }
   },
   mounted(){
-    window.taskbar = this;
+    // window.taskbar = this;
   }
 }
 </script>
 <template>
-  <div :id="componentId" class="taskbar h-full w-full">
+  <div :id="componentId" class="taskbar h-full w-full absolute z-[200]">
     <nav class="z-[200] bottom-0 h-full w-full bg-gray-500 text-white flex items-center shadow-md">
       <!-- start menu -->
       <div class="flex h-full mr-2 float-start">
@@ -44,6 +47,7 @@ export default {
   
       <!-- window task -->
       <div id="app-windowtask" class="flex h-full mr-2">
+        <!-- tempatnya task -->
       </div>
   
       <!-- other, eg: login state -->
@@ -55,7 +59,7 @@ export default {
     </nav>
     <FloatMenu :trigger="[{triggerId: componentId, on: 'contextmenu'}]">
       <div class="list">
-        <div>close</div>
+        <div @click="close">close</div>
       </div>
     </FloatMenu>
     <FloatMenu :trigger="[{triggerId: 'auth-menu', on: 'click'}]">

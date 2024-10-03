@@ -37,10 +37,17 @@ body{
   .clc {
     @apply top-0 left-0 h-full w-full z-50 absolute bg-[rgba(0,0,0,0.5)]
   }
-  .window-size-point-satu, .window-size-point-tiga{
-    @apply hover:cursor-nwse-resize
-  }
-  .window-size-point-dua, .window-size-point-empat{
-    @apply hover:cursor-nesw-resize
-  }
+}
+
+.ws-line-1:hover, .ws-line-3:hover{
+  cursor:n-resize;
+}
+.ws-line-2:hover, .ws-line-4:hover{
+  cursor:ew-resize;
+}
+.ws-dot-1:hover, .ws-dot-3:hover{
+  cursor:nwse-resize;
+}
+.ws-dot-2:hover, .ws-dot-4:hover{
+  cursor: nesw-resize;
 }

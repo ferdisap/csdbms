@@ -44,15 +44,37 @@ export default class WindowMove {
     this.window = windowElement;
   }
   setXY(target, rect, pointerdownX, pointerdownY, pointerupX, pointerupY) {
-    //const rect = target.getBoundingClientRect();
-    const x1 = rect.x;
-    const y1 = rect.y;
-    const x2 = pointerupX - pointerdownX;
-    const y2 = pointerupY - pointerdownY;
-    const xfinal = (x1 + x2) < 0 ? 0 : (x1 + x2);
-    const yfinal = (y1 + y2) < 0 ? 0 : (y1 + y2);
-    target.style.left = xfinal + 'px';
-    target.style.top = yfinal + 'px';
+    // const x1 = rect.x;
+    // const y1 = rect.y;
+    // const x2 = pointerupX - pointerdownX;
+    // const y2 = pointerupY - pointerdownY;
+    // const xfinal = (x1 + x2) < 0 ? 0 : (x1 + x2);
+    // const yfinal = (y1 + y2) < 0 ? 0 : (y1 + y2);
+    // target.style.left = xfinal + 'px';
+    // target.style.top = yfinal + 'px';
+    // return;
+    const l = (rect.x + (pointerupX - pointerdownX)) < -5 ? -5 : (rect.x + (pointerupX - pointerdownX));
+    const w = target.ownerDocument.firstElementChild.getBoundingClientRect().width;
+    // suaya jika framenya di geser maximal ke kiri, layar akan dibagi 2 dan ditaruh di kiri
+    if(l <= -5) {
+      const h = target.closest('#app-content-container').getBoundingClientRect().height;
+      target.style.left = 0;
+      target.style.top = 0;
+      target.style.width = w/2 + 'px';
+      target.style.height = h + 'px';
+    } 
+    // suaya jika framenya di geser maximal ke kiri, layar akan dibagi 2 dan ditaruh di kanan
+    else if((l + rect.width) >= (w + 5)){
+      const h = target.closest('#app-content-container').getBoundingClientRect().height;
+      target.style.left = w/2 + 'px';
+      target.style.top = 0;
+      target.style.width = w/2 + 'px';
+      target.style.height = h + 'px';
+    }
+    else {
+      target.style.left = l + 'px';
+      target.style.top = (rect.y + (pointerupY - pointerdownY)) < 0 ? 0 : (rect.y + (pointerupY - pointerdownY)) + 'px';
+    }
   }
   onPointerDown(edown, window) {
     if(!window){

@@ -22,10 +22,10 @@ export default {
 
 <template>
   <div class="main h-full w-full">
-    <div id="app-content-container" class="w-full h-[97%] relative bg-yellow-200">
+    <div id="app-content-container" class="w-full h-[96.5%] relative bg-yellow-200">
       <Content />
     </div>
-    <div class="w-full h-[3%]">
+    <div class="w-full h-[3%] relative">
       <TaskBar/>
     </div>
     <FloatMenu :trigger="[{triggerId: 'app-content-container', on: 'contextmenu'}]">
