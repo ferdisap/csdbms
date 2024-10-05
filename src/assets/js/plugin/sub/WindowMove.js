@@ -58,8 +58,8 @@ export default class WindowMove {
     // suaya jika framenya di geser maximal ke kiri, layar akan dibagi 2 dan ditaruh di kiri
     if(l <= -5) {
       const h = target.closest('#app-content-container').getBoundingClientRect().height;
-      target.style.left = 0;
-      target.style.top = 0;
+      target.style.left = '0px';
+      target.style.top = '0px';
       target.style.width = w/2 + 'px';
       target.style.height = h + 'px';
     } 
@@ -67,7 +67,7 @@ export default class WindowMove {
     else if((l + rect.width) >= (w + 5)){
       const h = target.closest('#app-content-container').getBoundingClientRect().height;
       target.style.left = w/2 + 'px';
-      target.style.top = 0;
+      target.style.top = '0px';
       target.style.width = w/2 + 'px';
       target.style.height = h + 'px';
     }
@@ -78,7 +78,9 @@ export default class WindowMove {
   }
   onPointerDown(window, beforeMove, afterMove, edown) {
     if(!window.enableMoving) return;
-    beforeMove();
+    if(beforeMove) beforeMove();
+    const pleft = window.style.left;
+    const ptop = window.style.top;
 
     window.style.opacity = '50%';
 
@@ -93,15 +95,19 @@ export default class WindowMove {
       this.setXY(frame, rectframe, edown.clientX, edown.clientY, emove.clientX, emove.clientY);
     }
     document.addEventListener('pointermove', moving);
-    document.addEventListener('pointerup', (eup) => {
+    document.addEventListener('pointerup', () => {
       document.removeEventListener('pointermove', moving);
       window.style.top = frame.style.top;
       window.style.left = frame.style.left;
       window.style.width = frame.style.width;
       window.style.height = frame.style.height;
+      
+      window.pleft = pleft;
+      window.ptop = ptop
+
       frame.remove()
       window.style.opacity = '';
-      afterMove();
+      if(afterMove) afterMove();
     }, { once: true })
   }
 }

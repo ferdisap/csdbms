@@ -21,7 +21,19 @@ export default {
     title: {
       type: String,
       default: 'Technical Publication'
-    }
+    },
+    hideButton: {
+      type: Boolean,
+      default: true,
+    },
+    sizingButton: {
+      type: Boolean,
+      default: true,
+    },
+    closeButton: {
+      type: Boolean,
+      default: true,
+    },
   },
   methods: {
     sizing(event){
@@ -44,13 +56,13 @@ export default {
 
 <template>
   <nav  class="titlebar bg-blue-500 text-white h-12 relative flex">
-    <div @pointerdown="this.isMaximize = false" class="trigger-move h-full w-full flex justify-between items-center mr-2">
+    <div @pointerdown="($props.sizingButton ? (this.isMaximize = false) : null)" class="trigger-move h-full w-full flex justify-between items-center mr-2">
       <span href="/" class="text-lg float-start ml-3">{{ $props.title }}</span>
     </div>
     <div class="py-3 mr-3 flex space-x-2">
-      <div @click.stop="hide" class="h-6 w-6 shadow-sm bg-green-500 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">minimize</span></div>
-      <div @click.stop="sizing" class="h-6 w-6 shadow-sm bg-yellow-500 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">{{ isMaximize ? 'close_fullscreen' : 'open_in_full' }}</span></div>
-      <div @click.stop="close" class="h-6 w-6 shadow-sm bg-red-600 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">close</span></div>
+      <div v-if="$props.hideButton" @click.stop="hide" class="h-6 w-6 shadow-sm bg-green-500 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">minimize</span></div>
+      <div v-if="$props.sizingButton" @click.stop="sizing" class="h-6 w-6 shadow-sm bg-yellow-500 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">{{ isMaximize ? 'close_fullscreen' : 'open_in_full' }}</span></div>
+      <div v-if="$props.closeButton" @click.stop="close" class="h-6 w-6 shadow-sm bg-red-600 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">close</span></div>
     </div>
   </nav>
 </template>

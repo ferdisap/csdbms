@@ -39,6 +39,7 @@ class Window {
   pm = new WeakMap(); // k = window, v = property
   ep = new WeakMap(); // k = propertyEl, v = property;
 
+  // dipakai di task
   getTaskByElement(taskEl) {
     return this.te.get(taskEl);
   }
@@ -57,7 +58,7 @@ class Window {
     // create window
     if (config.window) {
       window = this.newWindow(config.window);
-      window.appId = "top" + Randomstring.generate({ charset: 'alphabetic' })
+      window.appId = window.appId ?? "top" + Randomstring.generate({ charset: 'alphabetic' })
     }
     if (config.task) {
       task = this.newTask(config.task);
@@ -186,8 +187,6 @@ class Window {
     const triggerElement = windowEl.querySelector(".trigger-move");
     if (triggerElement) {
       if (windowEl.matches(".window-top")) {
-        const pleft = windowEl.style.left;
-        const ptop = windowEl.style.top;
         (new WindowMove()).attach(triggerElement,
           () => {
             if (windowEl.style.height === '100%') windowEl.style.height = '500px';
@@ -196,12 +195,14 @@ class Window {
             this.setToTop(windowEl);
           },
           () => {
-            windowEl.style.pleft = pleft
-            windowEl.style.ptop = ptop;
             setDotsPosition(windowEl);
             setLinesPosition(windowEl);
           });
-      } else {
+      } 
+      else if(windowEl.matches(".window-dialog")){
+        (new WindowMove()).attach(triggerElement, () => this.setToTop(windowEl));
+      }
+      else {
         (new WindowMove()).attach(triggerElement);
       }
     }
@@ -210,6 +211,10 @@ class Window {
   // ##########################################################################################
 
   mountWindow(window) {
+    // check wheter windows has mounted or not
+    const windowEl = document.getElementById(window.appId);
+    if(windowEl && windowEl.__vue_app__._instance.proxy !== undefined) return;
+
     const container = document.getElementById('app-content');
     const el = document.createElement('div');
     el.classList.add('app-window');
@@ -220,15 +225,26 @@ class Window {
     el.isMaximize = true;
     el.style.height = '100%';
     el.style.width = '100%';
+    el.style.top = '0px';
+    el.style.left = '0px';
+    el.enableMoving = true;
+    el.enableSizing = true;
     el.style.backgroundColor = '#ffffff';
     container.appendChild(el);
     window.mount('#' + el.id);
     this.em.set(el, window);
-    el.style.zIndex = this.zIndex.length;
     this.enableSizing(el);
     this.enableMoving(el);
-
+    
     this.zIndex.push(el.id);
+
+    el.style.zIndex = this.zIndex.length + 80;
+
+    el.addEventListener('new-window', (e) => {
+      // console.log(e.data);
+      e.data.config.window = {app: window};
+      this.create(e.data.config);
+    },true)
   }
   mountTask(task) {
     const container = document.getElementById('app-windowtask');
@@ -244,30 +260,40 @@ class Window {
     this.setBorderBottomTask(el)
   }
   mountDialog(dialog) {
-    const container = document.getElementById('app-windowtask');
+    const container = document.getElementById('app-content');
     const el = document.createElement('div');
     el.classList.add('app-window');
     el.classList.add('window-dialog');
     el.id = dialog.appId;
+    el.isMaximize = false;
+    el.enableSizing = false;
+    el.style.position = 'absolute';
+    el.style.width = '400px';
+    el.style.height = '200px';
+    el.style.top = ((top.innerHeight/2) - 100) + 'px';
+    el.style.left = ((top.innerWidth/2) - 200) + 'px';
+    el.style.backgroundColor = '#ffffff';
+    el.addEventListener('click', this.setToTop.bind(this, el));
     dialog.id = el.id
     container.appendChild(el);
     dialog.mount('#' + el.id);
     this.ed.set(el, dialog);
-
+    
     this.enableMoving(el);
-
+    
     if (this.zIndex[this.zIndex.length - 1] !== dialog.windowId) {
       this.zIndex[this.zIndex.indexOf(dialog.windowId)] = undefined;
       this.zIndex.push(dialog.windowId)
     }
     this.zIndex.push(el.id);
-
+    el.style.zIndex = this.zIndex.length + 80;
+    
     // prevent from user interactive in top-window
     const windowEl = document.getElementById(dialog.windowId);
     this.addTopWindowBlocker(windowEl);
   }
   mountAlert(alert) {
-    const container = document.getElementById('app-windowtask');
+    const container = document.getElementById('app-content');
     const el = document.createElement('div');
     el.classList.add('app-window');
     el.classList.add('window-alert');
@@ -290,7 +316,7 @@ class Window {
     this.addTopWindowBlocker(windowEl);
   }
   mountProperty(property) {
-    const container = document.getElementById('app-windowtask');
+    const container = document.getElementById('app-content');
     const el = document.createElement('div');
     el.classList.add('app-window');
     el.classList.add('window-property');
@@ -316,10 +342,13 @@ class Window {
   addTopWindowBlocker(topWindowEl) {
     const blocker = document.createElement('div');
     blocker.classList.add("window-blocker");
-    blocker.style.position = topWindowEl.style.position;
+    blocker.style.position = 'fixed';
     blocker.style.height = topWindowEl.style.height;
     blocker.style.width = topWindowEl.style.width;
-    blocker.addEventListener((e) => {
+    blocker.style.top = topWindowEl.style.top;
+    blocker.style.left = topWindowEl.style.left;
+    blocker.style.backgroundColor = '#9090908a';
+    blocker.addEventListener('pointerdown',(e) => {
       e.preventDefault();
       e.stopPropagation();
     }, true);
@@ -355,6 +384,7 @@ class Window {
     if (dialogEl) {
       this.ed.delete(dialogEl);
     }
+    dialogEl.remove();
   }
   unmountAlert(alert) {
     alert.unmount();
@@ -362,6 +392,7 @@ class Window {
     if (alertEl) {
       this.ea.delete(alertEl);
     }
+    alertEl.remove();
   }
   unmountProperty(property) {
     property.unmount();
@@ -369,6 +400,7 @@ class Window {
     if (propertyEl) {
       this.ep.delete(propertyEl);
     }
+    propertyEl.remove();
   }
 
   // ##########################################################################################
@@ -407,7 +439,8 @@ class Window {
     const windowEl = document.getElementById(dialog.windowId);
     if (windowEl && this.em.has(windowEl)) {
       this.dm.delete(this.em.get(windowEl));
-      this.stopTopWindow(this.em.get(windowEl));
+      // this.stopTopWindow(this.em.get(windowEl));
+      this.removeTopWindowBlocker(windowEl);
     }
     this.unmountDialog(dialog);
   }
@@ -526,11 +559,12 @@ class Window {
   // ##########################################################################################
 
   maximize(event) {
+    console.log('maximize');
     const windowEl = event.target.closest(".app-window");
     if (!windowEl.isMaximize) {
-      windowEl.style.pleft = windowEl.style.left;
+      windowEl.pleft = windowEl.style.left;
       windowEl.style.left = '0px';
-      windowEl.style.ptop = windowEl.style.top;
+      windowEl.ptop = windowEl.style.top;
       windowEl.style.top = '0px';
       windowEl.style.height = '100%';
       windowEl.style.width = '100%';
@@ -539,10 +573,14 @@ class Window {
       this.setToTop(windowEl);
       return windowEl.isMaximize = true;
     } else {
-      windowEl.style.left = windowEl.style.pleft;
-      windowEl.style.top = windowEl.style.ptop;
       windowEl.style.height = '500px';
       windowEl.style.width = '500px';
+      
+      const pl = parseInt(windowEl.pleft);
+      const w = parseInt(windowEl.style.width);
+      windowEl.style.left = ((pl + w) > top.innerWidth ? (top.innerWidth - w) : w) - 5 + 'px';
+      windowEl.style.top = windowEl.ptop;
+
       setDotsPosition(windowEl);
       setLinesPosition(windowEl);
       windowEl.isMaximize = false;

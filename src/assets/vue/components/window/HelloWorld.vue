@@ -9,12 +9,26 @@ export default {
     }
   },
   components:{TitleBar},
+  methods:{
+    openDialog(e){
+      const evt = new Event('new-window');
+      evt.data = {
+        config: {
+          dialog: {
+            tes: 'aaa'
+          }
+        }
+      }
+      e.target.dispatchEvent(evt);
+      // top.dispatchEvent(evt);
+    }
+  },
   mounted() {
     // const e = new Event('new-task');
     // e.data = { id: this.componentId, title: 'Hello World'};
     // document.dispatchEvent(e);
     // this.$window.register(this);
-    window.helloworld = this;
+    // window.helloworld = this;
   }
 }
 </script>
@@ -26,6 +40,9 @@ export default {
       <h1 class="text-center underline text-5xl font-bold tracking-widest text-blue-500">Hello World</h1>
       <p class="mt-2">Welcome to the CSDB Management System. In this application, you are enable to create, manage, publish
         your technical pubication. This Application comply to the S1000D international standard to build Technical Manuals.
+      </p>
+      <p>
+        <button @click.stop="openDialog">Open Dialog Box</button>
       </p>
     </div>
   </div>

@@ -218,6 +218,10 @@ export default class WindowSize {
   }
   onpointerdown(window, dotOrLine = {}, edown) {
     if(!window.enableSizing) return;
+
+    const pleft = window.style.left;
+    const ptop = window.style.top;
+
     const frame = createFrameMove(window);
     frame.style.zIndex = window.style.zIndex + 1;
 
@@ -265,10 +269,14 @@ export default class WindowSize {
       window.style.left = frame.style.left;
       window.style.width = frame.style.width;
       window.style.height = frame.style.height;
+
+      window.pleft = pleft;
+      window.ptop = ptop
+
       frame.remove();
       setDotsPosition(window);
       setLinesPosition(window);
-    });
+    },{once:true});
   }
 }
 
