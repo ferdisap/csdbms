@@ -23,14 +23,15 @@ export default {
       auth().login(this.email, this.password, this.componentId)
         .then(r => {
           // dispatch event to parent/opener to continue process
-          const event = new Event('auth');
-          window.opener.document.dispatchEvent(event)
-          mainStore().componentLoadingProgress[this.componentId] = false;
-          if(r) window.close();
-          console.log(r);
+          window.opener.document.dispatchEvent(new Event('auth'))
+          mainStore().componentLoadingProgress.set(this.componentId, false);
+          window.close();
+        })
+        .catch(e => {
+          // console.log(window.e = e);
         })
         .finally(r => {
-          mainStore().componentLoadingProgress[this.componentId] = false;
+          mainStore().componentLoadingProgress.set(this.componentId, false);
         })
 
     }

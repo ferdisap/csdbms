@@ -29,7 +29,8 @@ export const auth = defineStore('auth', {
      * authenticating user
      * @param {string} email 
      * @param {string} password 
-     * @return {Promise} <fulfilled> true/false
+     * @return {Promise} <rejected> AxiosError
+     * @return {Promise} <fulfilled> response
      */
     async login(email, password, componentId = '') {
       const config = {
@@ -44,14 +45,13 @@ export const auth = defineStore('auth', {
       const login = await axios(config);
       if(login.status >= 200 && login.status < 300){
         this.setAuthToken("Bearer " + login.data.access_token);
-        return Promise.resolve(true);
-      } else {
-        return Promise.resolve(false);
       }
+      return login;
     },
     /**
      * logout authenticated user
-     * @return {Promise} <fulfilled> true/false
+     * @return {Promise} <rejected> AxiosError
+     * @return {Promise} <fulfilled> response
      */
     async logout(){
       const logout = await axios({
@@ -62,16 +62,12 @@ export const auth = defineStore('auth', {
           "Authorization": this.getAuthToken()
         }
       });
-      if(logout.status === 200){
-        return Promise.resolve(true);
-      }
-      else {
-        return Promise.resolve(false);
-      }
+      return logout;
     },
     /**
      * check wheter user is authenticated or not
-     * @return {Promise} <fulfilled> boolean true/false
+     * @return {Promise} <rejected> AxiosError
+     * @return {Promise} <fulfilled> response
      */
     async check() {
       if(this.isAuth){
@@ -87,12 +83,8 @@ export const auth = defineStore('auth', {
       });
       if (check.status === 200) {
         this.isAuth = true;
-        return Promise.resolve(true);
       }
-      else if (check.status === 401) {
-        return Promise.resolve(false);
-      }
-      return Promise.resolve(false);
+      return check;
     }
   }
 });

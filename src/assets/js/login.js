@@ -20,7 +20,7 @@ app.use(pinia);
 
 app.use(new ErrorResponseMessage());
 
-window.app = app;
+// window.app = app;
 
 setInterceptor(app);
 app.mount('#app');

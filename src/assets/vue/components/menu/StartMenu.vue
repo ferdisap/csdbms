@@ -7,13 +7,22 @@ export default {
   },
   methods:{
     newExplorer(){
-      this.$task.create({name: 'Explorer'})
+      this.$window.create({
+        window: {name: 'Explorer'},
+        task: {title: 'Explorer'},
+      })
     },
     newHelloWorld(){
-      this.$task.create({name: 'HelloWorld'})
+      this.$window.create({
+        window: {name: 'HelloWorld'},
+        task: {title: 'Hello World'}
+      })
     },
     newDML(){
-      this.$task.create({name: 'DML'})
+      this.$window.create({
+        window: {name: 'DML'},
+        task: {title: 'DML'}
+      })
     }
   },
   mounted(){

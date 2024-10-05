@@ -92,6 +92,7 @@ export {createLines}
 export default class WindowSize {
 
   attach(windowElement, both) {
+    windowElement.enableSizing = true;
     const attachDots = () => {
       const dots = createDots();
       for (let i = 0; i < dots.length; i++) {
@@ -216,6 +217,7 @@ export default class WindowSize {
     target.style.width = (rect.width + (rect.x - pointerupX)) + 'px';
   }
   onpointerdown(window, dotOrLine = {}, edown) {
+    if(!window.enableSizing) return;
     const frame = createFrameMove(window);
     frame.style.zIndex = window.style.zIndex + 1;
 

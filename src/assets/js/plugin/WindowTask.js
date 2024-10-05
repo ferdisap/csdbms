@@ -11,10 +11,10 @@ import { setDotsPosition, setLinesPosition } from './sub/WindowSize';
 
 class WindowTask {
   o = [];
-  wm; // k = task, v = window
-  tm; // k = window, v = task
-  em; // k = windowEl, v = window
-  te; // k = taskEl, v = task
+  wm = new WeakMap(); // k = task, v = window
+  tm = new WeakMap(); // k = window, v = task
+  em = new WeakMap(); // k = windowEl, v = window
+  te = new WeakMap(); // k = taskEl, v = task
 
   getWindow(task) {
     return this.wm.get(task);
@@ -33,15 +33,7 @@ class WindowTask {
     app.config.globalProperties.$task = new WindowTask();
   }
 
-  constructor() {
-    this.wm = new WeakMap();
-    this.tm = new WeakMap();
-    this.em = new WeakMap();
-    this.te = new WeakMap();
-    // this.order = new Map()
-  }
-
-  register(task, window) {
+  registerWindowTask(window,task) {
     this.wm.set(task, window);
     this.tm.set(window, task);
   }
@@ -69,7 +61,7 @@ class WindowTask {
   create(config = {}) {
     const task = this.newTask(config.title ?? config.name);
     const window = this.newWindow(config);
-    this.register(task, window);
+    this.registerWindowTask(window, task);
     this.startTask(task);
     return task;
   }

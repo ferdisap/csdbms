@@ -28,7 +28,7 @@ function setInterceptor(app){
       return response;
     },
     (axiosError) => {
-      if (axiosError.code && axiosError.response.data.errors) {
+      if (axiosError.code && axiosError.response.data && axiosError.response.data.errors) {
         for(const key of Object.keys(axiosError.response.data.errors)){
           app.config.globalProperties.$ersp.set(key, axiosError.response.data.errors[key]);
         }
@@ -38,11 +38,12 @@ function setInterceptor(app){
           message: `<i>${axiosError.message}</i>` + '<br/>' + axiosError.response.data.message
         }
         document.dispatchEvent(e)
-      } else {
-        console.error(axiosError.stack);
-      }
+      } 
+      // else {
+      //   console.error(axiosError.stack);
+      // }
       if(axiosError.config.useComponentLoadingProgress) mainStore().componentLoadingProgress[axiosError.config.useComponentLoadingProgress] = false;
-      return axiosError;
+      throw axiosError;
     }
   );
 }

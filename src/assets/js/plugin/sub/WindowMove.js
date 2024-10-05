@@ -34,14 +34,14 @@ export {clearSelection};
  * wmove.onPointerDown(event, windowEl);
  */
 export default class WindowMove {
-  window; // window element yang dibuat dengan createApp vue di mount
+  // window; // window element yang dibuat dengan createApp vue di mount
 
-  attach(pointerDownTriggerElement, windowElement){
-    pointerDownTriggerElement.addEventListener('pointerdown', this.onPointerDown.bind(this));
+  attach(pointerDownTriggerElement, beforeMove, afterMove, windowElement){
     if(!windowElement){
       windowElement = findAncestor(pointerDownTriggerElement,".app-window");
     }
-    this.window = windowElement;
+    windowElement.enableMoving = true;
+    pointerDownTriggerElement.addEventListener('pointerdown', this.onPointerDown.bind(this, windowElement, beforeMove, afterMove));
   }
   setXY(target, rect, pointerdownX, pointerdownY, pointerupX, pointerupY) {
     // const x1 = rect.x;
@@ -76,10 +76,9 @@ export default class WindowMove {
       target.style.top = (rect.y + (pointerupY - pointerdownY)) < 0 ? 0 : (rect.y + (pointerupY - pointerdownY)) + 'px';
     }
   }
-  onPointerDown(edown, window) {
-    if(!window){
-      window = this.window;
-    }
+  onPointerDown(window, beforeMove, afterMove, edown) {
+    if(!window.enableMoving) return;
+    beforeMove();
 
     window.style.opacity = '50%';
 
@@ -102,6 +101,7 @@ export default class WindowMove {
       window.style.height = frame.style.height;
       frame.remove()
       window.style.opacity = '';
+      afterMove();
     }, { once: true })
   }
 }

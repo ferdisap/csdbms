@@ -23,11 +23,11 @@ export default {
       document.dispatchEvent(new Event('start-menu'));
     },
     close(){
-      this.$task.stopTask(this.$task.getTaskByElement(this.FloatMenu.anchor.closest('.app-task')));
+      this.$window.stopTask(this.$window.getTaskByElement(this.FloatMenu.anchor.closest('.window-task')));
     }
   },
   mounted(){
-    // window.taskbar = this;
+    window.taskbar = this;
   }
 }
 </script>

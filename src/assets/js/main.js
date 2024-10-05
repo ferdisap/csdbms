@@ -11,8 +11,9 @@ import { auth } from './Auth';
 import { mainStore } from './MainStore';
 import ContextMenu from './gui/ContextMenu';
 import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';
-import WindowTask from './plugin/WindowTask';
+// import WindowTask from './plugin/WindowTask';
 import FloatMenu from './gui/FloatMenu';
+import window from './plugin/Window';
 
 window.axios = axios;
 window.auth = auth;
@@ -27,7 +28,8 @@ mainApp.use(new ErrorResponseMessage());
 setInterceptor(mainApp);
 
 // use my window
-mainApp.use(new WindowTask());
+mainApp.use(window);
+// mainApp.use(new WindowTask());
 // mainApp.config.globalProperties.$windowtask = new WindowTask();
 
 // use emitter
@@ -51,16 +53,16 @@ mainApp.config.globalProperties.FloatMenu = new FloatMenu();
 // check auth
 auth().check()
   .then(function(r){
-    if (!r) {
-      window.open("/login.html", "login", "popup,height=800,width=800,left=100");
-      document.addEventListener('auth', () => {
-        mainApp.mount('#app')
-      });
-    } else {
-      mainApp.mount('#app')
-    }
-  }
-  );
+    mainApp.mount('#app')
+  })
+  .catch((e) => {
+    mainApp.mount('#app');return;
+    top.open("/login.html", "login", "popup,height=800,width=800,left=100");
+    document.addEventListener('auth', () => {
+      mainStore().isAuth = true;
+      mainApp.mount('#app');
+    }, {once:true});
+  })
 
 // window.main = app;
 
