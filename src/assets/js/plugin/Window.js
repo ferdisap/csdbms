@@ -8,9 +8,10 @@ import Dialog from '../../vue/components/window/child/Dialog.vue';
 import Property from '../../vue/components/window/child/Property.vue';
 import Randomstring from 'randomstring';
 import WindowMove from './sub/WindowMove';
-import { findAncestor } from '../util/helper';
 import WindowSize from './sub/WindowSize';
 import { setDotsPosition, setLinesPosition } from './sub/WindowSize';
+import { randomInt } from '../util/helper';
+import {dialog as runDialog} from '../../vue/components/window/child/Dialog.vue';
 
 
 
@@ -19,6 +20,16 @@ import { setDotsPosition, setLinesPosition } from './sub/WindowSize';
  * alert window tidak bisa di move, tidak bisa di size, tidak ada button close, top-window nya tidak bisa user interactive
  * dialog window bisa di move dan tidak bisa di size, ada button closenya, top-window nya tidak bisa user interactive
  * property window bisa di move, tidak bisa di size, ada button closenya, top-windownya masih bisa interactive
+ * 
+ * CUSTOM EVENTS:
+ * 'new-window', 'close-window', 'toggle-window', 'sizing-window' yang di dispatch di element inside the window (sizing-window dimatikan karna nanti tidak bisa ubah icon di title bar).
+ * 
+ * TIPS:
+ * (success tested in prod) dari window.vue, jika ingin mengakses custom object di appnya maka run >>> this._.appContext.app.customObject
+ * (success tested in prod) dari app, jika ingin akses root element component pertama, run >>> app._container.firstElementChild
+ * (fail tested in prod) dari root window.vue, this._ === app._container.__vue_app__._instance (true, kalau di production, ._instance akan null)
+ * (fail tested in prod) dari app, jika ingin akses root component, maka run >>> app._container.__vue_app__._instance.data.componentId (sama dengan >>> this.componentId di dalam window.vue)
+ * kesimpulan: belum bisa akses root window.vue dari app
  */
 class Window {
   o = [];
@@ -42,6 +53,10 @@ class Window {
   // dipakai di task
   getTaskByElement(taskEl) {
     return this.te.get(taskEl);
+  }
+
+  constructor(){
+    top.addEventListener('close-window', this.close.bind(this));
   }
 
   /**
@@ -121,6 +136,8 @@ class Window {
     switch (config.name) {
       case 'HelloWorld':
         window = createApp(HelloWorld);
+        top.whw = window;
+        top.whx = createApp(HelloWorld);
         break;
       case 'Explorer':
         window = createApp(Explorer);
@@ -212,39 +229,43 @@ class Window {
 
   mountWindow(window) {
     // check wheter windows has mounted or not
-    const windowEl = document.getElementById(window.appId);
-    if(windowEl && windowEl.__vue_app__._instance.proxy !== undefined) return;
+    if(window._container) return;
 
     const container = document.getElementById('app-content');
     const el = document.createElement('div');
     el.classList.add('app-window');
     el.classList.add('window-top');
     el.id = window.appId;
-    el.addEventListener('click', this.setToTop.bind(this, el));
     el.style.position = 'absolute';
     el.isMaximize = true;
     el.style.height = '100%';
     el.style.width = '100%';
     el.style.top = '0px';
+    el.ptop = '0px';
+    el.pleft = '0px';
     el.style.left = '0px';
     el.enableMoving = true;
     el.enableSizing = true;
     el.style.backgroundColor = '#ffffff';
+    
     container.appendChild(el);
     window.mount('#' + el.id);
     this.em.set(el, window);
+
     this.enableSizing(el);
     this.enableMoving(el);
     
     this.zIndex.push(el.id);
-
     el.style.zIndex = this.zIndex.length + 80;
-
+    
+    el.addEventListener('click', this.setToTop.bind(this, el));
     el.addEventListener('new-window', (e) => {
-      // console.log(e.data);
       e.data.config.window = {app: window};
       this.create(e.data.config);
     },true)
+    el.addEventListener('close-window', this.close.bind(this),true);
+    el.addEventListener('toggle-window', (e) => this.toggle(e.data),true);
+    // el.addEventListener('sizing-window', this.sizing.bind(this),true);
   }
   mountTask(task) {
     const container = document.getElementById('app-windowtask');
@@ -273,14 +294,15 @@ class Window {
     el.style.top = ((top.innerHeight/2) - 100) + 'px';
     el.style.left = ((top.innerWidth/2) - 200) + 'px';
     el.style.backgroundColor = '#ffffff';
-    el.addEventListener('click', this.setToTop.bind(this, el));
-    dialog.id = el.id
-    container.appendChild(el);
+    container.appendChild(el);    
+    dialog.id = el.id;
     dialog.mount('#' + el.id);
     this.ed.set(el, dialog);
     
+    // configure to enable moving window
     this.enableMoving(el);
     
+    // set z Index
     if (this.zIndex[this.zIndex.length - 1] !== dialog.windowId) {
       this.zIndex[this.zIndex.indexOf(dialog.windowId)] = undefined;
       this.zIndex.push(dialog.windowId)
@@ -291,6 +313,13 @@ class Window {
     // prevent from user interactive in top-window
     const windowEl = document.getElementById(dialog.windowId);
     this.addTopWindowBlocker(windowEl);
+    
+    // add event
+    el.addEventListener('click', this.setToTop.bind(this, el));
+    el.addEventListener('close-window', this.close.bind(this),true);
+
+    // add dialog result
+    document.getElementById(dialog.windowId).dialog = runDialog();
   }
   mountAlert(alert) {
     const container = document.getElementById('app-content');
@@ -523,26 +552,6 @@ class Window {
     }
   }
 
-  // setToBottom(windowEl){
-  //   // this.zIndex[this.zIndex.indexOf(windowEl.id)] = undefined;
-  //   // this.zIndex.push(windowEl.id);
-  //   const a = [windowEl.id];
-  //   const childWindow = [];
-  //   if (this.dm.has(window)) childWindow.push(this.dm.get(window).appId);
-  //   if (this.am.has(window)) childWindow.push(this.am.get(window).appId);
-  //   if (this.pm.has(window)) childWindow.push(this.pm.get(window).appId);
-
-  //   // supaya urutan child window tetap beraturan
-  //   for (let i = 0; i < childWindow.length; i++) {
-  //     let index = this.zIndex.indexOf(childWindow[i])
-  //     this.zIndex[index] = undefined;
-  //     a[index] = childWindow[i]; // akan menghasilkan array index empty
-  //   }
-  //   a = a.filter(v => v);
-  //   a.reverse();
-  //   this.zIndex.unshift(...a);
-  // }
-
   /**
    * support function untuk function toogle task
    * @param {HTMLElement} taskEl 
@@ -558,9 +567,8 @@ class Window {
 
   // ##########################################################################################
 
-  maximize(event) {
-    console.log('maximize');
-    const windowEl = event.target.closest(".app-window");
+  sizing(event) {
+    const windowEl = event.target.closest(".app-window");;
     if (!windowEl.isMaximize) {
       windowEl.pleft = windowEl.style.left;
       windowEl.style.left = '0px';
@@ -576,10 +584,8 @@ class Window {
       windowEl.style.height = '500px';
       windowEl.style.width = '500px';
       
-      const pl = parseInt(windowEl.pleft);
-      const w = parseInt(windowEl.style.width);
-      windowEl.style.left = ((pl + w) > top.innerWidth ? (top.innerWidth - w) : w) - 5 + 'px';
-      windowEl.style.top = windowEl.ptop;
+      windowEl.style.left = (windowEl.pleft === '0px' ? randomInt(0,(top.innerWidth - parseInt(windowEl.style.width))) +'px' : windowEl.pleft);
+      windowEl.style.top = (windowEl.ptop === '0px' ? randomInt(0,(top.innerHeight - parseInt(windowEl.style.height))) +'px' : windowEl.ptop);
 
       setDotsPosition(windowEl);
       setLinesPosition(windowEl);

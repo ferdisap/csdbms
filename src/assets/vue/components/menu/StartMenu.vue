@@ -37,8 +37,8 @@ export default {
     // dummy
     setTimeout(()=>{
       // this.newExplorer();
+      // this.newDML();
       this.newHelloWorld();
-      this.newDML();
     },10)
   },
 }

@@ -37,14 +37,16 @@ export default {
   },
   methods: {
     sizing(event){
-      this.isMaximize = top.mainApp.config.globalProperties.$window.maximize(event);      
-      // top.mainApp.config.globalProperties.$window.setToTop(event.target.closest(".app-window"));
+      this.isMaximize = top.mainApp.config.globalProperties.$window.sizing(event);
     },
     hide(event){
-      top.mainApp.config.globalProperties.$window.toggle({window: event.target.closest(".app-window")});
+      // top.mainApp.config.globalProperties.$window.toggle({window: event.target.closest(".app-window")});
+      const evt = new Event('toggle-window');
+      evt.data = {window: event.target.closest(".app-window")};
+      this.$el.dispatchEvent(evt);
     },
-    close(event){
-      top.mainApp.config.globalProperties.$window.close(event);
+    close(){
+      this.$el.dispatchEvent(new Event('close-window'));
     }
   },
   mounted(){
@@ -61,7 +63,7 @@ export default {
     </div>
     <div class="py-3 mr-3 flex space-x-2">
       <div v-if="$props.hideButton" @click.stop="hide" class="h-6 w-6 shadow-sm bg-green-500 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">minimize</span></div>
-      <div v-if="$props.sizingButton" @click.stop="sizing" class="h-6 w-6 shadow-sm bg-yellow-500 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">{{ isMaximize ? 'close_fullscreen' : 'open_in_full' }}</span></div>
+      <div v-if="$props.sizingButton" @click.stop="sizing" class="h-6 w-6 shadow-sm bg-yellow-500 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">{{ isMaximize ? 'close_fullscreen' : 'expand_content' }}</span></div>
       <div v-if="$props.closeButton" @click.stop="close" class="h-6 w-6 shadow-sm bg-red-600 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">close</span></div>
     </div>
   </nav>
