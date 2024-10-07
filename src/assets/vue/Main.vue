@@ -16,7 +16,7 @@ export default {
   },
   components: { TitleBar, Content, TaskBar, FloatMenu, Desktop },
   mounted() {
-    window.main = this;
+    // window.main = this;
   }
 }
 </script>

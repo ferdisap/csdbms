@@ -1,5 +1,4 @@
 <script>
-import ContextMenu from  "../menu/ContextMenu.vue";
 import { auth } from "../../../js/Auth";
 import StartMenu from "../menu/StartMenu.vue";
 import { mainStore } from '../../../js/MainStore';
@@ -24,10 +23,16 @@ export default {
     },
     close(){
       this.$window.stopTask(this.$window.getTaskByElement(this.FloatMenu.anchor.closest('.window-task')));
+    },
+    hideshow(){
+      const showAll = !this.$window.showAll;
+      const evt = new Event("hideshow-window");
+      evt.data = {state:showAll};
+      top.dispatchEvent(evt)
     }
   },
   mounted(){
-    window.taskbar = this;
+    // window.taskbar = this;
   }
 }
 </script>
@@ -51,13 +56,14 @@ export default {
       </div>
   
       <!-- other, eg: login state -->
-      <div class="h-full flex items-center justify-end py-3 mr-3 w-full">
-        <div id="auth-menu" :class="[auth.isAuth ? 'bg-blue-600' : 'bg-red-600','relative h-6 w-6 float-end text-center rounded-full hover:bg-gray-700 hover:cursor-pointer']">
+      <div class="h-full flex items-center justify-end w-full">
+        <div id="auth-menu" :class="[auth.isAuth ? 'bg-blue-600' : 'bg-red-600','relative h-6 w-6 mr-0 float-end text-center rounded-full hover:bg-gray-700 hover:cursor-pointer']">
           <span class="material-symbols-outlined text-base font-bold">account_circle</span>
         </div>
+        <div class="hover:bg-gray-700 w-3 text-transparent cursor-pointer h-full" @click="hideshow">_</div>
       </div>
     </nav>
-    <FloatMenu :trigger="[{triggerId: componentId, on: 'contextmenu'}]">
+    <FloatMenu :trigger="[{triggerId: 'app-windowtask', on: 'contextmenu'}]">
       <div class="list">
         <div @click="close">close</div>
       </div>

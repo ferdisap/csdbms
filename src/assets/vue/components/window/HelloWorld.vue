@@ -38,7 +38,7 @@ export default {
     }
   },
   mounted() {
-    window.helloworld = this;
+    // window.helloworld = this;
     // if(localStorage.getItem(this._.uid)){
     //   this._.props.foo = JSON.parse(localStorage.getItem(this._.uid)).props.foo;
     // }

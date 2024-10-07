@@ -40,7 +40,7 @@ import {dialog as runDialog} from '../../vue/components/window/child/Dialog.vue'
  */
 class Window {
   // o = [];
-  zIndex = [];
+  zIndex = []; // appId
 
   em = new WeakMap(); // k = windowEl, v = window
 
@@ -64,6 +64,7 @@ class Window {
 
   constructor(){
     top.addEventListener('close-window', this.close.bind(this));
+    top.addEventListener('hideshow-window', this.hideshow.bind(this));
   }
 
   /**
@@ -507,6 +508,7 @@ class Window {
   // ##########################################################################################
 
   /**
+   * TIPS: pakai closest pada event target eg.: >>> {window: event.target.closest(".app-window")}
    * untuk show/hide window by task
    * @param {Object} el contain key task or window
    */
@@ -618,6 +620,28 @@ class Window {
       case "alt": this.stopAlert(this.ea.get(target)); break;
       case "prp": this.stopProperty(this.ep.get(target)); break;
     }
+  }
+
+  /**
+   * untuk hide/show all element
+   * @param {Event} event perlu event.data = {state:boolean} 
+   */
+  showAll = true;
+  hideshow(event){
+    this.zIndex.filter(v => v).reverse().forEach(appId => {
+      const windowEl = document.getElementById(appId);
+      // hide All
+      // console.log(event.data.state && windowEl.style.display !== 'none');
+      if(!event.data.state && windowEl.style.display !== 'none'){
+        this.toggle({window: windowEl});
+        this.showAll = false;
+      } 
+      // show all
+      else if (event.data.state && windowEl.style.display === 'none'){
+        this.toggle({window: windowEl});
+        this.showAll = true;
+      }
+    })
   }
 }
 
