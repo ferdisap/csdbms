@@ -1,6 +1,7 @@
 <script>
 import WindowMove from '../../../js/plugin/sub/WindowMove'
 import FloatMenu from '../menu/FloatMenu.vue';
+import { installCheckbox, hideAll, showAll, push} from "../../../js/gui/Checkbox"
 /**
  * Desktop ini dipakai untuk menampilkan localstorage key 'cached-window'
  */
@@ -28,6 +29,9 @@ export default {
         })
         this.cachedWindow.list = display;
       }
+      setTimeout(()=>{
+        installCheckbox(document.getElementById('desktop-cb'));
+      },0)
     },
     open(event) {
       const evt = new Event('open-cached-window');
@@ -59,13 +63,77 @@ export default {
         tr.remove();
       }
     },
+    cancel(){
+      const cbHome = this.FloatMenu.anchor.closest(".cb-home");
+      if(cbHome) hideAll(cbHome);
+    },
+    select(){
+      const cbHome = this.FloatMenu.anchor.closest(".cb-home");
+      if(cbHome) {
+        push(this.FloatMenu.anchor);
+        showAll(cbHome);
+      };
+    }
+  },
+  beforeMount(){
+    this.updateList();
   },
   mounted(){    
-    this.updateList();
     this.enableMove(document.getElementById('title-cached-window'));
+
+    // pakai setTimeout arena list bergantung ke dengan function
+    installCheckbox(document.getElementById('desktop-cb'));
   }
 }
 </script>
+
+<template>
+  <div id="app-desktop" class="relative">
+    <div class="h-96 w-fit absolute bg-gray-100 shadow-md overflow-auto" id="cached-window-list" @click="setToTop">
+      <div id="title-cached-window" class="bg-blue-500">Saved Window <button @click="updateList" class="material-symbols-outlined float-end text-base mx-2">replay</button></div>
+      <div class="p-2">
+        <table id="desktop-cb" class="cb-home">
+          <thead>
+            <tr class="cb-room-all">
+              <th style="display:none" class="cb-window-all"><input type="checkbox"></th>
+              <th>No</th>
+              <th>Name</th>
+              <th>Key</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="title-cached-window-body">
+            <tr v-for="(item, i) in cachedWindow.list" @dblclick="open" :app-id="item.appId" class="cb-room">
+              <td style="display:none" class="cb-window"><input type="checkbox" :value="item.appId"></td>
+              <td>{{i + 1}}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.appId }}</td>
+              <td>{{ item.last_saved }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- <FloatMenu :trigger="[{triggerId: 'title-cached-window-body', on:'contextmenu'}]"> -->
+    <FloatMenu :trigger="[{triggerId: 'app-desktop', on:'contextmenu'}]">
+      <div class="list" @click="updateList">
+        <div>refresh</div>
+      </div>
+      <div class="list" @click="open">
+        <div>open</div>
+      </div>
+      <div class="list" @click="remove">
+        <div>delete</div>
+      </div>
+      <div class="list" @click="cancel">
+        <div>cancel</div>
+      </div>
+      <div class="list" @click="select">
+        <div>select</div>
+      </div>
+    </FloatMenu>
+  </div>
+</template>
 
 <style scoped>
 #app-desktop th {
@@ -94,41 +162,4 @@ table td, table th {
 tr:hover {
   cursor: pointer;
 }
-
 </style>
-
-<template>
-  <div id="app-desktop" class="relative">
-    <div class="h-96 w-fit absolute bg-gray-100 shadow-md overflow-auto" id="cached-window-list" @click="setToTop">
-      <div id="title-cached-window" class="bg-blue-500">Saved Window <button @click="updateList" class="material-symbols-outlined float-end text-base mx-2">replay</button></div>
-      <div class="p-2">
-        <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Name</th>
-              <th>Key</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody id="title-cached-window-body">
-            <tr v-for="(item, i) in cachedWindow.list" @dblclick="open" :app-id="item.appId">
-              <td>{{i + 1}}</td>
-              <td>{{ item.name }}</td>
-              <td>{{ item.appId }}</td>
-              <td>{{ item.last_saved }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <FloatMenu :trigger="[{triggerId: 'title-cached-window-body', on:'contextmenu'}]">
-      <div class="list" @click="open">
-        <div>open</div>
-      </div>
-      <div class="list" @click="remove">
-        <div>delete</div>
-      </div>
-    </FloatMenu>
-  </div>
-</template>

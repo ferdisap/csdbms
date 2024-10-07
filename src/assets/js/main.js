@@ -9,16 +9,17 @@ import '../css/main.css'
 import Main from '../vue/Main.vue';
 import { auth } from './Auth';
 import { mainStore } from './MainStore';
-import ContextMenu from './gui/ContextMenu';
-import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';
-// import WindowTask from './plugin/WindowTask';
+import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';  
 import FloatMenu from './gui/FloatMenu';
 import window from './plugin/Window';
 import cache from './plugin/WindowCache';
+import { installCheckbox } from './gui/Checkbox';
 
-window.axios = axios;
-window.auth = auth;
-window.mainStore = mainStore;
+top.installCheckbox = installCheckbox;
+
+// top.axios = axios;
+// top.auth = auth;
+// top.mainStore = mainStore;
 
 // create app
 top.mainApp = createApp(Main);

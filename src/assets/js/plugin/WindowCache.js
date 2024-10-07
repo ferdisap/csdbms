@@ -50,21 +50,24 @@ class WindowCache {
 
   #create(appId) {    
     const cached = JSON.parse(localStorage.getItem('cached-window'))[appId]
-    window.history.pushState({},"",cached.url)
-    const create = {
-      window: {
-        appId: appId,
-        uid: cached.uid,
-        name: cached.name,
-        loadFromCache: true,
-        props: cached.props,
-      },
-      task: {
-        title: cached.name,
+    top.history.pushState({},"",cached.url)
+    const evt = new Event("new-window");
+    evt.data = {
+      config: {
+        window: {
+          appId: appId,
+          uid: cached.uid,
+          name: cached.name,
+          loadFromCache: true,
+          props: cached.props,
+        },
+        task: {
+          title: cached.name,
+        }
       }
     };
-    main.$window.create(create);
-    console.log(cached.url);
+    // top.mainApp.config.globalProperties.$window.create(create);
+    top.dispatchEvent(evt);
 
   }
 }

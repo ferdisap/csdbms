@@ -65,6 +65,9 @@ class Window {
   constructor(){
     top.addEventListener('close-window', this.close.bind(this));
     top.addEventListener('hideshow-window', this.hideshow.bind(this));
+    top.addEventListener('new-window', (e) => {
+      this.create(e.data.config);
+    })
   }
 
   /**
