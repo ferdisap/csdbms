@@ -14,7 +14,7 @@ export default {
     },
     newHelloWorld(){
       this.$window.create({
-        window: {name: 'HelloWorld'},
+        window: {name: 'HelloWorld', props:{foo:'bue'}},
         task: {title: 'Hello World'}
       })
     },
@@ -38,7 +38,7 @@ export default {
     setTimeout(()=>{
       // this.newExplorer();
       // this.newDML();
-      this.newHelloWorld();
+      // this.newHelloWorld();
     },10)
   },
 }

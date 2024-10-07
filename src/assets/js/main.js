@@ -14,6 +14,7 @@ import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';
 // import WindowTask from './plugin/WindowTask';
 import FloatMenu from './gui/FloatMenu';
 import window from './plugin/Window';
+import cache from './plugin/WindowCache';
 
 window.axios = axios;
 window.auth = auth;
@@ -21,6 +22,8 @@ window.mainStore = mainStore;
 
 // create app
 top.mainApp = createApp(Main);
+
+mainApp.use(cache);
 
 // error response message store
 mainApp.use(new ErrorResponseMessage());

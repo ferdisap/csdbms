@@ -12,7 +12,7 @@ import WindowSize from './sub/WindowSize';
 import { setDotsPosition, setLinesPosition } from './sub/WindowSize';
 import { randomInt } from '../util/helper';
 import {dialog as runDialog} from '../../vue/components/window/child/Dialog.vue';
-
+// import cache from './WindowCache';
 
 
 /**
@@ -30,6 +30,13 @@ import {dialog as runDialog} from '../../vue/components/window/child/Dialog.vue'
  * (fail tested in prod) dari root window.vue, this._ === app._container.__vue_app__._instance (true, kalau di production, ._instance akan null)
  * (fail tested in prod) dari app, jika ingin akses root component, maka run >>> app._container.__vue_app__._instance.data.componentId (sama dengan >>> this.componentId di dalam window.vue)
  * kesimpulan: belum bisa akses root window.vue dari app
+ * 
+ * untuk akses root component (window.vue) dari app, run >>> app._container.firstElementChild.__vnode.children (sampai firstElementChild saja)
+ * 
+ * app._container._vnode.component.props
+ * helloworld._.props // get all props (in object)
+ * helloworld._.subTree.children // get all component (in array)
+ * helloworld._.subTree.children[0].component.subTree.children[0].el // aksess sub component dengan .children[0].component
  */
 class Window {
   o = [];
@@ -73,7 +80,8 @@ class Window {
     // create window
     if (config.window) {
       window = this.newWindow(config.window);
-      window.appId = window.appId ?? "top" + Randomstring.generate({ charset: 'alphabetic' })
+      window.appId = window.appId ?? (config.window.appId ?? "top" + Randomstring.generate({ charset: 'alphabetic' }))
+      window.url = (new URL(top.window.location.href)).toString();
     }
     if (config.task) {
       task = this.newTask(config.task);
@@ -110,6 +118,7 @@ class Window {
       this.registerWindowProperty(window, property);
     }
     this.startWindow(window, task, dialog, alert, property);
+    return window;
   }
 
   // ##########################################################################################
@@ -135,20 +144,24 @@ class Window {
     let window;
     switch (config.name) {
       case 'HelloWorld':
-        window = createApp(HelloWorld);
+        window = createApp(HelloWorld, config.props);
+        // window.use(cache);
         top.whw = window;
-        top.whx = createApp(HelloWorld);
+        // top.whx = createApp(HelloWorld);
         break;
       case 'Explorer':
-        window = createApp(Explorer);
+        window = createApp(Explorer, config.props);
         break;
       case 'DML':
-        window = createApp(DML);
+        window = createApp(DML, config.props);
+        top.dml = window;
         break;
-      default:
-        window.name = config.name;
-        break;
-    }
+    }    
+    // console.log(window._uid)
+    window.name = config.name;
+    if(config.uid) window.prevUid = config.uid; // prevUid adalah untuk first/root component uid, bukan app uid. Ini karena window._container.firstElementChild null
+    window.loadFromCache = config.loadFromCache;
+    top.w = window;
     return window;
   }
 
@@ -539,6 +552,7 @@ class Window {
 
     // set to top all child window such as dialog, alert property
     const window = this.em.get(windowEl);
+    // top.window.history.pushState({},"",window.url)
     if (this.dm.has(window)) this.setToTop(document.getElementById(this.dm.get(window).appId));
     else if (this.am.has(window)) this.setToTop(document.getElementById(this.am.get(window).appId));
     else if (this.pm.has(window)) this.setToTop(document.getElementById(this.pm.get(window).appId));

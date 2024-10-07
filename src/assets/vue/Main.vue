@@ -3,6 +3,7 @@ import TitleBar from './components/gui/TitleBar.vue';
 import TaskBar from './components/gui/TaskBar.vue';
 import Content from './components/gui/Content.vue';
 import FloatMenu from './components/menu/FloatMenu.vue';
+import Desktop from './components/gui/Desktop.vue';
 
 export default {
   data() {
@@ -13,7 +14,7 @@ export default {
       tasks: [],
     }
   },
-  components: { TitleBar, Content, TaskBar, FloatMenu },
+  components: { TitleBar, Content, TaskBar, FloatMenu, Desktop },
   mounted() {
     window.main = this;
   }
@@ -23,7 +24,8 @@ export default {
 <template>
   <div class="main h-full w-full">
     <div id="app-content-container" class="w-full h-[96.5%] relative bg-yellow-200">
-      <Content />
+      <Desktop/>
+      <Content/>
     </div>
     <div class="w-full h-[3%] relative">
       <TaskBar/>

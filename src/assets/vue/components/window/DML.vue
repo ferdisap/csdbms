@@ -1,7 +1,10 @@
 <script>
 import TitleBar from '../gui/TitleBar.vue';
 export default {
-  components: { TitleBar }
+  components: { TitleBar },
+  mounted() {
+    window.dataml = this;
+  },
 }
 </script>
 <template>

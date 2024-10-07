@@ -1,7 +1,8 @@
 <script>
 import TitleBar from '../gui/TitleBar.vue';
+import Tes from './sub/Tes.vue';
 export default {
-  components: { TitleBar }
+  components: { TitleBar, Tes }
 }
 </script>
 <template>
@@ -10,5 +11,6 @@ export default {
     <div class="mt-5 px-3 py-5">
       this is Explorer
     </div>
+    <Tes/>
   </div>
 </template>
