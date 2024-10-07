@@ -23,7 +23,7 @@ body{
     @apply border shadow-md
   }
   .floatmenu .container{
-    @apply bg-white w-60 flex flex-col text-xl py-1 px-1 text-gray-500 shadow-lg
+    @apply bg-white w-60 flex flex-col text-base py-1 px-1 text-gray-500 shadow-md rounded-md
   }
   .floatmenu .list{
     @apply flex bg-white hover:bg-gray-100 py-1 px-1 cursor-pointer text-gray-900

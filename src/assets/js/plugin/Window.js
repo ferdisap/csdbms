@@ -39,7 +39,7 @@ import {dialog as runDialog} from '../../vue/components/window/child/Dialog.vue'
  * helloworld._.subTree.children[0].component.subTree.children[0].el // aksess sub component dengan .children[0].component
  */
 class Window {
-  o = [];
+  // o = [];
   zIndex = [];
 
   em = new WeakMap(); // k = windowEl, v = window

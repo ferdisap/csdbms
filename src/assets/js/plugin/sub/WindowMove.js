@@ -1,5 +1,3 @@
-import { findAncestor } from "../../util/helper";
-
 const createFrameMove = (basicElement) => {
   const frame = basicElement.cloneNode();
   frame.id = 'framemove';
@@ -35,10 +33,11 @@ export {clearSelection};
  */
 export default class WindowMove {
   // window; // window element yang dibuat dengan createApp vue di mount
+  persistenSize = false;
 
   attach(pointerDownTriggerElement, beforeMove, afterMove, windowElement){
     if(!windowElement){
-      windowElement = findAncestor(pointerDownTriggerElement,".app-window");
+      windowElement = pointerDownTriggerElement.closest(".app-window");
     }
     windowElement.enableMoving = true;
     pointerDownTriggerElement.addEventListener('pointerdown', this.onPointerDown.bind(this, windowElement, beforeMove, afterMove));
@@ -56,7 +55,7 @@ export default class WindowMove {
     const l = (rect.x + (pointerupX - pointerdownX)) < -5 ? -5 : (rect.x + (pointerupX - pointerdownX));
     const w = target.ownerDocument.firstElementChild.getBoundingClientRect().width;
     // suaya jika framenya di geser maximal ke kiri, layar akan dibagi 2 dan ditaruh di kiri
-    if(l <= -5) {
+    if(l <= -5 && !this.persistenSize) {
       const h = target.closest('#app-content-container').getBoundingClientRect().height;
       target.style.left = '0px';
       target.style.top = '0px';
@@ -64,29 +63,40 @@ export default class WindowMove {
       target.style.height = h + 'px';
     } 
     // suaya jika framenya di geser maximal ke kiri, layar akan dibagi 2 dan ditaruh di kanan
-    else if((l + rect.width) >= (w + 5)){
+    else if((l + rect.width) >= (w + 5) && !this.persistenSize){
       const h = target.closest('#app-content-container').getBoundingClientRect().height;
       target.style.left = w/2 + 'px';
       target.style.top = '0px';
       target.style.width = w/2 + 'px';
       target.style.height = h + 'px';
     }
+    // supaya windownya full jika mouse diarahkan ke atas
+    else if(pointerupY < -5){
+      target.style.left = '0px';
+      target.style.top = '0px';
+      target.style.width = '100%';
+      target.style.height = '100%';
+    }
     else {
+      target.style.height = this.pheight;
+      target.style.width = this.pwidth;
       target.style.left = l + 'px';
       target.style.top = (rect.y + (pointerupY - pointerdownY)) < 0 ? 0 : (rect.y + (pointerupY - pointerdownY)) + 'px';
     }
   }
-  onPointerDown(window, beforeMove, afterMove, edown) {
-    if(!window.enableMoving) return;
+  onPointerDown(windowEl, beforeMove, afterMove, edown) {
+    if(!windowEl.enableMoving) return;
     if(beforeMove) beforeMove();
-    const pleft = window.style.left;
-    const ptop = window.style.top;
+    const pleft = windowEl.style.left;
+    const ptop = windowEl.style.top;
+    this.pheight = windowEl.style.height
+    this.pwidth = windowEl.style.width
 
-    window.style.opacity = '50%';
+    windowEl.style.opacity = '50%';
 
     // create frame
-    const frame = createFrameMove(window);
-    frame.style.zIndex = window.style.zIndex + 1;
+    const frame = createFrameMove(windowEl);
+    frame.style.zIndex = windowEl.style.zIndex + 1;
 
     const rectframe = frame.getBoundingClientRect();
     const moving = (emove) => {
@@ -97,16 +107,18 @@ export default class WindowMove {
     document.addEventListener('pointermove', moving);
     document.addEventListener('pointerup', () => {
       document.removeEventListener('pointermove', moving);
-      window.style.top = frame.style.top;
-      window.style.left = frame.style.left;
-      window.style.width = frame.style.width;
-      window.style.height = frame.style.height;
+      windowEl.style.top = frame.style.top;
+      windowEl.style.left = frame.style.left;
+      if(!this.persistenSize){
+        windowEl.style.width = frame.style.width;
+        windowEl.style.height = frame.style.height;
+      }
       
-      window.pleft = pleft;
-      window.ptop = ptop
+      windowEl.pleft = pleft;
+      windowEl.ptop = ptop
 
       frame.remove()
-      window.style.opacity = '';
+      windowEl.style.opacity = '';
       if(afterMove) afterMove();
     }, { once: true })
   }
