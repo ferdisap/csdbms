@@ -4,7 +4,7 @@ import HelloWorld from '../../vue/components/window/HelloWorld.vue';
 import Explorer from '../../vue/components/window/Explorer.vue';
 import DML from '../../vue/components/window/DML.vue';
 import Alert from '../../vue/components/window/child/Alert.vue';
-import Dialog from '../../vue/components/window/child/Dialog.vue';
+import WindowDialog from './sub/WindowDialog';
 import Property from '../../vue/components/window/child/Property.vue';
 import Randomstring from 'randomstring';
 import WindowMove from './sub/WindowMove';
@@ -12,8 +12,8 @@ import WindowSize from './sub/WindowSize';
 import { setDotsPosition, setLinesPosition } from './sub/WindowSize';
 import { randomInt } from '../util/helper';
 import {dialog as runDialog} from '../../vue/components/window/child/Dialog.vue';
-// import cache from './WindowCache';
-
+import {alert as runAlert} from '../../vue/components/window/child/Alert.vue';
+import WindowProperty from './sub/WindowProperty';
 
 /**
  * setiap window ada tasknya, kecuali dialog, alert, dan property window
@@ -23,6 +23,9 @@ import {dialog as runDialog} from '../../vue/components/window/child/Dialog.vue'
  * 
  * CUSTOM EVENTS:
  * 'new-window', 'close-window', 'toggle-window', 'sizing-window' yang di dispatch di element inside the window (sizing-window dimatikan karna nanti tidak bisa ubah icon di title bar).
+ * 
+ * when open a sub window (dialog, alert, properties) access the element with (".app-window").dialog.result() by the promise result
+ * z-index top-window berkisar 80-200, dekstop 60-80,
  * 
  * TIPS:
  * (success tested in prod) dari window.vue, jika ingin mengakses custom object di appnya maka run >>> this._.appContext.app.customObject
@@ -76,6 +79,7 @@ class Window {
    *    for data = child?:Object 
    *       for child = sama dengan window key diatas ada name, type, data 
    * for task = title:string
+   * each config must define any props with key props?:Object
    * @param {Object} config selain diatas, config ini diperuntukan juga untuk config pembuatan app vue
    * @returns {void}
    */
@@ -132,16 +136,16 @@ class Window {
    * @returns 
    */
   newTask(config = {}) {
-    return createApp(Task, config);
+    return createApp(Task, config.props);
   }
   newDialog(config = {}) {
-    return createApp(Dialog, config);
+    return new WindowDialog(config);
   }
   newAlert(config = {}) {
-    return createApp(Alert, config);
+    return createApp(Alert, config.props);
   }
   newProperty(config = {}) {
-    return createApp(Property, config);
+    return new WindowProperty(config);
   }
   newWindow(config = {}) {
     if (config.app) return config.app;
@@ -149,9 +153,6 @@ class Window {
     switch (config.name) {
       case 'HelloWorld':
         window = createApp(HelloWorld, config.props);
-        // window.use(cache);
-        top.whw = window;
-        // top.whx = createApp(HelloWorld);
         break;
       case 'Explorer':
         window = createApp(Explorer, config.props);
@@ -164,8 +165,7 @@ class Window {
     // console.log(window._uid)
     window.name = config.name;
     if(config.uid) window.prevUid = config.uid; // prevUid adalah untuk first/root component uid, bukan app uid. Ini karena window._container.firstElementChild null
-    window.loadFromCache = config.loadFromCache;
-    top.w = window;
+    // window.loadFromCache = config.loadFromCache;
     return window;
   }
 
@@ -307,7 +307,7 @@ class Window {
     el.enableSizing = false;
     el.style.position = 'absolute';
     el.style.width = '400px';
-    el.style.height = '200px';
+    // el.style.height = '200px';
     el.style.top = ((top.innerHeight/2) - 100) + 'px';
     el.style.left = ((top.innerWidth/2) - 200) + 'px';
     el.style.backgroundColor = '#ffffff';
@@ -344,22 +344,27 @@ class Window {
     el.classList.add('app-window');
     el.classList.add('window-alert');
     el.id = alert.appId;
-    alert.id = el.id
+    el.isMaximize = false;
+    el.enableSizing = false;
+    el.style.position = 'absolute';
+    el.style.width = '400px';
+    el.style.top = ((top.innerHeight/2) - 100) + 'px';
+    el.style.left = ((top.innerWidth/2) - 200) + 'px';
+    el.style.backgroundColor = '#ffffff';
     container.appendChild(el);
+    alert.id = el.id
     alert.mount('#' + el.id);
-    this.ed.set(el, alert);
+    this.ea.set(el, alert);
 
-    if (this.zIndex[this.zIndex.length - 1] !== alert.windowId) {
-      this.zIndex[this.zIndex.indexOf(alert.windowId)] = undefined;
-      this.zIndex.push(alert.windowId)
-    }
-    this.zIndex.push(el.id);
+    el.style.zIndex = 200; // maximum value of top-window is in range of 80-200
 
     // prevent from user interactive in top-window
     const windowEl = document.getElementById(alert.windowId);
-    windowEl.enableMoving = false;
-    windowEl.enableSizing = false;
     this.addTopWindowBlocker(windowEl);
+
+    // add event
+    el.addEventListener('close-window', this.close.bind(this),true);
+    document.getElementById(alert.windowId).alert = runAlert();
   }
   mountProperty(property) {
     const container = document.getElementById('app-content');
@@ -485,8 +490,11 @@ class Window {
     const windowEl = document.getElementById(dialog.windowId);
     if (windowEl && this.em.has(windowEl)) {
       this.dm.delete(this.em.get(windowEl));
-      // this.stopTopWindow(this.em.get(windowEl));
+      this.zIndex[this.zIndex.indexOf(dialog.appId)] = undefined;
       this.removeTopWindowBlocker(windowEl);
+      
+      //hapus property di windowEl nya yang digunakan untuk akses result alert. Kalau tidak dihapus, reuslt akan selalu <pending> jika tidak di OK atau Yes melainkan di pencet close button di title barnya
+      delete windowEl.dialog
     }
     this.unmountDialog(dialog);
   }
@@ -494,7 +502,8 @@ class Window {
     const windowEl = document.getElementById(alert.windowId);
     if (windowEl && this.em.has(windowEl)) {
       this.am.delete(this.em.get(windowEl));
-      this.stopTopWindow(this.em.get(windowEl));
+      this.removeTopWindowBlocker(windowEl);
+      delete windowEl.dialog      
     }
     this.unmountAlert(alert);
   }
@@ -567,7 +576,8 @@ class Window {
     this.zIndex = this.zIndex.filter(v => v);
     for (let i = 0; i < this.zIndex.length; i++) {
       const element = document.getElementById(this.zIndex[i]);
-      element.style.zIndex = i;      
+      if(element) element.style.zIndex = i + 80;
+      else this.zIndex[i] = undefined;
     }
   }
 

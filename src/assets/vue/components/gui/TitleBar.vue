@@ -12,11 +12,6 @@ export default {
       isMaximize: undefined
     }
   },
-  // computed:{
-  //   isMaximize(){
-  //     return this.$el ? this.$el.closest('.app-window').isMaximize : true
-  //   }
-  // },
   props:{
     title: {
       type: String,
@@ -38,6 +33,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    bgColor: {
+      type: String,
+      default: 'bg-blue-500'
+    }
   },
   methods: {
     sizing(event){
@@ -67,7 +66,7 @@ export default {
 </script>
 
 <template>
-  <nav  class="titlebar bg-blue-500 text-white h-12 relative flex">
+  <nav :class="[$props.bgColor,'titlebar bg-blue-500 text-white h-12 relative flex']">
     <div @pointerdown="($props.sizingButton ? (this.isMaximize = false) : null)" class="trigger-move h-full w-full flex justify-between items-center mr-2">
       <span href="/" class="text-lg float-start ml-3 font-bold">{{ $props.title }}</span>
     </div>

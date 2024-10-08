@@ -16,7 +16,11 @@ export default {
       const evt = new Event('new-window');
       evt.data = {
         config: {
-          dialog: {}
+          dialog: {
+            props: {
+              instruction: "Are you sure want to delete this ... item?",
+            }
+          }
         }
       }
       this.$el.dispatchEvent(evt);
@@ -29,6 +33,21 @@ export default {
         console.log(r);
         // continue process (r is boolean false)
       });
+    },
+    async openAlert(){
+      const evt = new Event('new-window');
+      evt.data = {
+        config: {
+          alert: {
+            title: 'Note'
+          }
+        }
+      }
+      this.$el.dispatchEvent(evt);
+      this.$el.closest('.app-window').alert.result()
+      .then(r => {
+        // continue process (r is always boolean true)
+      })
     }
   },
   props:{
@@ -61,10 +80,17 @@ export default {
       </p>
       <p>
         <button @click.stop="openDialog">Open Dialog Box</button>
+        <button @click.stop="openAlert">Open Alert Box</button>
       </p>
       <Tes :text="$props.foo"/>
       <Tes :text="$props.foo"/>
     </div>
+
+    <form id="tesform" @submit.prevent>
+      <input type="text" name="name[]" :value="$props.foo">
+      <input type="text" name="name[]" value="nami">
+      <button type="submit">submit</button>
+    </form>
   </div>
 </template>
 

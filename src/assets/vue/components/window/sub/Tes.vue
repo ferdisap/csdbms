@@ -1,5 +1,5 @@
 <script>
-import {useCache} from '../../../../js/plugin/WindowCache'; 
+import {useCache} from '../../../../js/plugin/sub/WindowCache'; 
 export default {
   props: {
     text: {

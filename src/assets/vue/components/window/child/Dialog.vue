@@ -1,21 +1,6 @@
 <script>
 import TitleBar from '../../gui/TitleBar.vue';
 
-// function run() {
-//   let resolve = undefined;
-//   let reject = undefined;
-
-//   const promise = new Promise((r, j) => {
-//     resolve = r;
-//     reject = j;
-//   })
-
-//   const yes = () => resolve(1);
-//   const no = () => reject(0);
-//   const wait = () => promise;
-//   return { yes, no, wait };
-// }
-
 const dialog = () => {
   let resolve = undefined;
   let reject = undefined;
@@ -34,6 +19,11 @@ const dialog = () => {
 export {dialog}
 
 export default {
+  data(){
+    return {
+      showOptions: true,
+    }
+  },
   components: { TitleBar },
   props: {
     title: {
@@ -50,8 +40,12 @@ export default {
     },
     options: {
       type: String,
-      default: ''
+      default: 'asas'
     },
+    footer: {
+      type: String,
+      default: 'loremasasas',
+    }
   },
   methods: {
     yes() {
@@ -63,38 +57,31 @@ export default {
       this.$el.dispatchEvent(new Event('close-window'));
     }
   },
-  mounted() {
-    top.dc = this;
-  }
+  // mounted() {
+  //   top.dc = this;
+  // }
 }
 </script>
 <template>
   <div class="h-full w-full border shadow-md">
-    <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" />
+    <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" :cache-button="false"/>
     <div class="px-3 py-1">
-      <div class="font-bold text-lg mt-2">{{ $props.instruction }}</div>
-      <div class="mt-2 h-32">
+      <div class="text-lg mt-2" v-html="$props.instruction"></div>
+      <div class="mt-2 h-20">
         <slot name="content"></slot>
       </div>
 
-      <div class="relative">
-        <div v-if="$props.options" class="absolute left-0 space-x-1">
-          <button class="material-symbols-outlined text-base">keyboard_arrow_down</button>
-          <span>More options</span>
-        </div>
-
-        <div class="absolute space-x-2 right-2">
-          <!-- <button @click="this.button(true, $event)" -->
-          <button @click="this.yes"
-            class="bg-slate-200 shadow-md px-2 py-1 rounded-md font-bold">Yes</button>
-          <!-- <button @click="this.button(false, $event)" -->
-          <button @click="this.no"
-            class="bg-slate-200 shadow-md px-2 py-1 rounded-md font-bold">No</button>
-        </div>
+      <div v-if="$props.options" class="space-x-1 mb-2" @click="showOptions = !showOptions">
+        <button class="material-symbols-outlined text-base">keyboard_arrow_down</button>
+        <button class="italic">More options</button>
       </div>
+      <div v-if="showOptions">asaa</div>
 
-      <div v-if="$slots.footer">
-        <slot name="footer"></slot>
+      <div class="border-t-2 border-black mt-1 text-sm" v-html="$props.footer"></div>
+
+      <div class="text-center mt-2 mb-2 space-x-2">
+        <button @click="this.yes" class="bg-slate-200 shadow-md px-2 py-1 rounded-md font-bold">Yes</button>
+        <button @click="this.no" class="bg-slate-200 shadow-md px-2 py-1 rounded-md font-bold">No</button>
       </div>
     </div>
   </div>

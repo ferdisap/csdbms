@@ -1,7 +1,6 @@
 import { createApp } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import setInterceptor from './axiosInterceptor';
-import axios from 'axios';
 import { createPinia } from 'pinia';
 import RoutesVue from './RoutesVue';
 import mitt from 'mitt';
@@ -12,7 +11,7 @@ import { mainStore } from './MainStore';
 import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';  
 import FloatMenu from './gui/FloatMenu';
 import window from './plugin/Window';
-import cache from './plugin/WindowCache';
+import cache from './plugin/sub/WindowCache';
 import { installCheckbox } from './gui/Checkbox';
 
 top.installCheckbox = installCheckbox;
