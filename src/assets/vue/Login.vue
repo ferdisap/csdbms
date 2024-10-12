@@ -4,6 +4,15 @@ import { auth } from '../js/Auth';
 import { mainStore } from '../js/MainStore';
 import ContinuousLoadingCircle from './components/sub/ContinuousLoadingCircle.vue';
 import Flash from './components/sub/Flash.vue';
+// import jsCookie from 'js-cookie';
+
+const logged = function(data) {
+  if (window.dialog && window.dialog.yes) {
+    window.dialog.yes(data);
+  }
+  window.close();
+}
+export {logged};
 
 export default {
   data() {
@@ -12,23 +21,28 @@ export default {
       'email': '',
       'password': '',
       'componentId': 'fppas',
+      'rememberMe': false,
     }
   },
-  components: { ContinuousLoadingCircle, Flash},
+  components: { ContinuousLoadingCircle, Flash },
   methods: {
     registerURL() {
       return config.CSDB_HOST_PROD + '/login';
     },
     login() {
-      auth().login(this.email, this.password, this.componentId)
-        .then(r => {
-          // dispatch event to parent/opener to continue process
-          window.opener.document.dispatchEvent(new Event('auth'))
-          mainStore().componentLoadingProgress.set(this.componentId, false);
-          window.close();
+      auth().login(this.email, this.password, this.componentId, this.rememberMe)
+        .then(data => {
+          // top.data = data;
+          logged(data);
         })
-        .catch(e => {
-          // console.log(window.e = e);
+        .catch(data => {
+          this.$ersp.newError(data.errors);
+          const e = new Event('flash');
+          e.data = {
+            type: data.infotype,
+            message: data.message
+          }
+          document.dispatchEvent(e);
         })
         .finally(r => {
           mainStore().componentLoadingProgress.set(this.componentId, false);
@@ -36,13 +50,15 @@ export default {
 
     }
   },
-  mounted(){
-    window.l = this;
+  async mounted() {
+    // window.l = this;
+    // window.auth = auth();
+    // top.jsCookie = jsCookie;
   }
 }
 </script>
 <template>
-  <Flash/>
+  <Flash />
   <div class="w-[100vw] h-[100vh]">
     <form @submit.prevent="login">
 
@@ -64,6 +80,12 @@ export default {
             <input v-model="password" placeholder="eg.: password" type="password" class="w-full outline-none" />
           </div>
           <div class="error-form" v-html="$ersp.get('password')"></div>
+        </div>
+
+        <div class="mr-3 mt-2 flex items-center justify-end space-x-2">
+          <button type="button" tabindex="-1" @click.stop.prevent="rememberMe = !rememberMe"
+            class="italic font-thin">remember me</button>
+          <input type="checkbox" :checked="rememberMe">
         </div>
 
         <div class="p-2 w-full mt-2 px-4">

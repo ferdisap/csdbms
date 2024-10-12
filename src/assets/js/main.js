@@ -13,8 +13,12 @@ import FloatMenu from './gui/FloatMenu';
 import window from './plugin/Window';
 import cache from './plugin/sub/WindowCache';
 import { installCheckbox } from './gui/Checkbox';
+import axios from 'axios';
+// import jsCookie from 'js-cookie';
 
-top.installCheckbox = installCheckbox;
+// top.jsCookie = jsCookie;
+
+// top.installCheckbox = installCheckbox;
 
 // top.axios = axios;
 // top.auth = auth;
@@ -28,6 +32,9 @@ mainApp.use(cache);
 // error response message store
 mainApp.use(new ErrorResponseMessage());
 
+// use pinia
+mainApp.use(createPinia());
+
 setInterceptor(mainApp);
 
 // use my window
@@ -36,11 +43,7 @@ mainApp.use(window);
 // mainApp.config.globalProperties.$windowtask = new WindowTask();
 
 // use emitter
-mainApp.config.globalProperties.emitter = mitt();
-
-// use pinia
-const pinia = createPinia();
-mainApp.use(pinia);
+// mainApp.config.globalProperties.emitter = mitt();
 
 // use router
 const router = createRouter({
@@ -51,21 +54,23 @@ mainApp.use(router);
 
 // use context menu
 // mainApp.config.globalProperties.ContextMenu = new ContextMenu();
-mainApp.config.globalProperties.FloatMenu = new FloatMenu();
+top.FloatMenu = new FloatMenu();
 
 // check auth
-auth().check()
-  .then(function(r){
-    mainApp.mount('#app')
-  })
-  .catch((e) => {
-    mainApp.mount('#app');return;
-    top.open("/login.html", "login", "popup,height=800,width=800,left=100");
-    document.addEventListener('auth', () => {
-      mainStore().isAuth = true;
-      mainApp.mount('#app');
-    }, {once:true});
-  })
+// top.axios = axios
+// top.auth = auth();
+mainApp.mount('#app')
+// auth().check()
+//   .then(function(r){
+//   })
+//   .catch((e) => {
+//     // mainApp.mount('#app');return;
+//     top.open("/login.html", "login", "popup,height=800,width=800,left=100");
+//     document.addEventListener('auth', () => {
+//       mainStore().isAuth = true;
+//       mainApp.mount('#app');
+//     }, {once:true});
+//   })
 
 // window.main = app;
 

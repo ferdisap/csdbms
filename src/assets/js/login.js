@@ -1,27 +1,24 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import axios from 'axios';
-import setInterceptor from './axiosInterceptor.js';
 import App from '../vue/Login.vue';
+import {logged} from '../vue/Login.vue';
 import '../css/login.css'
 import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';
-
-// window.mainStore = mainStore; 
-// window.auth = auth();
-// window.axios = axios;
-// window.mitt = mitt;
-
-axios.defaults.baseURL = 'http://127.0.0.1:8000';
-axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+import {auth} from '../js/Auth';
 
 const app = createApp(App);
-const pinia = createPinia();
-app.use(pinia);
+app.use(createPinia());
 
 app.use(new ErrorResponseMessage());
 
-// window.app = app;
+auth().check()
+  .then((r)=>{
+    if (r) {
+      logged({authorization: auth().getAuthToken()});
+    } else {
+      app.mount('#app');
+    }
+  })
 
-setInterceptor(app);
-app.mount('#app');
+
 

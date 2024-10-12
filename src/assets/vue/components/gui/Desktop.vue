@@ -1,7 +1,7 @@
 <script>
 import WindowMove from '../../../js/plugin/sub/WindowMove'
 import FloatMenu from '../menu/FloatMenu.vue';
-import { installCheckbox, hideAll, showAll, push} from "../../../js/gui/Checkbox"
+import { installCheckbox, cancel, select} from "../../../js/gui/Checkbox"
 /**
  * Desktop ini dipakai untuk menampilkan localstorage key 'cached-window'
  */
@@ -63,17 +63,8 @@ export default {
         tr.remove();
       }
     },
-    cancel(){
-      const cbHome = this.FloatMenu.anchor.closest(".cb-home");
-      if(cbHome) hideAll(cbHome);
-    },
-    select(){
-      const cbHome = this.FloatMenu.anchor.closest(".cb-home");
-      if(cbHome) {
-        push(this.FloatMenu.anchor);
-        showAll(cbHome);
-      };
-    }
+    cancel: cancel,
+    select: select,
   },
   beforeMount(){
     this.updateList();
@@ -89,12 +80,12 @@ export default {
 
 <template>
   <div id="app-desktop" class="relative">
-    <div class="h-96 w-fit absolute bg-gray-100 shadow-md overflow-auto" id="cached-window-list" @click="setToTop">
+    <div class="h-96 w-fit absolute bg-white shadow-md overflow-auto" id="cached-window-list" @click="setToTop">
       <div id="title-cached-window" class="bg-blue-500">Saved Window <button @click="updateList" class="material-symbols-outlined float-end text-base mx-2">replay</button></div>
       <div class="p-2">
         <table id="desktop-cb" class="cb-home">
           <thead>
-            <tr class="cb-room-all">
+            <tr class="cb-room">
               <th style="display:none" class="cb-window-all"><input type="checkbox"></th>
               <th>No</th>
               <th>Name</th>

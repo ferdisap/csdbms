@@ -9,6 +9,7 @@ export default defineConfig({
       input: [
         "index.html",
         "login.html",
+        // "src/assets/js/worker/ListTree.js"
       ],
       // external: ['json'],
       // output: {

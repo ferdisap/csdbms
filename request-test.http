@@ -1,0 +1,3 @@
+GET http://127.0.0.1:8000/s1000d/csdb/all HTTP/1.1
+content-type: application/json
+Authorization: Bearer 151|mfKq23Cy4SBRmJnNJypEiIeCTYMS9VCtxwVrYOCWeadb6390

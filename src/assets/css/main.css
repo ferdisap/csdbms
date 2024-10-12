@@ -33,10 +33,67 @@ body{
   }
 }
 
+@layer components{
+  /* general cb */
+  div.cb-room:hover, tr.cb-room:hover{
+    @apply bg-gray-100
+  }
+  div.cb-room:active, tr.cb-room:active {
+    @apply bg-blue-400
+  }
+  details.cb-room:active > summary, details.cb-room:hover > summary {
+    @apply bg-none
+  }
+
+  /* listtree vue */
+  .listtree {
+    @apply h-full w-72 text-nowrap shadow-md border py-2 px-2
+  }
+  .listtree-list {
+    @apply h-full overflow-auto
+  }
+  
+  /* untuk checkbox listtree */
+  .listtree-list details, .listtree-list details div.cb-room {
+    @apply ml-3
+  }  
+  .listtree-list .chevron {
+    @apply cursor-pointer text-sm content-center
+  }
+  .listtree-list .cb-window, .listtree-list .cb-window-all {
+    @apply mr-1
+  }
+  .listtree-list .item {
+    @apply text-xs
+  }}
+
 @layer components {
   .clc {
     @apply top-0 left-0 h-full w-full z-50 absolute bg-[rgba(0,0,0,0.5)]
   }
+  .error-form {
+    @apply text-sm text-red-600 text-left
+  }
+}
+
+.clc-buffer {
+  z-index: 100;
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  
+  animation: spin 2s linear infinite;
+
+  position: absolute;
+  width:20px;
+  height:20px;
+  top:calc(25% + 20px);
+  left:calc(50% - 10px);
+}
+
+@keyframes spin {
+  from {transform:rotate(0deg);}
+  to {transform:rotate(360deg);}
 }
 
 .ws-line-1:hover, .ws-line-3:hover{

@@ -1,6 +1,6 @@
 {
   "APP_NAME": "tpubcsdbms",
   "APP_KEY": "ljqgw",
-  "CSDB_HOST_DEV": "http://127.0.0.1:8000",
-  "CSDB_HOST_PROD": "https://techub.test"
+  "CSDB_HOST": "http://127.0.0.1:8000",
+  "CSDB_HOST_DEV": "http://127.0.0.1:8000"
 }

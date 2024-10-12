@@ -45,9 +45,9 @@ export default {
           <span class="material-symbols-outlined ">menu</span>
           <StartMenu/>
         </div>
-        <div class="min-w-6 h-full flex items-center px-1 hover:bg-gray-700 hover:cursor-pointer">
+        <!-- <div class="min-w-6 h-full flex items-center px-1 hover:bg-gray-700 hover:cursor-pointer">
           <span class="material-symbols-outlined ">search</span>
-        </div>
+        </div> -->
       </div>
   
       <!-- window task -->

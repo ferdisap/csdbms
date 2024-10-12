@@ -14,7 +14,15 @@ export default class FloatMenu {
   anchor; // HTMLElement
 
   constructor() {
+    // BB, AA, bb, aa, cc
+    // document.addEventListener('mouseup', ()=> console.log('aa'))
+    // document.addEventListener('mousedown', ()=> console.log('AA'))
+    // document.addEventListener('pointerup', ()=> console.log('bb'))
+    // document.addEventListener('pointerdown', ()=> console.log('BB'))
+    // document.addEventListener('click', ()=> console.log('cc'))
+    
     document.addEventListener('click', ()=> this.off())
+    // document.addEventListener('pointerup', ()=> this.off())
     // document.addEventListener('contextmenu', ()=>this.off(),true); // kalau capture artinya akan di listen oleh top to bottom element
     document.addEventListener('contextmenu', ()=>this.off()); // kalau capture artinya akan di listen oleh top to bottom element
   }

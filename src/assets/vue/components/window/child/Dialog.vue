@@ -10,8 +10,8 @@ const dialog = () => {
     reject = j;
   })
 
-  const yes = () => resolve(true);
-  const no = () => reject(false);
+  const yes = (data) => resolve(data ?? true);
+  const no = (data) => reject(data ?? true);
   const result = () => promise;
   return { yes, no, result };
 }

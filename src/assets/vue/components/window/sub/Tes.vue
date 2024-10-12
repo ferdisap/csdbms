@@ -35,5 +35,46 @@ export default {
     <button @click="cache">CACHE</button>
     <button @click="changeProps('text','foo')">change into Foo</button>
     <button @click="changeProps('text','bar')">change into bar</button>
+
+    <!-- <FloatMenu :trigger="[{triggerId: 'app-content-container', on: 'contextmenu'}]">
+      <div class="list">
+        <div>test</div>
+      </div>
+      <div class="list">
+        <div class="w-full">
+          test
+          <span id="level2" class="float-end">open</span>
+        </div>
+      </div>
+      <div class="list">
+        <div>test</div>
+      </div>
+      <div class="list">
+        <div>test</div>
+      </div>
+      <div class="list">
+        <div class="w-full">
+          test
+          <span id="lagilevel2" class="float-end">open</span>
+        </div>
+      </div>
+    </FloatMenu>
+    <FloatMenu :trigger="[{triggerId: 'level2', on: 'pointerover'}]" level="1">
+      <div class="list">
+        <div>tes level 2</div>
+      </div>
+      <div class="list">
+        <div>tes level 2</div>
+      </div>
+    </FloatMenu>
+    <FloatMenu :trigger="[{triggerId: 'lagilevel2', on: 'mouseover'}]" level="1">
+      <div class="list">
+        <div>tes level 2</div>
+      </div>
+      <div class="list">
+        <div>tes level 2</div>
+      </div>
+    </FloatMenu> -->
+
   </div>
 </template>

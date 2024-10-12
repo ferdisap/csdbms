@@ -1,18 +1,22 @@
 <script>
 import { mainStore } from '../../../js/MainStore.js'
-import Randomstring from 'randomstring';
+
+/**
+ * HOW TO USE
+ * attach <ContinuousLoadingCircle /> in your vue template
+ * run this.$emit('clp', true) from your vue template to show loading circle
+ * run this.$emit('clp', false) from your vue template to unshow loading circle * 
+*/
 export default {
   data(){
     return {
       mainStore: mainStore(),
+      show: false,
   }
   },
   beforeMount() {
-    if (!this.$parent.componentId) {
-      this.$parent.componentId = Randomstring.generate({charset:'alphabetic'});
-    }
-    mainStore().componentLoadingProgress[this.$parent.componentId] = false;
-
+    if(!(this.$parent._.emitsOptions)) this.$parent._.emitsOptions = {};
+    this.$parent._.emitsOptions.fetch = (state) => this.show = state;
   },
   mounted(){
     this.$el.parentElement.style.position = 'relative';
@@ -20,7 +24,7 @@ export default {
 }
 </script>
 <template>
-   <div v-if="mainStore.componentLoadingProgress[$parent.componentId]" class="clc">
+   <div class="clc" @fetch="show = !show" v-if="show">
     <div class="clc-buffer" />
   </div>
 </template>

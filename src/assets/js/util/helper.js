@@ -19,11 +19,11 @@ const formDataToObject = (v) => {
 const objectToFormData = (v) => {
   const fd = new FormData;
   Object.keys(v).forEach(k => {
-      if(Array.isArray(v[k])){
-          fd.set(k+'[]', v[k]);
-      } else {
-          fd.set(k, v[k]);
-      }
+    if (Array.isArray(v[k])) {
+      fd.set(k + '[]', v[k]);
+    } else {
+      fd.set(k, v[k]);
+    }
   });
   return fd;
 }
@@ -52,12 +52,12 @@ const findText = (pattern, subject) => {
  * @returns {*}
  */
 const getObjectValueFromString = (obj, key) => {
-  if(!(isObject(obj) && !isEmpty(key))) return '';
+  if (!(isObject(obj) && !isEmpty(key))) return '';
   const i = key.indexOf(".")
   let v;
-  if(i > 0){
-    v = obj[key.substring(0,i)];
-    v = getObjectValueFromString(v, key.substring(i+1));
+  if (i > 0) {
+    v = obj[key.substring(0, i)];
+    v = getObjectValueFromString(v, key.substring(i + 1));
   } else {
     v = obj[key];
   }
@@ -192,6 +192,22 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * src: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
+ * @param {Number} value 
+ * @returns 
+ */
+function hashStr(value) {
+  let hash = 0, i, chr;
+  if (value.length === 0) return hash;
+  for (i = 0; i < value.length; i++) {
+    chr = value.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+}
+
 export {
   // general
   array_unique, formDataToObject, objectToFormData, findText, getObjectValueFromString, isObject, isNumber, isEmpty, isString, isArray, isClassIntance, isFunction,
@@ -200,5 +216,5 @@ export {
   // event
   isArrowDownKeyPress, isArrowUpKeyPress, isEnterKeyPress, isEscapeKeyPress, isLeftClick, isRightClick, isCharacterKeyPress,
   // utilization
-  copy, randomArbitrary, randomInt
+  copy, randomArbitrary, randomInt, hashStr
 };

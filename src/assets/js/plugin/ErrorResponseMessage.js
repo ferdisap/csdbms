@@ -21,6 +21,13 @@ export default class ErrorResponseMessage {
       },
       getBag: function(){
         return this.bag;
+      },
+      newError: function(errors = {}){
+        if(Object.keys(errors).length){
+          for(const key of Object.keys(errors)){
+            this.set(key, errors[key]);
+          }
+        }
       }
     });
   }

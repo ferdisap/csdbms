@@ -1,4 +1,4 @@
-import { createApp } from 'vue';
+import { createApp } from 'vue/dist/vue.esm-bundler';
 import Task from '../../vue/components/gui/sub/Task.vue'
 import HelloWorld from '../../vue/components/window/HelloWorld.vue';
 import Explorer from '../../vue/components/window/Explorer.vue';
@@ -14,6 +14,9 @@ import { randomInt } from '../util/helper';
 import {dialog as runDialog} from '../../vue/components/window/child/Dialog.vue';
 import {alert as runAlert} from '../../vue/components/window/child/Alert.vue';
 import WindowProperty from './sub/WindowProperty';
+import { createPinia } from 'pinia';
+// import { createRouter, createWebHistory } from 'vue-router';
+// import RoutesVue from './../RoutesVue';
 
 /**
  * setiap window ada tasknya, kecuali dialog, alert, dan property window
@@ -149,24 +152,7 @@ class Window {
   }
   newWindow(config = {}) {
     if (config.app) return config.app;
-    let window;
-    switch (config.name) {
-      case 'HelloWorld':
-        window = createApp(HelloWorld, config.props);
-        break;
-      case 'Explorer':
-        window = createApp(Explorer, config.props);
-        break;
-      case 'DML':
-        window = createApp(DML, config.props);
-        top.dml = window;
-        break;
-    }    
-    // console.log(window._uid)
-    window.name = config.name;
-    if(config.uid) window.prevUid = config.uid; // prevUid adalah untuk first/root component uid, bukan app uid. Ini karena window._container.firstElementChild null
-    // window.loadFromCache = config.loadFromCache;
-    return window;
+    return createWindow(config);
   }
 
   // ##########################################################################################
@@ -665,10 +651,21 @@ const window = {
 }
 export default window
 
-// TEST
-// const wt = new WindowTask();
-// const task = wt.createTask({
-//   window_config:{
-//     name: 'Explorer'
-//   }
-// });
+function createWindow(config){
+  let app;
+  switch (config.name) {
+    case 'HelloWorld':
+      app = createApp(HelloWorld, config.props);
+      break;
+    case 'Explorer':
+      app = createApp(Explorer, config.props);
+      break;
+    case 'DML':
+      app = createApp(DML, config.props);
+      break;
+  }
+  app.name = config.name;
+  if(config.uid) app.prevUid = config.uid; // prevUid adalah untuk first/root component uid, bukan app uid. Ini karena app._container.firstElementChild null
+  app.use(createPinia());
+  return app;
+}

@@ -13,7 +13,8 @@ export default {
     trigger:Array
   },
   mounted(){
-    top.mainApp.config.globalProperties.FloatMenu.register(this.componentId,this.trigger, parseInt(this.$props.level));
+    // top.mainApp.config.globalProperties.FloatMenu.register(this.componentId,this.trigger, parseInt(this.$props.level));
+    top.FloatMenu.register(this.componentId,this.trigger, parseInt(this.$props.level));
   }
 }
 </script>

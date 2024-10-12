@@ -6,17 +6,14 @@ import FloatMenu from './components/menu/FloatMenu.vue';
 import Desktop from './components/gui/Desktop.vue';
 
 export default {
-  data() {
-    return {
-      techpubStore: {},
-      infoData: {}, // requiredAttribute: 'show:Boolean', 'message:String', 'name:String'
-      alertData: {},
-      tasks: [],
-    }
-  },
   components: { TitleBar, Content, TaskBar, FloatMenu, Desktop },
-  mounted() {
-    // window.main = this;
+  methods:{
+    showDesktop(){
+      const showAll = !this.$window.showAll;
+      const evt = new Event("hideshow-window");
+      evt.data = {state:showAll};
+      top.dispatchEvent(evt)
+    }
   }
 }
 </script>
@@ -31,42 +28,8 @@ export default {
       <TaskBar/>
     </div>
     <FloatMenu :trigger="[{triggerId: 'app-content-container', on: 'contextmenu'}]">
-      <div class="list">
-        <div>test</div>
-      </div>
-      <div class="list">
-        <div class="w-full">
-          test
-          <span id="level2" class="float-end">open</span>
-        </div>
-      </div>
-      <div class="list">
-        <div>test</div>
-      </div>
-      <div class="list">
-        <div>test</div>
-      </div>
-      <div class="list">
-        <div class="w-full">
-          test
-          <span id="lagilevel2" class="float-end">open</span>
-        </div>
-      </div>
-    </FloatMenu>
-    <FloatMenu :trigger="[{triggerId: 'level2', on: 'pointerover'}]" level="1">
-      <div class="list">
-        <div>tes level 2</div>
-      </div>
-      <div class="list">
-        <div>tes level 2</div>
-      </div>
-    </FloatMenu>
-    <FloatMenu :trigger="[{triggerId: 'lagilevel2', on: 'mouseover'}]" level="1">
-      <div class="list">
-        <div>tes level 2</div>
-      </div>
-      <div class="list">
-        <div>tes level 2</div>
+      <div class="list" @click="showDesktop">
+        <div>Show desktop</div>
       </div>
     </FloatMenu>
   </div>
