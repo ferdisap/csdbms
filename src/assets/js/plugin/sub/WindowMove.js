@@ -40,7 +40,14 @@ export default class WindowMove {
       windowElement = pointerDownTriggerElement.closest(".app-window");
     }
     windowElement.enableMoving = true;
-    pointerDownTriggerElement.addEventListener('pointerdown', this.onPointerDown.bind(this, windowElement, beforeMove, afterMove));
+    // pointerDownTriggerElement.addEventListener('pointerdown', this.onPointerDown.bind(this, windowElement, beforeMove, afterMove));
+    const move = (event) => this.onPointerDown(windowElement, beforeMove, afterMove, event);
+    pointerDownTriggerElement.addEventListener('pointerdown', (event) => {
+      const to = setTimeout(() => move(event), 200);
+      event.target.addEventListener('pointerup', () => {
+        clearTimeout(to);
+      }, { once: true });
+    });
   }
   setXY(target, rect, pointerdownX, pointerdownY, pointerupX, pointerupY) {
     // const x1 = rect.x;
@@ -85,6 +92,7 @@ export default class WindowMove {
     }
   }
   onPointerDown(windowEl, beforeMove, afterMove, edown) {
+    if(edown.which !== 1) return;
     if(!windowEl.enableMoving) return;
     if(beforeMove) beforeMove();
     const pleft = windowEl.style.left;
@@ -122,4 +130,64 @@ export default class WindowMove {
       if(afterMove) afterMove();
     }, { once: true })
   }
+
+  // masih salah. Tujuannya agar jika title bar di click tanpa moving mouse, window tidak akan mengecil/berpindah
+  // xx_onPointerDown(windowEl, beforeMove, afterMove, edown) {
+  //   if(edown.which !== 1) return;
+  //   if(!windowEl.enableMoving) return;
+  //   let pleft,ptop,frame, rectframe, isMove;
+  //   const firstMoving = (event) => {
+  //     console.log('first moving');
+  //     event.stopPropagation();
+  //     isMove = true;
+  //     if(beforeMove) beforeMove();
+  //     pleft = windowEl.style.left;
+  //     ptop = windowEl.style.top;
+  //     this.pheight = windowEl.style.height
+  //     this.pwidth = windowEl.style.width
+  
+  //     windowEl.style.opacity = '50%';
+  
+  //     // create frame
+  //     frame = createFrameMove(windowEl);
+  //     frame.style.zIndex = windowEl.style.zIndex + 1;
+  
+  //     rectframe = frame.getBoundingClientRect();      
+  //     document.removeEventListener('pointermove', firstMoving, true);    
+  //   };
+  //   document.addEventListener('pointerup', () => {
+  //     console.log('pointer up');
+  //     document.removeEventListener('pointermove', firstMoving, true)
+  //   },{once:true});
+
+  //   const moving = (emove) => {
+  //     console.log('moving');
+  //     clearSelection();
+  //     // lakukan frame move untuk simulation
+  //     this.setXY(frame, rectframe, edown.clientX, edown.clientY, emove.clientX, emove.clientY);
+  //   }
+  //   document.addEventListener('pointermove', firstMoving, true);
+  //   document.addEventListener('pointermove', moving);
+  //   if(isMove){
+  //     document.addEventListener('pointerup', () => {
+  //       document.removeEventListener('pointermove', moving);
+  //       windowEl.style.top = frame.style.top;
+  //       windowEl.style.left = frame.style.left;
+  //       if(!this.persistenSize){
+  //         windowEl.style.width = frame.style.width;
+  //         windowEl.style.height = frame.style.height;
+  //       }
+        
+  //       windowEl.pleft = pleft;
+  //       windowEl.ptop = ptop
+  
+  //       frame.remove()
+  //       windowEl.style.opacity = '';
+  //       if(afterMove) afterMove();
+  //     }, { once: true })
+  //   }
+  //   else {
+  //     document.removeEventListener('pointermove', moving);
+  //   }
+  // }
 }

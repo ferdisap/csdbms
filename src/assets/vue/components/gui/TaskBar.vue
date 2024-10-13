@@ -22,7 +22,7 @@ export default {
       document.dispatchEvent(new Event('start-menu'));
     },
     close(){
-      this.$window.stopTask(this.$window.getTaskByElement(this.FloatMenu.anchor.closest('.window-task')));
+      this.$window.stopTask(this.$window.getTaskByElement(top.FloatMenu.anchor.closest('.window-task')));
     },
     hideshow(){
       const showAll = !this.$window.showAll;
@@ -32,7 +32,7 @@ export default {
     }
   },
   mounted(){
-    window.taskbar = this;
+    // window.taskbar = this;
   }
 }
 </script>

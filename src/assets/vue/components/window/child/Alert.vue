@@ -1,11 +1,12 @@
 <script>
 import TitleBar from '../../gui/TitleBar.vue';
 
+/**
+ * Alert akan selalu return true, karena alert adalah hanya informasi yang disampaikan ke user vueCompoennt
+*/
 const alert = () => {
   let resolve = undefined;
-
   const promise = new Promise(r => resolve = r);
-
   const ok = () => resolve(true);
   const result = () => promise;
   return { ok, result };

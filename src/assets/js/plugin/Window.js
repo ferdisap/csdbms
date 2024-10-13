@@ -13,6 +13,7 @@ import { setDotsPosition, setLinesPosition } from './sub/WindowSize';
 import { randomInt } from '../util/helper';
 import { dialog as runDialog } from '../../vue/components/window/child/Dialog.vue';
 import { alert as runAlert } from '../../vue/components/window/child/Alert.vue';
+import { property as runProperty } from '../../vue/components/window/child/Property.vue';
 import WindowProperty from './sub/WindowProperty';
 import { history, clearUrl } from './sub/WindowHistory';
 // import { createRouter, createWebHistory } from 'vue-router';
@@ -45,8 +46,7 @@ import { history, clearUrl } from './sub/WindowHistory';
  * helloworld._.subTree.children[0].component.subTree.children[0].el // aksess sub component dengan .children[0].component
  */
 class Window {
-  // o = [];
-  zIndex = []; // appId
+  zIndex = []; // appId (windowId)
 
   em = new WeakMap(); // k = windowEl, v = window
 
@@ -62,6 +62,8 @@ class Window {
 
   pm = new WeakMap(); // k = window, v = property
   ep = new WeakMap(); // k = propertyEl, v = property;
+
+  rootAppId = "app"; // dimana mainApp.mount("#app");
 
   // dipakai di task
   getTaskByElement(taskEl) {
@@ -83,6 +85,9 @@ class Window {
    *       for child = sama dengan window key diatas ada name, type, data 
    * for task = title:string
    * each config must define any props with key props?:Object
+   * 
+   * jika membuat Dialog, Alert, Property window tanpa top window, maka document akan menjadi tempat result() nya;
+   * 
    * @param {Object} config selain diatas, config ini diperuntukan juga untuk config pembuatan app vue
    * @returns {void}
    */
@@ -95,27 +100,27 @@ class Window {
     if (config.task) {
       task = this.newTask(config.task);
       task.appId = "tsk" + Randomstring.generate({ charset: 'alphabetic' })
-      task.windowId = window.appId;
+      task.windowId = window ? window.appId : undefined;
     }
     if (config.dialog) {
       dialog = this.newDialog(config.dialog);
       dialog.appId = "dlg" + Randomstring.generate({ charset: 'alphabetic' })
-      dialog.windowId = window.appId;
+      dialog.windowId = window ? window.appId : undefined;
     }
     if (config.alert) {
       alert = this.newAlert(config.alert);
       alert.appId = "alt" + Randomstring.generate({ charset: 'alphabetic' })
-      alert.windowId = window.appId;
+      alert.windowId = window ? window.appId : undefined;
     }
     if (config.property) {
       property = this.newAlert(config.property);
       property.appId = "prp" + Randomstring.generate({ charset: 'alphabetic' })
-      property.windowId = window.appId;
+      property.windowId = window ? window.appId : undefined;
     }
     // register
     if (window && task) {
       this.registerWindowTask(window, task);
-      this.resetZIndex;
+      this.resetZIndex();
     }
     if (window && dialog) {
       this.registerWindowDialog(window, dialog);
@@ -176,8 +181,8 @@ class Window {
       this.mountTask(task);
     }
     if (dialog) {
-      const dialog = this.dm.get(window);
-      this.mountDialog(dialog);
+      if(this.dm.has(window)) this.mountDialog(this.dm.get(window));
+      else this.mountDialog(dialog);      
     }
     if (alert) {
       const alert = this.am.get(window);
@@ -188,7 +193,7 @@ class Window {
       this.mountProperty(property);
     }
     // mount task and window here
-    this.mountWindow(window);
+    if(window) this.mountWindow(window);
   }
 
   // ##########################################################################################
@@ -258,12 +263,12 @@ class Window {
     this.zIndex.push(el.id);
     el.style.zIndex = this.zIndex.length + 80;
 
-    el.addEventListener('click', this.setToTop.bind(this, el));
+    el.addEventListener('click', this.setToTop.bind(this, el), true); // di buat true agar ini dijalankan lebih dulu daripada close() saat ada event, misal tombol close di TitleBar.vue
     el.addEventListener('new-window', (e) => {
       e.data.config.window = { app: window };
       this.create(e.data.config);
     }, true)
-    el.addEventListener('close-window', this.close.bind(this), true);
+    el.addEventListener('close-window', this.close.bind(this), true); // ref mountDialog(), jika sama sama tidak capture=true, close-window tidak berjalan
     el.addEventListener('toggle-window', (e) => this.toggle(e.data), true);
     // el.addEventListener('sizing-window', this.sizing.bind(this),true);
   }
@@ -294,32 +299,43 @@ class Window {
     el.style.top = ((top.innerHeight / 2) - 100) + 'px';
     el.style.left = ((top.innerWidth / 2) - 200) + 'px';
     el.style.backgroundColor = '#ffffff';
-    container.appendChild(el);
     dialog.id = el.id;
-    dialog.mount('#' + el.id);
     this.ed.set(el, dialog);
 
     // configure to enable moving window
     this.enableMoving(el);
 
-    // set z Index
-    if (this.zIndex[this.zIndex.length - 1] !== dialog.windowId) {
-      this.zIndex[this.zIndex.indexOf(dialog.windowId)] = undefined;
-      this.zIndex.push(dialog.windowId)
-    }
-    this.zIndex.push(el.id);
-    el.style.zIndex = this.zIndex.length + 80;
+    if(dialog.windowId){
+      // push z Index
+      if (this.zIndex[this.zIndex.length - 1] !== dialog.windowId) {
+        this.zIndex[this.zIndex.indexOf(dialog.windowId)] = undefined;
+        this.zIndex.push(dialog.windowId)
+      }
+      this.zIndex.push(el.id);
+      // prevent from user interactive in top-window
+      const windowEl = document.getElementById(dialog.windowId);
+      dialog.blockerId = this.addTopWindowBlocker(windowEl);
 
-    // prevent from user interactive in top-window
-    const windowEl = document.getElementById(dialog.windowId);
-    this.addTopWindowBlocker(windowEl);
+      // add dialog result
+      if(windowEl.dialog) throw Error("Cannot open dialog window.");
+      windowEl.dialog = runDialog();
+
+    } else {
+      if(document.dialog) throw Error("Cannot open dialog window.");
+      document.dialog = runDialog();
+      dialog.blockerId = this.addTopWindowBlocker(document.getElementById(this.rootAppId));
+    }
+
+    // set zIndex
+    el.style.zIndex = this.zIndex.length + 80 + 1;
 
     // add event
-    el.addEventListener('click', this.setToTop.bind(this, el));
-    el.addEventListener('close-window', this.close.bind(this), true);
+    el.addEventListener('click', this.setToTop.bind(this, el), true); // di buat true agar ini dijalankan lebih dulu daripada close() saat ada event, misal tombol close di TitleBar.vue
+    el.addEventListener('close-window', this.close.bind(this), true); // jika sama sama tidak capture=true, close-window tidak berjalan
 
-    // add dialog result
-    document.getElementById(dialog.windowId).dialog = runDialog();
+    // append and mount dialog to document
+    container.appendChild(el);
+    dialog.mount('#' + el.id);
   }
   mountAlert(alert) {
     const container = document.getElementById('app-content');
@@ -334,20 +350,31 @@ class Window {
     el.style.top = ((top.innerHeight / 2) - 100) + 'px';
     el.style.left = ((top.innerWidth / 2) - 200) + 'px';
     el.style.backgroundColor = '#ffffff';
-    container.appendChild(el);
     alert.id = el.id
-    alert.mount('#' + el.id);
     this.ea.set(el, alert);
 
     el.style.zIndex = 200; // maximum value of top-window is in range of 80-200
 
-    // prevent from user interactive in top-window
-    const windowEl = document.getElementById(alert.windowId);
-    this.addTopWindowBlocker(windowEl);
+    if(alert.windowId){
+      // prevent from user interactive in top-window
+      const windowEl = document.getElementById(alert.windowId);
+      alert.blockerId = this.addTopWindowBlocker(windowEl);  
+
+      // add alert result
+      if(windowEl.alert) throw Error("Cannot open alert window.");
+      windowEl.alert = runAlert();
+    } else {
+      if(document.alert) throw Error("Cannot open alert window.");
+      document.alert = runAlert();
+      alert.blockerId = this.addTopWindowBlocker(document.getElementById(this.rootAppId));
+    }
 
     // add event
     el.addEventListener('close-window', this.close.bind(this), true);
-    document.getElementById(alert.windowId).alert = runAlert();
+
+    // append and mount alert to document
+    container.appendChild(el);
+    alert.mount('#' + el.id);
   }
   mountProperty(property) {
     const container = document.getElementById('app-content');
@@ -356,42 +383,52 @@ class Window {
     el.classList.add('window-property');
     el.id = property.appId;
     property.id = el.id
-    container.appendChild(el);
-    property.mount('#' + el.id);
     this.ed.set(el, property);
 
-    if (this.zIndex[this.zIndex.length - 1] !== property.windowId) {
-      this.zIndex[this.zIndex.indexOf(property.windowId)] = undefined;
-      this.zIndex.push(property.windowId)
-    }
-    this.zIndex.push(el.id);
+    if(property.windowId){
+      if (this.zIndex[this.zIndex.length - 1] !== property.windowId) {
+        this.zIndex[this.zIndex.indexOf(property.windowId)] = undefined;
+        this.zIndex.push(property.windowId)
+      }
+      this.zIndex.push(el.id);
 
-    // prevent from user interactive in top-window
-    const windowEl = document.getElementById(property.windowId);
-    this.addTopWindowBlocker(windowEl);
+      // add property result
+      const windowEl = document.getElementById(property.windowId);
+      if(windowEl.property) throw Error("Cannot open property window.");
+      windowEl.property = runProperty();
+    } else {
+      if(document.property) throw Error("Cannot open property window.");
+      document.property = runProperty();
+    }
+
+    // append and mount property to document
+    container.appendChild(el);
+    property.mount('#' + el.id);
   }
 
   // ##########################################################################################
 
   addTopWindowBlocker(topWindowEl) {
     const blocker = document.createElement('div');
+    const id = Randomstring.generate({charset:'alphabetic'});
     blocker.classList.add("window-blocker");
+    blocker.setAttribute('id', id);
     blocker.style.position = 'fixed';
-    blocker.style.height = topWindowEl.style.height;
-    blocker.style.width = topWindowEl.style.width;
-    blocker.style.top = topWindowEl.style.top;
-    blocker.style.left = topWindowEl.style.left;
+    blocker.style.height = topWindowEl.style.height ? topWindowEl.style.height : '100%';
+    blocker.style.width = topWindowEl.style.width ? topWindowEl.style.width : '100%';
+    blocker.style.top = topWindowEl.style.top ? topWindowEl.style.top : "0px";
+    blocker.style.left = topWindowEl.style.left ? topWindowEl.style.left : "0px";
     blocker.style.backgroundColor = '#9090908a';
     blocker.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       e.stopPropagation();
     }, true);
     topWindowEl.appendChild(blocker);
+    return id;
   }
 
-  removeTopWindowBlocker(topWindowEl) {
-    const blocker = topWindowEl.querySelector(".window-blocker");
-    blocker.remove();
+  removeTopWindowBlocker(blockerId) {
+    document.getElementById(blockerId).remove();
   }
 
   // ##########################################################################################
@@ -475,21 +512,23 @@ class Window {
     const windowEl = document.getElementById(dialog.windowId);
     if (windowEl && this.em.has(windowEl)) {
       this.dm.delete(this.em.get(windowEl));
-      this.zIndex[this.zIndex.indexOf(dialog.appId)] = undefined;
-      this.removeTopWindowBlocker(windowEl);
-
+      
       //hapus property di windowEl nya yang digunakan untuk akses result alert. Kalau tidak dihapus, reuslt akan selalu <pending> jika tidak di OK atau Yes melainkan di pencet close button di title barnya
-      delete windowEl.dialog
+      delete windowEl.dialog;
     }
+    delete document.dialog;
+    this.zIndex[this.zIndex.indexOf(dialog.appId)] = undefined;
+    this.removeTopWindowBlocker(dialog.blockerId);
     this.unmountDialog(dialog);
   }
   stopAlert(alert) {
     const windowEl = document.getElementById(alert.windowId);
     if (windowEl && this.em.has(windowEl)) {
       this.am.delete(this.em.get(windowEl));
-      this.removeTopWindowBlocker(windowEl);
-      delete windowEl.dialog
+      delete windowEl.alert;
     }
+    delete document.alert;
+    this.removeTopWindowBlocker(alert.blockerId);
     this.unmountAlert(alert);
   }
   stopProperty(property) {
@@ -497,7 +536,10 @@ class Window {
     if (windowEl && this.em.has(windowEl)) {
       this.am.delete(this.em.get(windowEl));
       this.stopTopWindow(this.em.get(windowEl));
+      delete windowEl.property;
     }
+    delete document.property;
+    this.zIndex[this.zIndex.indexOf(property.appId)] = undefined;
     this.unmountProperty(property);
   }
 
@@ -550,13 +592,15 @@ class Window {
     windowEl.style.zIndex = (this.zIndex.length) + 80;
 
     // push history
-    const window = this.em.get(windowEl);
-    window.config.globalProperties.$history.pushState();
+    if(this.em.has(windowEl)){
+      const window = this.em.get(windowEl);
+      window.config.globalProperties.$history.pushState();
 
-    // set to top all child window such as dialog, alert property
-    if (this.dm.has(window)) this.setToTop(document.getElementById(this.dm.get(window).appId));
-    else if (this.am.has(window)) this.setToTop(document.getElementById(this.am.get(window).appId));
-    else if (this.pm.has(window)) this.setToTop(document.getElementById(this.pm.get(window).appId));
+      // set to top all child window such as dialog, alert property
+      if (this.dm.has(window)) this.setToTop(document.getElementById(this.dm.get(window).appId));
+      else if (this.am.has(window)) this.setToTop(document.getElementById(this.am.get(window).appId));
+      else if (this.pm.has(window)) this.setToTop(document.getElementById(this.pm.get(window).appId));
+    }
   }
 
   resetZIndex() {
@@ -656,6 +700,7 @@ export default window
 
 /**
  * yang disebut app adalah window app
+ * class ".trigger-move" diperlukan untuk memindahkan window, default sudah terpasang di TitleBar.vue
  * @param {Object} config 
  * @returns 
  */
@@ -663,19 +708,16 @@ function createWindow(config) {
 
   if (config.app) return config.app; // jika buat dialog, dll windownya sudah ada jadi ga buat lagi
 
-  let component, path;
+  let component;
   switch (config.name) {
     case 'HelloWorld':
       component = HelloWorld;
-      path = "/helloworld";
       break;
     case 'Explorer':
       component = Explorer;
-      path = "/explore";
       break;
     case 'DML':
       component = DML;
-      path = "/dml";
       break;
   }
   // jika di create dari windowCache diambil dari config
@@ -683,9 +725,7 @@ function createWindow(config) {
   app.appId = config.appId ?? "top" + Randomstring.generate({ charset: 'alphabetic' });
   app.name = config.name;
   if (config.uid) app.prevUid = config.uid; // prevUid adalah untuk first/root component uid, bukan app uid. Ini karena app._container.firstElementChild null
-  app.use(history, {
-    path: path,
-  });
+  app.use(history);
   app.use(top.pinia);
   return app;
 }

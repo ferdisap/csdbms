@@ -43,11 +43,19 @@ export default {
     });
 
     // dummy
-    setTimeout(()=>{
-      // this.newExplorer();
-      // this.newDML();
-      // this.newHelloWorld();
-    },10)
+    // setTimeout(async ()=>{
+      // 
+      // this.$window.create({
+      //   dialog:{
+      //     props:{
+      //       title: 'Recent Windows',
+      //       instruction: "Do you want to open previous windows?"
+      //     }
+      //   }
+      // });
+    // },10)
+
+    top.sm = this;
   },
 }
 </script>

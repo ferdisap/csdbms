@@ -1,8 +1,8 @@
-function objectToSearch(query) {
-  const seachParams = new URLSearchParams;
-  Object.keys(query).forEach(key => seachParams.set(key, query[key]));
-  return seachParams;
-}
+// function objectToSearch(query) {
+//   const seachParams = new URLSearchParams;
+//   Object.keys(query).forEach(key => seachParams.set(key, query[key]));
+//   return seachParams;
+// }
 
 function clearUrl(){
   top.history.pushState({}, "", top.location.origin);
@@ -10,46 +10,47 @@ function clearUrl(){
 
 export {clearUrl}
 
+/**
+ * ini akan di tempel di setiap window app
+ */
 class WindowHistory {
 
-  _id;
-  _path;
-  _query;
-  _hash;
-
-  constructor(id, path = '', query = {}, hash = '') {
-    this._id = id;
-    this._path = path;
-    this._query = query;
-    this._hash = hash;
-    this.pushState()
+  constructor(id) {
+    this.pushState({id: id});
   }
 
   /**
    * 
-   * @param {Object} query 
+   * @param {Object} query key is any object that enable toString() 
    * @param {String} hash 
    */
   pushState(query, hash) {
     const url = new URL(window.location);
-    url.pathname = this._path;
-
-    let search;
-    if(query) search = objectToSearch(query);
-    else search = objectToSearch(this._query);
-    search.set("id", this._id);
-    url.search = search;
-    
+    if(query) Object.keys(query).forEach(key => url.searchParams.set(key, query[key].toString()));    
     if(hash) url.hash = hash;
-    else url.hash = this._hash;
-
     top.history.pushState({}, "", url);
+  }
+
+  /**
+   * @param {String} key 
+   * @returns {Array}
+   */
+  getQuery(key){
+    return (new URL(window.location)).searchParams.get(key).split(",");
+  }
+
+  /**
+   * @returns {String}
+   */
+  getHash(){
+   return (new URL(window.location)).hash;
   }
 }
 
 const history = {
-  install: (app, options) => {
-    app.config.globalProperties.$history = new WindowHistory(app.appId, options.path, options.query, options.hash);
+  install: (app) => {
+    app.config.globalProperties.$history = new WindowHistory(app.appId);
+    // app.config.globalProperties.$history = new WindowHistory(app.appId, options.path, options.query, options.hash);
   }
 }
 

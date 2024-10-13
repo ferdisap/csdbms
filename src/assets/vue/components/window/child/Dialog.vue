@@ -1,21 +1,19 @@
 <script>
 import TitleBar from '../../gui/TitleBar.vue';
 
+/**
+ * Dialog selalu return resolve karena pada dasarnya user akan mengunakan 'await dialog.result()'
+ * 
+ * meski di close menggunakan title bar, itu tidak akan menjalankan fungsi no(). Itu juga akan menghentikan logic script setelah 'await dialog.result()''
+*/
 const dialog = () => {
   let resolve = undefined;
-  let reject = undefined;
-
-  const promise = new Promise((r, j) => {
-    resolve = r;
-    reject = j;
-  })
-
+  const promise = new Promise((r) => resolve = r);
   const yes = (data) => resolve(data ?? true);
-  const no = (data) => reject(data ?? true);
+  const no = () => resolve(false);
   const result = () => promise;
   return { yes, no, result };
 }
-
 export {dialog}
 
 export default {
@@ -40,20 +38,22 @@ export default {
     },
     options: {
       type: String,
-      default: 'asas'
+      default: ''
     },
     footer: {
       type: String,
-      default: 'loremasasas',
+      default: '',
     }
   },
   methods: {
     yes() {
-      top.document.getElementById(this._.appContext.app.windowId).dialog.yes();
+      if(this._.appContext.app.windowId) top.document.getElementById(this._.appContext.app.windowId).dialog.yes();
+      else top.document.dialog.yes();
       this.$el.dispatchEvent(new Event('close-window'));
     },
     no(){
-      top.document.getElementById(this._.appContext.app.windowId).dialog.no();
+      if(this._.appContext.app.windowId) top.document.getElementById(this._.appContext.app.windowId).dialog.no();
+      else top.document.dialog.no();
       this.$el.dispatchEvent(new Event('close-window'));
     }
   },
@@ -75,7 +75,7 @@ export default {
         <button class="material-symbols-outlined text-base">keyboard_arrow_down</button>
         <button class="italic">More options</button>
       </div>
-      <div v-if="showOptions">asaa</div>
+      <div v-if="showOptions" v-html="$props.options"></div>
 
       <div class="border-t-2 border-black mt-1 text-sm" v-html="$props.footer"></div>
 

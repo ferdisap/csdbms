@@ -50,6 +50,7 @@ class WindowCache {
 
   #create(appId) {    
     const cached = JSON.parse(localStorage.getItem('cached-window'))[appId]
+    if(!cached) return;
     top.history.pushState({},"",cached.url)
     const evt = new Event("new-window");
     evt.data = {
@@ -70,7 +71,6 @@ class WindowCache {
     };
     // top.mainApp.config.globalProperties.$window.create(create);
     top.dispatchEvent(evt);
-
   }
 }
 

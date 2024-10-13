@@ -2,6 +2,12 @@
 import { formDataToObject } from '../../../../js/util/helper';
 import TitleBar from '../../gui/TitleBar.vue';
 
+/**
+ * Tidak seperti Alert dan Dialog, Property bisa reject karena 
+ * misal jika user ingin buat commment pakai property window, jika cancel maka logic creating comment di vueComponent akan dihentikan
+ * 
+ * parameter yes(param) adalah property component dan akan direturn props nya
+*/
 const property = function () {
   let resolve = undefined;
   let reject = undefined;
@@ -18,6 +24,9 @@ const property = function () {
 }
 export {property}
 
+/**
+ * jika memerlukan cara mengubah form untuk di set di props, bind fungsi ini di vueComponent
+*/
 const setPropsByHTMLForm = function(event){
   event.preventDefault();  
   const form = formDataToObject(new FormData(event.target));
@@ -25,7 +34,6 @@ const setPropsByHTMLForm = function(event){
     this._.props[i] = v;
   });
 } 
-
 export {setPropsByHTMLForm}
 
 /**
