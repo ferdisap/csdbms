@@ -7,7 +7,6 @@ export default {
   props:{
     title: {
       type: String,
-      default: 'tes foo'
     }
   },
   methods:{

@@ -15,8 +15,7 @@ export default {
   }
   },
   beforeMount() {
-    if(!(this.$parent._.emitsOptions)) this.$parent._.emitsOptions = {};
-    this.$parent._.emitsOptions.fetch = (state) => this.show = state;
+    this.$parent.clp = (state) => this.show = state;
   },
   mounted(){
     this.$el.parentElement.style.position = 'relative';

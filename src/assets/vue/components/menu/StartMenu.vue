@@ -6,28 +6,36 @@ export default {
     }
   },
   methods:{
-    newExplorer(){
+    newExplorer(event){
+      event.preventDefault();
       this.$window.create({
         window: {name: 'Explorer'},
-        task: {title: 'Explorer'},
+        task: {
+          props: {title: 'Explorer'}
+        },
       })
     },
-    newHelloWorld(){
+    newHelloWorld(event){
+      event.preventDefault();
       this.$window.create({
         window: {name: 'HelloWorld', props:{foo:'bue'}},
-        task: {title: 'Hello World'}
+        task: {
+          props: {title: 'Hello World'
+        }}
       })
     },
-    newDML(){
+    newDML(event){
+      event.preventDefault();
       this.$window.create({
         window: {name: 'DML'},
-        task: {title: 'DML'}
+        task: {
+          props: {title: 'DML'
+        }}
       })
     }
   },
   mounted(){
     document.addEventListener('start-menu',()=>{
-      console.log('start-menu');
       this.state = !this.state;
     })
     document.addEventListener('click', () => {
@@ -45,7 +53,12 @@ export default {
 </script>
 <template>
   <div v-show="state" class="w-48 h-96 top-[-24rem] text-black bg-neutral-200 absolute left-0 z-[90] p-2">
-    <RouterLink @click="newHelloWorld()" :to="$router.resolve({name: 'HelloWorld'})['fullPath']"
+    <a href="/explore" @click="newExplorer"
+      class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
+      <span class="material-symbols-outlined">explore</span>
+      <span class="font-semibold">Explore</span>
+    </a>
+    <!-- <RouterLink @click="newHelloWorld()" :to="$router.resolve({name: 'HelloWorld'})['fullPath']"
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
       <span class="material-symbols-outlined">explore</span>
       <span class="font-semibold">Hello World</span>
@@ -59,6 +72,6 @@ export default {
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
       <span class="material-symbols-outlined">explore</span>
       <span class="font-semibold">DML</span>
-    </RouterLink>
+    </RouterLink> -->
   </div>
 </template>

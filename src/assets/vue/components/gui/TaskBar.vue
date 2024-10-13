@@ -32,7 +32,7 @@ export default {
     }
   },
   mounted(){
-    // window.taskbar = this;
+    window.taskbar = this;
   }
 }
 </script>

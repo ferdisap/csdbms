@@ -1,10 +1,8 @@
 <script>
 import config from '../config.json';
 import { auth } from '../js/Auth';
-import { mainStore } from '../js/MainStore';
 import ContinuousLoadingCircle from './components/sub/ContinuousLoadingCircle.vue';
 import Flash from './components/sub/Flash.vue';
-// import jsCookie from 'js-cookie';
 
 const logged = function(data) {
   if (window.dialog && window.dialog.yes) {
@@ -17,7 +15,6 @@ export {logged};
 export default {
   data() {
     return {
-      'mainStore': mainStore(),
       'email': '',
       'password': '',
       'componentId': 'fppas',
@@ -30,6 +27,7 @@ export default {
       return config.CSDB_HOST_PROD + '/login';
     },
     login() {
+      this.$emit('clp',true);
       auth().login(this.email, this.password, this.componentId, this.rememberMe)
         .then(data => {
           // top.data = data;
@@ -40,18 +38,19 @@ export default {
           const e = new Event('flash');
           e.data = {
             type: data.infotype,
-            message: data.message
+            message: data.message,
+            errors: data.errors
           }
           document.dispatchEvent(e);
         })
         .finally(r => {
-          mainStore().componentLoadingProgress.set(this.componentId, false);
+          this.$emit('clp',false);
         })
 
     }
   },
   async mounted() {
-    // window.l = this;
+    window.l = this;
     // window.auth = auth();
     // top.jsCookie = jsCookie;
   }

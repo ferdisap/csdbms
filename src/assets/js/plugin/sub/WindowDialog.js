@@ -1,5 +1,4 @@
 import Dialog from '../../../vue/components/window/child/Dialog.vue';
-// import TesDialog from '../../../vue/components/window/child/TesDialog.vue';
 import { createApp } from 'vue';
 
 export default class WindowDialog{
@@ -8,9 +7,7 @@ export default class WindowDialog{
   }
 
   componentResolver(name){
-    switch (name) {    
-      // case 'tes': 
-      //   return TesDialog
+    switch (name) {
       default:
         return Dialog;
     }

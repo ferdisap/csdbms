@@ -37,8 +37,8 @@ function createListTreeHTML() {
   const hrefForOther = '#';
   const worker = new WorkerListTree;
   worker.onmessage = (e) => {
-    this.html = e.data
-    this.$emit('clp',false);
+    this.html = e.data;
+    this.clp(false);
     worker.terminate();
   };
   worker.postMessage({
@@ -56,7 +56,7 @@ function createListTreeHTML() {
 }
 
 async function start() {  
-  this.$emit('clp',true);
+  this.clp(true)
   this.data = new Proxy({}, {
     set: (t, k, v) => {
       t[k] = v;
@@ -67,11 +67,8 @@ async function start() {
     }
   });
   this._.props.open = JSON.parse(top.sessionStorage.getItem(window.location.origin + window.location.pathname + window.location.search));
-  setTimeout(()=>{
-    fetchList.apply(this);
-  },3000);
+  fetchList.apply(this);
 }
-
 export default {
   components: { ContinuousLoadingCircle, FloatMenu },
   data() {
@@ -86,9 +83,6 @@ export default {
       type: Object,
       default: {},
     },
-    clc: {
-      default: true
-    }
   },
   methods: {
     /*
@@ -202,7 +196,7 @@ export default {
     }
   },
   async mounted() {
-    // top.lt = this;
+    top.lt = this;
     start.apply(this);
   },
 }
@@ -211,7 +205,7 @@ export default {
 <template>
   <div :id="componentId" class="listtree">
     <div class="listtree-list">
-      <component v-show="html" :is="tree" />
+      <component v-if="html" :is="tree" />
     </div>    
     <FloatMenu :trigger="[{triggerId: componentId, on:'contextmenu'}]">
       <div class="list" @click="select">

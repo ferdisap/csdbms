@@ -1,12 +1,19 @@
 <script>
 import WindowMove from '../../../js/plugin/sub/WindowMove'
 import FloatMenu from '../menu/FloatMenu.vue';
-import { installCheckbox, cancel, select} from "../../../js/gui/Checkbox"
+import { installCheckbox, cancel, select } from "../../../js/gui/Checkbox"
+
+function openWindow(data) {
+  const evt = new Event('open-cached-window');
+  evt.data = data;
+  document.dispatchEvent(evt)
+}
+
 /**
  * Desktop ini dipakai untuk menampilkan localstorage key 'cached-window'
  */
 export default {
-  data(){
+  data() {
     return {
       cachedWindow: {
         zIndex: [],
@@ -14,12 +21,12 @@ export default {
       }
     }
   },
-  components:{FloatMenu},
+  components: { FloatMenu },
   methods: {
     updateList() {
       const cached = JSON.parse(localStorage.getItem('cached-window'));
       const display = [];
-      if(cached){
+      if (cached) {
         Object.keys(cached).sort().forEach(appId => {
           display.push({
             appId: appId,
@@ -29,35 +36,33 @@ export default {
         })
         this.cachedWindow.list = display;
       }
-      setTimeout(()=>{
+      setTimeout(() => {
         installCheckbox(document.getElementById('desktop-cb'));
-      },0)
+      }, 0)
     },
     open(event) {
-      const evt = new Event('open-cached-window');
       let anchor = event.target.closest("*[app-id]");
-      if(!anchor) anchor = this.FloatMenu.anchor.closest("*[app-id]");
-      if(anchor){
-        evt.data = { appId: anchor.getAttribute('app-id') };
-        document.dispatchEvent(evt)
+      if (!anchor) anchor = this.FloatMenu.anchor.closest("*[app-id]");
+      if (anchor) {
+        openWindow({ appId: anchor.getAttribute('app-id') });
       }
     },
-    setToTop(event){
+    setToTop(event) {
       const windowEl = event.target;
       this.cachedWindow.zIndex[this.cachedWindow.zIndex.indexOf(windowEl.id)] = undefined;
       this.cachedWindow.zIndex.push(windowEl.id);
-      if(this.cachedWindow.zIndex.length > 20) this.cachedWindow.zIndex = this.cachedWindow.zIndex.filter(v => v);
+      if (this.cachedWindow.zIndex.length > 20) this.cachedWindow.zIndex = this.cachedWindow.zIndex.filter(v => v);
       windowEl.style.zIndex = (this.cachedWindow.zIndex.length) + 60; // kasi 60 karena window itu minimal zIndex 80
     },
-    enableMove(trigger){
+    enableMove(trigger) {
       const wmove = new WindowMove();
       wmove.persistenSize = true;
-      wmove.attach(trigger,null,null,trigger.parentElement)
+      wmove.attach(trigger, null, null, trigger.parentElement)
     },
-    remove(){
-      const tr = this.FloatMenu.anchor.closest("*[app-id]");
-      if(tr){
-        const cached = JSON.parse(localStorage.getItem('cached-window')); 
+    remove() {
+      const tr = top.FloatMenu.anchor.closest("*[app-id]");
+      if (tr) {
+        const cached = JSON.parse(localStorage.getItem('cached-window'));
         delete cached[tr.getAttribute('app-id')]
         localStorage.setItem('cached-window', JSON.stringify(cached));
         tr.remove();
@@ -66,14 +71,14 @@ export default {
     cancel: cancel,
     select: select,
   },
-  beforeMount(){
+  beforeMount() {
     this.updateList();
   },
-  mounted(){    
+  mounted() {
     this.enableMove(document.getElementById('title-cached-window'));
 
-    // pakai setTimeout arena list bergantung ke dengan function
-    installCheckbox(document.getElementById('desktop-cb'));
+    const url = new URL(top.location);
+    if (url.searchParams.has('id')) openWindow({appId: url.searchParams.get('id')});
   }
 }
 </script>
@@ -81,7 +86,8 @@ export default {
 <template>
   <div id="app-desktop" class="relative">
     <div class="h-96 w-fit absolute bg-white shadow-md overflow-auto" id="cached-window-list" @click="setToTop">
-      <div id="title-cached-window" class="bg-blue-500">Saved Window <button @click="updateList" class="material-symbols-outlined float-end text-base mx-2">replay</button></div>
+      <div id="title-cached-window" class="bg-blue-500">Saved Window <button @click="updateList"
+          class="material-symbols-outlined float-end text-base mx-2">replay</button></div>
       <div class="p-2">
         <table id="desktop-cb" class="cb-home">
           <thead>
@@ -96,7 +102,7 @@ export default {
           <tbody id="title-cached-window-body">
             <tr v-for="(item, i) in cachedWindow.list" @dblclick="open" :app-id="item.appId" class="cb-room">
               <td style="display:none" class="cb-window"><input type="checkbox" :value="item.appId"></td>
-              <td>{{i + 1}}</td>
+              <td>{{ i + 1 }}</td>
               <td>{{ item.name }}</td>
               <td>{{ item.appId }}</td>
               <td>{{ item.last_saved }}</td>
@@ -106,7 +112,7 @@ export default {
       </div>
     </div>
     <!-- <FloatMenu :trigger="[{triggerId: 'title-cached-window-body', on:'contextmenu'}]"> -->
-    <FloatMenu :trigger="[{triggerId: 'app-desktop', on:'contextmenu'}]">
+    <FloatMenu :trigger="[{ triggerId: 'app-desktop', on: 'contextmenu' }]">
       <div class="list" @click="updateList">
         <div>refresh</div>
       </div>
@@ -129,27 +135,40 @@ export default {
 <style scoped>
 #app-desktop th {
   font-weight: bold;
-  font-size: 1rem; /* text-base */
-  line-height: 1.5 rem; /* text-base */
+  font-size: 1rem;
+  /* text-base */
+  line-height: 1.5 rem;
+  /* text-base */
 }
+
 #title-cached-window {
-  height: 2rem; /* h-8 */
+  height: 2rem;
+  /* h-8 */
   text-align: center;
   font-weight: bold;
   color: white;
-  padding-top: 0.25rem; /* py-1 */
-  padding-bottom: 0.25rem; /* py-1 */  
+  padding-top: 0.25rem;
+  /* py-1 */
+  padding-bottom: 0.25rem;
+  /* py-1 */
 }
+
 table {
-  margin-top: 0.25rem; /* mt-1 */
+  margin-top: 0.25rem;
+  /* mt-1 */
 }
-table td, table th {
+
+table td,
+table th {
   padding-left: 0.25rem;
   padding-right: 0.25rem;
   border: 1px dashed gray;
-  font-size: 1rem; /* text-base */
-  line-height: 1.5 rem; /* text-base */
+  font-size: 1rem;
+  /* text-base */
+  line-height: 1.5 rem;
+  /* text-base */
 }
+
 tr:hover {
   cursor: pointer;
 }

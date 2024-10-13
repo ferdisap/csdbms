@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import setInterceptor from './axiosInterceptor';
 import { createPinia } from 'pinia';
 import RoutesVue from './RoutesVue';
-import mitt from 'mitt';
+// import mitt from 'mitt';
 import '../css/main.css'
 import Main from '../vue/Main.vue';
 import { auth } from './Auth';
@@ -12,8 +12,8 @@ import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';
 import FloatMenu from './gui/FloatMenu';
 import window from './plugin/Window';
 import cache from './plugin/sub/WindowCache';
-import { installCheckbox } from './gui/Checkbox';
-import axios from 'axios';
+// import { installCheckbox } from './gui/Checkbox';
+// import axios from 'axios';
 // import jsCookie from 'js-cookie';
 
 // top.jsCookie = jsCookie;
@@ -21,8 +21,6 @@ import axios from 'axios';
 // top.installCheckbox = installCheckbox;
 
 // top.axios = axios;
-// top.auth = auth;
-// top.mainStore = mainStore;
 
 // create app
 top.mainApp = createApp(Main);
@@ -33,7 +31,10 @@ mainApp.use(cache);
 mainApp.use(new ErrorResponseMessage());
 
 // use pinia
-mainApp.use(createPinia());
+top.pinia = createPinia(); // jangan dihapus agar window bisa pakai ini
+mainApp.use(top.pinia);
+// top.auth = auth();
+// top.mainStore = mainStore;
 
 setInterceptor(mainApp);
 
@@ -46,11 +47,11 @@ mainApp.use(window);
 // mainApp.config.globalProperties.emitter = mitt();
 
 // use router
-const router = createRouter({
-  routes: RoutesVue,
-  history: createWebHistory(),
-});
-mainApp.use(router);
+// const router = createRouter({
+//   routes: RoutesVue,
+//   history: createWebHistory(),
+// });
+// mainApp.use(router);
 
 // use context menu
 // mainApp.config.globalProperties.ContextMenu = new ContextMenu();

@@ -62,7 +62,9 @@ class WindowCache {
           props: cached.props,
         },
         task: {
-          title: cached.name,
+          props:{
+            title: cached.name,
+          }
         }
       }
     };

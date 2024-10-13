@@ -11,10 +11,10 @@ import WindowMove from './sub/WindowMove';
 import WindowSize from './sub/WindowSize';
 import { setDotsPosition, setLinesPosition } from './sub/WindowSize';
 import { randomInt } from '../util/helper';
-import {dialog as runDialog} from '../../vue/components/window/child/Dialog.vue';
-import {alert as runAlert} from '../../vue/components/window/child/Alert.vue';
+import { dialog as runDialog } from '../../vue/components/window/child/Dialog.vue';
+import { alert as runAlert } from '../../vue/components/window/child/Alert.vue';
 import WindowProperty from './sub/WindowProperty';
-import { createPinia } from 'pinia';
+import { history, clearUrl } from './sub/WindowHistory';
 // import { createRouter, createWebHistory } from 'vue-router';
 // import RoutesVue from './../RoutesVue';
 
@@ -68,7 +68,7 @@ class Window {
     return this.te.get(taskEl);
   }
 
-  constructor(){
+  constructor() {
     top.addEventListener('close-window', this.close.bind(this));
     top.addEventListener('hideshow-window', this.hideshow.bind(this));
     top.addEventListener('new-window', (e) => {
@@ -91,8 +91,6 @@ class Window {
     // create window
     if (config.window) {
       window = this.newWindow(config.window);
-      window.appId = window.appId ?? (config.window.appId ?? "top" + Randomstring.generate({ charset: 'alphabetic' }))
-      window.url = (new URL(top.window.location.href)).toString();
     }
     if (config.task) {
       task = this.newTask(config.task);
@@ -151,7 +149,6 @@ class Window {
     return new WindowProperty(config);
   }
   newWindow(config = {}) {
-    if (config.app) return config.app;
     return createWindow(config);
   }
 
@@ -218,8 +215,8 @@ class Window {
             setDotsPosition(windowEl);
             setLinesPosition(windowEl);
           });
-      } 
-      else if(windowEl.matches(".window-dialog")){
+      }
+      else if (windowEl.matches(".window-dialog")) {
         (new WindowMove()).attach(triggerElement, () => this.setToTop(windowEl));
       }
       else {
@@ -232,7 +229,7 @@ class Window {
 
   mountWindow(window) {
     // check wheter windows has mounted or not
-    if(window._container) return;
+    if (window._container) return;
 
     const container = document.getElementById('app-content');
     const el = document.createElement('div');
@@ -250,24 +247,24 @@ class Window {
     el.enableMoving = true;
     el.enableSizing = true;
     el.style.backgroundColor = '#ffffff';
-    
+
     container.appendChild(el);
     window.mount('#' + el.id);
     this.em.set(el, window);
 
     this.enableSizing(el);
     this.enableMoving(el);
-    
+
     this.zIndex.push(el.id);
     el.style.zIndex = this.zIndex.length + 80;
-    
+
     el.addEventListener('click', this.setToTop.bind(this, el));
     el.addEventListener('new-window', (e) => {
-      e.data.config.window = {app: window};
+      e.data.config.window = { app: window };
       this.create(e.data.config);
-    },true)
-    el.addEventListener('close-window', this.close.bind(this),true);
-    el.addEventListener('toggle-window', (e) => this.toggle(e.data),true);
+    }, true)
+    el.addEventListener('close-window', this.close.bind(this), true);
+    el.addEventListener('toggle-window', (e) => this.toggle(e.data), true);
     // el.addEventListener('sizing-window', this.sizing.bind(this),true);
   }
   mountTask(task) {
@@ -294,17 +291,17 @@ class Window {
     el.style.position = 'absolute';
     el.style.width = '400px';
     // el.style.height = '200px';
-    el.style.top = ((top.innerHeight/2) - 100) + 'px';
-    el.style.left = ((top.innerWidth/2) - 200) + 'px';
+    el.style.top = ((top.innerHeight / 2) - 100) + 'px';
+    el.style.left = ((top.innerWidth / 2) - 200) + 'px';
     el.style.backgroundColor = '#ffffff';
-    container.appendChild(el);    
+    container.appendChild(el);
     dialog.id = el.id;
     dialog.mount('#' + el.id);
     this.ed.set(el, dialog);
-    
+
     // configure to enable moving window
     this.enableMoving(el);
-    
+
     // set z Index
     if (this.zIndex[this.zIndex.length - 1] !== dialog.windowId) {
       this.zIndex[this.zIndex.indexOf(dialog.windowId)] = undefined;
@@ -312,14 +309,14 @@ class Window {
     }
     this.zIndex.push(el.id);
     el.style.zIndex = this.zIndex.length + 80;
-    
+
     // prevent from user interactive in top-window
     const windowEl = document.getElementById(dialog.windowId);
     this.addTopWindowBlocker(windowEl);
-    
+
     // add event
     el.addEventListener('click', this.setToTop.bind(this, el));
-    el.addEventListener('close-window', this.close.bind(this),true);
+    el.addEventListener('close-window', this.close.bind(this), true);
 
     // add dialog result
     document.getElementById(dialog.windowId).dialog = runDialog();
@@ -334,8 +331,8 @@ class Window {
     el.enableSizing = false;
     el.style.position = 'absolute';
     el.style.width = '400px';
-    el.style.top = ((top.innerHeight/2) - 100) + 'px';
-    el.style.left = ((top.innerWidth/2) - 200) + 'px';
+    el.style.top = ((top.innerHeight / 2) - 100) + 'px';
+    el.style.left = ((top.innerWidth / 2) - 200) + 'px';
     el.style.backgroundColor = '#ffffff';
     container.appendChild(el);
     alert.id = el.id
@@ -349,7 +346,7 @@ class Window {
     this.addTopWindowBlocker(windowEl);
 
     // add event
-    el.addEventListener('close-window', this.close.bind(this),true);
+    el.addEventListener('close-window', this.close.bind(this), true);
     document.getElementById(alert.windowId).alert = runAlert();
   }
   mountProperty(property) {
@@ -385,7 +382,7 @@ class Window {
     blocker.style.top = topWindowEl.style.top;
     blocker.style.left = topWindowEl.style.left;
     blocker.style.backgroundColor = '#9090908a';
-    blocker.addEventListener('pointerdown',(e) => {
+    blocker.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       e.stopPropagation();
     }, true);
@@ -462,6 +459,8 @@ class Window {
       if (this.am.has(window)) this.stopAlert(this.am.get(window));
       if (this.pm.has(window)) this.stopProperty(this.pm.get(window));
       this.unmountWindow(window);
+
+      clearUrl()
     }
   }
   stopTask(task) {
@@ -478,7 +477,7 @@ class Window {
       this.dm.delete(this.em.get(windowEl));
       this.zIndex[this.zIndex.indexOf(dialog.appId)] = undefined;
       this.removeTopWindowBlocker(windowEl);
-      
+
       //hapus property di windowEl nya yang digunakan untuk akses result alert. Kalau tidak dihapus, reuslt akan selalu <pending> jika tidak di OK atau Yes melainkan di pencet close button di title barnya
       delete windowEl.dialog
     }
@@ -489,7 +488,7 @@ class Window {
     if (windowEl && this.em.has(windowEl)) {
       this.am.delete(this.em.get(windowEl));
       this.removeTopWindowBlocker(windowEl);
-      delete windowEl.dialog      
+      delete windowEl.dialog
     }
     this.unmountAlert(alert);
   }
@@ -540,7 +539,7 @@ class Window {
           id = this.zIndex[k];
           backEl = document.getElementById(id);
         }
-        if(backEl) this.setToTop(backEl);
+        if (backEl) this.setToTop(backEl);
       }
     }
   }
@@ -550,19 +549,21 @@ class Window {
     this.zIndex.push(windowEl.id);
     windowEl.style.zIndex = (this.zIndex.length) + 80;
 
-    // set to top all child window such as dialog, alert property
+    // push history
     const window = this.em.get(windowEl);
-    // top.window.history.pushState({},"",window.url)
+    window.config.globalProperties.$history.pushState();
+
+    // set to top all child window such as dialog, alert property
     if (this.dm.has(window)) this.setToTop(document.getElementById(this.dm.get(window).appId));
     else if (this.am.has(window)) this.setToTop(document.getElementById(this.am.get(window).appId));
     else if (this.pm.has(window)) this.setToTop(document.getElementById(this.pm.get(window).appId));
   }
 
-  resetZIndex(){
+  resetZIndex() {
     this.zIndex = this.zIndex.filter(v => v);
     for (let i = 0; i < this.zIndex.length; i++) {
       const element = document.getElementById(this.zIndex[i]);
-      if(element) element.style.zIndex = i + 80;
+      if (element) element.style.zIndex = i + 80;
       else this.zIndex[i] = undefined;
     }
   }
@@ -598,9 +599,9 @@ class Window {
     } else {
       windowEl.style.height = '500px';
       windowEl.style.width = '500px';
-      
-      windowEl.style.left = (windowEl.pleft === '0px' ? randomInt(0,(top.innerWidth - parseInt(windowEl.style.width))) +'px' : windowEl.pleft);
-      windowEl.style.top = (windowEl.ptop === '0px' ? randomInt(0,(top.innerHeight - parseInt(windowEl.style.height))) +'px' : windowEl.ptop);
+
+      windowEl.style.left = (windowEl.pleft === '0px' ? randomInt(0, (top.innerWidth - parseInt(windowEl.style.width))) + 'px' : windowEl.pleft);
+      windowEl.style.top = (windowEl.ptop === '0px' ? randomInt(0, (top.innerHeight - parseInt(windowEl.style.height))) + 'px' : windowEl.ptop);
 
       setDotsPosition(windowEl);
       setLinesPosition(windowEl);
@@ -626,22 +627,24 @@ class Window {
    * @param {Event} event perlu event.data = {state:boolean} 
    */
   showAll = true;
-  hideshow(event){
+  hideshow(event) {
     this.zIndex.filter(v => v).reverse().forEach(appId => {
       const windowEl = document.getElementById(appId);
       // hide All
       // console.log(event.data.state && windowEl.style.display !== 'none');
-      if(!event.data.state && windowEl.style.display !== 'none'){
-        this.toggle({window: windowEl});
+      if (!event.data.state && windowEl.style.display !== 'none') {
+        this.toggle({ window: windowEl });
         this.showAll = false;
-      } 
+      }
       // show all
-      else if (event.data.state && windowEl.style.display === 'none'){
-        this.toggle({window: windowEl});
+      else if (event.data.state && windowEl.style.display === 'none') {
+        this.toggle({ window: windowEl });
         this.showAll = true;
       }
     })
   }
+
+
 }
 
 const window = {
@@ -651,21 +654,38 @@ const window = {
 }
 export default window
 
-function createWindow(config){
-  let app;
+/**
+ * yang disebut app adalah window app
+ * @param {Object} config 
+ * @returns 
+ */
+function createWindow(config) {
+
+  if (config.app) return config.app; // jika buat dialog, dll windownya sudah ada jadi ga buat lagi
+
+  let component, path;
   switch (config.name) {
     case 'HelloWorld':
-      app = createApp(HelloWorld, config.props);
+      component = HelloWorld;
+      path = "/helloworld";
       break;
     case 'Explorer':
-      app = createApp(Explorer, config.props);
+      component = Explorer;
+      path = "/explore";
       break;
     case 'DML':
-      app = createApp(DML, config.props);
+      component = DML;
+      path = "/dml";
       break;
   }
+  // jika di create dari windowCache diambil dari config
+  const app = createApp(component, config.props);
+  app.appId = config.appId ?? "top" + Randomstring.generate({ charset: 'alphabetic' });
   app.name = config.name;
-  if(config.uid) app.prevUid = config.uid; // prevUid adalah untuk first/root component uid, bukan app uid. Ini karena app._container.firstElementChild null
-  app.use(createPinia());
+  if (config.uid) app.prevUid = config.uid; // prevUid adalah untuk first/root component uid, bukan app uid. Ini karena app._container.firstElementChild null
+  app.use(history, {
+    path: path,
+  });
+  app.use(top.pinia);
   return app;
 }

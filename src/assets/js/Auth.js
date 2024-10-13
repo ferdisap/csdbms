@@ -28,6 +28,7 @@ export const auth = defineStore('auth', {
     setAuthToken(value, useCookie = false) {
       if(useCookie){
         jsCookie.set(config.APP_NAME + '_' + 'auth_token', value)
+        //jsCookie.set(config.APP_NAME + '_' + 'auth_token', value, {expired: 7}) // expires 7 day
         return;
       }
       const authorization = jsCookie.get(config.APP_NAME + '_' + 'auth_token');
@@ -51,6 +52,7 @@ export const auth = defineStore('auth', {
      * @return {Promise} <fulfilled>/<rejected>
      */
     async login(email, password, remember) {
+      console.log(config.APP_NAME + '_' + 'auth_token');
       const configFetch = {
         method: 'POST',
         body: JSON.stringify({

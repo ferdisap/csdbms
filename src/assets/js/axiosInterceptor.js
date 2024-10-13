@@ -17,8 +17,6 @@ async function beforeRequest(config) {
       config.headers['Authorization'] = auth().getAuthToken();
     }
   }
-
-  if (config.useComponentLoadingProgress) mainStore().componentLoadingProgress[config.useComponentLoadingProgress] = true;
   return config;
 }
 
@@ -38,12 +36,13 @@ function onResponseSuccess(response) {
     type: response.data.infotype,
     message: response.data.message
   }
+  if (response.data.errors) e.data.errors = response.data.errors;
   document.dispatchEvent(e);
-  if (response.config.useComponentLoadingProgress) mainStore().componentLoadingProgress[response.config.useComponentLoadingProgress] = false;
   return response;
 }
 
 function onResponseError(axiosError) {
+  console.log('fooo')
   if (axiosError.code && axiosError.response.data && axiosError.response.data.errors) {
     for (const key of Object.keys(axiosError.response.data.errors)) {
       this.config.globalProperties.$ersp.set(key, axiosError.response.data.errors[key]);
@@ -51,11 +50,11 @@ function onResponseError(axiosError) {
     const e = new Event('flash');
     e.data = {
       type: axiosError.response.data.infotype,
-      message: `<i>${axiosError.message}</i>` + '<br/>' + axiosError.response.data.message
+      message: `<i>${axiosError.message}</i>` + '<br/>' + axiosError.response.data.message,
+      errors: axiosError.response.data.errors,
     }
     document.dispatchEvent(e)
   }
-  if (axiosError.config.useComponentLoadingProgress) mainStore().componentLoadingProgress[axiosError.config.useComponentLoadingProgress] = false;
   throw axiosError;
 }
 
