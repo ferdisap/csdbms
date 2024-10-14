@@ -48,7 +48,8 @@ export default {
   },
   methods: {
     ok() {
-      top.document.getElementById(this._.appContext.app.windowId).alert.ok();
+      if(this._.appContext.app.windowId) top.document.getElementById(this._.appContext.app.windowId).alert.ok();
+      else top.document.alert.ok();
       this.$el.dispatchEvent(new Event('close-window'));
     },
   },

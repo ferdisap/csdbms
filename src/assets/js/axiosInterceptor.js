@@ -4,16 +4,24 @@ import configApp from '../config.json';
 import { auth } from "./Auth";
 import { dialog } from "../vue/components/window/child/Dialog.vue";
 
+function openLoginPage() {
+  top.newWindow = top.open("/login.html", "login", "popup,height=800,width=800,left=100");
+  top.newWindow.dialog = dialog();
+  return top.newWindow.dialog.result()
+  .then((data) => {
+    auth().isAuth = true
+    auth().setAuthToken(data.token_type + " " + data.access_token);
+    axios.defaults.headers.common['Authorization'] = auth().getAuthToken();
+    return data;
+  })
+}
+
+export {openLoginPage}
+
 async function beforeRequest(config) {
 
-  if(!(auth().isAuth)){
-    top.newWindow = top.open("/login.html", "login", "popup,height=800,width=800,left=100");
-    top.newWindow.dialog = dialog();
-    const data = await top.newWindow.dialog.result();
-    if(data){
-      auth().isAuth = true
-      auth().setAuthToken(data.token_type + " " + data.access_token);
-      axios.defaults.headers.common['Authorization'] = auth().getAuthToken();
+  if (!(auth().isAuth)) {
+    if(await openLoginPage()){
       config.headers['Authorization'] = auth().getAuthToken();
     }
   }
@@ -62,6 +70,6 @@ function setInterceptor(app) {
   axios.defaults.baseURL = configApp.CSDB_HOST;
   axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
   axios.interceptors.request.use(beforeRequest.bind(app), onRequestError.bind(app));
-  axios.interceptors.response.use(onResponseSuccess.bind(app),onResponseError.bind(app));
+  axios.interceptors.response.use(onResponseSuccess.bind(app), onResponseError.bind(app));
 }
 export default setInterceptor;

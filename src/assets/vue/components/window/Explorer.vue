@@ -8,13 +8,13 @@ import { auth } from '../../../js/Auth';
 export default {
   data(){
     return{
-      auth: auth()
+      // auth: auth()
     }
   },
   components: { TitleBar, ListTree, Folder, Tes },
   mounted(){
-    top.exp = this;
-    top.auth = this.auth;
+    // top.exp = this;
+    // top.auth = this.auth;
   }
 }
 </script>

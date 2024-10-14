@@ -52,7 +52,6 @@ export const auth = defineStore('auth', {
      * @return {Promise} <fulfilled>/<rejected>
      */
     async login(email, password, remember) {
-      console.log(config.APP_NAME + '_' + 'auth_token');
       const configFetch = {
         method: 'POST',
         body: JSON.stringify({
@@ -86,7 +85,7 @@ export const auth = defineStore('auth', {
           "Authorization": this.getAuthToken()
         }
       });
-      const data = await login.json();
+      const data = await logout.json();
       if(logout.ok){
         this.setAuthToken('');
         this.isAuth = false;

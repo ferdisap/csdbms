@@ -74,7 +74,7 @@ class Window {
     top.addEventListener('close-window', this.close.bind(this));
     top.addEventListener('hideshow-window', this.hideshow.bind(this));
     top.addEventListener('new-window', (e) => {
-      this.create(e.data.config);
+      this.create(e.data);
     })
   }
 
@@ -185,11 +185,11 @@ class Window {
       else this.mountDialog(dialog);      
     }
     if (alert) {
-      const alert = this.am.get(window);
+      if(this.am.has(window)) this.mountDialog(this.am.get(window));
       this.mountAlert(alert);
     }
     if (property) {
-      const property = this.pm.get(window);
+      if(this.pm.has(window)) this.mountDialog(this.pm.get(window));
       this.mountProperty(property);
     }
     // mount task and window here

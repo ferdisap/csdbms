@@ -14,9 +14,9 @@ import window from './plugin/Window';
 import cache from './plugin/sub/WindowCache';
 // import { installCheckbox } from './gui/Checkbox';
 // import axios from 'axios';
-// import jsCookie from 'js-cookie';
+import jsCookie from 'js-cookie';
 
-// top.jsCookie = jsCookie;
+top.jsCookie = jsCookie;
 
 // top.installCheckbox = installCheckbox;
 

@@ -6,33 +6,49 @@ import AuthMenu from "../menu/AuthMenu.vue";
 import FloatMenu from "../../components/menu/FloatMenu.vue";
 import Randomstring from 'randomstring';
 export default {
-  data(){
+  data() {
     return {
       mainStore: mainStore(),
       auth: auth(),
 
       // menu
-      componentId: Randomstring.generate({charset:'alphabetic'}),
+      componentId: Randomstring.generate({ charset: 'alphabetic' }),
       authmenu: false,
     }
   },
-  components:{ StartMenu, AuthMenu, FloatMenu},
+  components: { StartMenu, AuthMenu, FloatMenu },
   methods: {
-    startMenu(){
+    startMenu() {
       document.dispatchEvent(new Event('start-menu'));
     },
-    close(){
+    close() {
       this.$window.stopTask(this.$window.getTaskByElement(top.FloatMenu.anchor.closest('.window-task')));
     },
-    hideshow(){
+    hideshow() {
       const showAll = !this.$window.showAll;
       const evt = new Event("hideshow-window");
-      evt.data = {state:showAll};
+      evt.data = { state: showAll };
       top.dispatchEvent(evt)
     }
   },
-  mounted(){
+  mounted() {
     // window.taskbar = this;
+    this.auth.check()
+    .then(r => {
+      if(!r){
+        const e = new Event('new-window');
+        e.data = {
+          alert: {
+            props: {
+              title: "Login Status",
+              type: r ? "note" : "caution",
+              instruction: "You are " + (r ? '' : 'not ') + "logged in!"
+            }
+          }
+        }
+        top.dispatchEvent(e);
+      }
+    })
   }
 }
 </script>
@@ -41,35 +57,37 @@ export default {
     <nav class="z-[200] bottom-0 h-full w-full bg-gray-500 text-white flex items-center shadow-md">
       <!-- start menu -->
       <div class="flex h-full mr-2 float-start">
-        <div @click.prevent.stop="startMenu" class="min-w-6 h-full relative flex items-center px-1 hover:bg-gray-700 hover:cursor-pointer">
+        <div @click.prevent.stop="startMenu"
+          class="min-w-6 h-full relative flex items-center px-1 hover:bg-gray-700 hover:cursor-pointer">
           <span class="material-symbols-outlined ">menu</span>
-          <StartMenu/>
+          <StartMenu />
         </div>
         <!-- <div class="min-w-6 h-full flex items-center px-1 hover:bg-gray-700 hover:cursor-pointer">
           <span class="material-symbols-outlined ">search</span>
         </div> -->
       </div>
-  
+
       <!-- window task -->
       <div id="app-windowtask" class="flex h-full mr-2">
         <!-- tempatnya task -->
       </div>
-  
+
       <!-- other, eg: login state -->
       <div class="h-full flex items-center justify-end w-full">
-        <div id="auth-menu" :class="[auth.isAuth ? 'bg-blue-600' : 'bg-red-600','relative h-6 w-6 mr-0 float-end text-center rounded-full hover:bg-gray-700 hover:cursor-pointer']">
+        <div id="auth-menu"
+          :class="[auth.isAuth ? 'bg-blue-600' : 'bg-red-600', 'relative h-6 w-6 mr-0 float-end text-center rounded-full hover:bg-gray-700 hover:cursor-pointer']">
           <span class="material-symbols-outlined text-base font-bold">account_circle</span>
         </div>
         <div class="hover:bg-gray-700 w-3 text-transparent cursor-pointer h-full" @click="hideshow">_</div>
       </div>
     </nav>
-    <FloatMenu :trigger="[{triggerId: 'app-windowtask', on: 'contextmenu'}]">
+    <FloatMenu :trigger="[{ triggerId: 'app-windowtask', on: 'contextmenu' }]">
       <div class="list">
         <div @click="close">close</div>
       </div>
     </FloatMenu>
-    <FloatMenu :trigger="[{triggerId: 'auth-menu', on: 'click'}]">
-      <AuthMenu/>
+    <FloatMenu :trigger="[{ triggerId: 'auth-menu', on: 'click' }]">
+      <AuthMenu />
     </FloatMenu>
   </div>
 </template>

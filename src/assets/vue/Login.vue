@@ -4,13 +4,21 @@ import { auth } from '../js/Auth';
 import ContinuousLoadingCircle from './components/sub/ContinuousLoadingCircle.vue';
 import Flash from './components/sub/Flash.vue';
 
-const logged = function(data) {
+const logged = function (data) {
   if (window.dialog && window.dialog.yes) {
     window.dialog.yes(data);
   }
   window.close();
 }
-export {logged};
+export { logged };
+
+const unlogged = function () {
+  if (window.dialog && window.dialog.yes) {
+    window.dialog.no();
+  }
+  window.close();
+}
+export { unlogged };
 
 export default {
   data() {
@@ -27,10 +35,11 @@ export default {
       return config.CSDB_HOST_PROD + '/login';
     },
     login() {
-      this.$emit('clp',true);
+      this.$emit('clp', true);
+
       auth().login(this.email, this.password, this.componentId, this.rememberMe)
         .then(data => {
-          // top.data = data;
+          window.onbeforeunload = undefined;
           logged(data);
         })
         .catch(data => {
@@ -44,15 +53,21 @@ export default {
           document.dispatchEvent(e);
         })
         .finally(r => {
-          this.$emit('clp',false);
+          this.$emit('clp', false);
+          window.onbeforeunload = undefined;
         })
 
     }
   },
   async mounted() {
-    window.l = this;
+    // window.l = this;
     // window.auth = auth();
     // top.jsCookie = jsCookie;
+
+    window.onbeforeunload = (event) => {
+      event.preventDefault();
+      unlogged();
+    }
   }
 }
 </script>
