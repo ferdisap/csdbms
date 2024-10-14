@@ -42,7 +42,7 @@ export default {
     },
     open(event) {
       let anchor = event.target.closest("*[app-id]");
-      if (!anchor) anchor = this.FloatMenu.anchor.closest("*[app-id]");
+      if (!anchor) anchor = top.FloatMenu.anchor.closest("*[app-id]");
       if (anchor) {
         openWindow({ appId: anchor.getAttribute('app-id') });
       }

@@ -108,3 +108,24 @@ body{
 .ws-dot-2:hover, .ws-dot-4:hover{
   cursor: nesw-resize;
 }
+
+@layer components {
+  .button-nav {
+    @apply px-3 font-semibold shadow-sm mx-2 hover:bg-slate-100
+  }
+  .button {
+    @apply py-1 px-3 font-semibold shadow-sm mx-2 bg-neutral-200 hover:bg-neutral-400 rounded-full
+  }
+  .button-danger {
+    @apply py-1 px-3 font-semibold shadow-sm mx-2 rounded-full bg-red-500 hover:text-white hover:bg-red-700
+  }
+  .button-violet {
+    @apply text-white py-1 px-3 font-semibold shadow-sm mx-2 bg-violet-400 hover:bg-violet-600 rounded-full
+  }
+  .button-primary {
+    @apply text-white py-1 px-3 font-semibold shadow-sm mx-2 bg-blue-500 hover:bg-blue-700 rounded-full
+  }
+  .button-safe {
+    @apply text-white py-1 px-3 font-semibold shadow-sm mx-2 bg-green-400 hover:bg-green-600 rounded-full
+  }
+}

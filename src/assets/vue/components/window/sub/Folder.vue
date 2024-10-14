@@ -90,7 +90,22 @@ export default {
       this.back(path);
     },
     clickFilename: async function (filename) {
-      alert("filename clicked", filename)
+      console.log("filename clicked", filename)
+      const event = new Event("new-window");
+      event.data = {
+        window: {
+          name: 'XMLEditor',
+          props: {
+            filename: filename
+          }
+        },
+        task: {
+          props: {
+            title: 'XMLEditor'
+          }
+        }
+      }
+      top.dispatchEvent(event);
     },
     sortTable: function sortTable(event) {
       const getCellValue = function (row, index) {

@@ -54,18 +54,16 @@ class WindowCache {
     top.history.pushState({},"",cached.url)
     const evt = new Event("new-window");
     evt.data = {
-      config: {
-        window: {
-          appId: appId,
-          uid: cached.uid,
-          name: cached.name,
-          loadFromCache: true,
-          props: cached.props,
-        },
-        task: {
-          props:{
-            title: cached.name,
-          }
+      window: {
+        appId: appId,
+        uid: cached.uid,
+        name: cached.name,
+        loadFromCache: true,
+        props: cached.props,
+      },
+      task: {
+        props:{
+          title: cached.name,
         }
       }
     };

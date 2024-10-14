@@ -8,7 +8,8 @@ import '../css/main.css'
 import Main from '../vue/Main.vue';
 import { auth } from './Auth';
 import { mainStore } from './MainStore';
-import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';  
+// import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';  
+import {createErsp} from './plugin/ErrorResponseMessage.js';  
 import FloatMenu from './gui/FloatMenu';
 import window from './plugin/Window';
 import cache from './plugin/sub/WindowCache';
@@ -28,7 +29,9 @@ top.mainApp = createApp(Main);
 mainApp.use(cache);
 
 // error response message store
-mainApp.use(new ErrorResponseMessage());
+top.ersp = createErsp();
+// mainApp.use((top.ersp));
+mainApp.config.globalProperties.$ersp = top.ersp
 
 // use pinia
 // top.getPinia = () => {

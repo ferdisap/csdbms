@@ -20,7 +20,7 @@ export {openLoginPage}
 
 async function beforeRequest(config) {
 
-  if (promiseState(auth().isAuth) !== "<fulfilled>: true") {
+  if (await promiseState(auth().isAuth) !== "<fulfilled>: true") {
     if(await openLoginPage()){
       config.headers['Authorization'] = auth().getAuthToken();
     }
@@ -33,10 +33,10 @@ function onRequestError() {
 }
 
 function onResponseSuccess(response) {
-  this.config.globalProperties.$ersp.clear();
+  top.ersp.clear();
   if (response.data.errors) {
     for (const key of Object.keys(response.data.errors)) {
-      this.config.globalProperties.$ersp.set(key, response.data.errors[key]);
+      top.ersp.set(key, response.data.errors[key]);
     }
   }
   const e = new Event('flash');
@@ -50,10 +50,9 @@ function onResponseSuccess(response) {
 }
 
 function onResponseError(axiosError) {
-  console.log('fooo')
   if (axiosError.code && axiosError.response.data && axiosError.response.data.errors) {
     for (const key of Object.keys(axiosError.response.data.errors)) {
-      this.config.globalProperties.$ersp.set(key, axiosError.response.data.errors[key]);
+      top.ersp.set(key, axiosError.response.data.errors[key]);
     }
     const e = new Event('flash');
     e.data = {

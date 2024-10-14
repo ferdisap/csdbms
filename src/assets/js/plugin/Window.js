@@ -3,6 +3,7 @@ import Task from '../../vue/components/gui/sub/Task.vue'
 import HelloWorld from '../../vue/components/window/HelloWorld.vue';
 import Explorer from '../../vue/components/window/Explorer.vue';
 import DML from '../../vue/components/window/DML.vue';
+import XMLEditor from '../../vue/components/window/XMLEditor.vue';
 import Alert from '../../vue/components/window/child/Alert.vue';
 import WindowDialog from './sub/WindowDialog';
 import Property from '../../vue/components/window/child/Property.vue';
@@ -16,6 +17,8 @@ import { alert as runAlert } from '../../vue/components/window/child/Alert.vue';
 import { property as runProperty } from '../../vue/components/window/child/Property.vue';
 import WindowProperty from './sub/WindowProperty';
 import { history, clearUrl } from './sub/WindowHistory';
+import setInterceptor from '../axiosInterceptor';
+import ErrorResponseMessage from './ErrorResponseMessage';
 // import { createRouter, createWebHistory } from 'vue-router';
 // import RoutesVue from './../RoutesVue';
 
@@ -715,6 +718,9 @@ function createWindow(config) {
     case 'HelloWorld':
       component = HelloWorld;
       break;
+    case 'XMLEditor':
+      component = XMLEditor;
+      break;
     case 'Explorer':
       component = Explorer;
       break;
@@ -729,5 +735,8 @@ function createWindow(config) {
   if (config.uid) app.prevUid = config.uid; // prevUid adalah untuk first/root component uid, bukan app uid. Ini karena app._container.firstElementChild null
   app.use(history);
   app.use(top.pinia);
+  app.config.globalProperties.$ersp = top.ersp;
+  // setInterceptor(app);
+  // app.use(new ErrorResponseMessage());
   return app;
 }

@@ -60,7 +60,7 @@ export default {
   },
   mounted(){
     this.isMaximize = this.$el.closest('.app-window').isMaximize;
-    window.tt = this;
+    // window.tt = this;
   },
 }
 </script>
