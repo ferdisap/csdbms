@@ -14,9 +14,9 @@ import window from './plugin/Window';
 import cache from './plugin/sub/WindowCache';
 // import { installCheckbox } from './gui/Checkbox';
 // import axios from 'axios';
-import jsCookie from 'js-cookie';
+// import jsCookie from 'js-cookie';
 
-top.jsCookie = jsCookie;
+// top.jsCookie = jsCookie;
 
 // top.installCheckbox = installCheckbox;
 
@@ -31,6 +31,10 @@ mainApp.use(cache);
 mainApp.use(new ErrorResponseMessage());
 
 // use pinia
+// top.getPinia = () => {
+//   console.log('getPinia');
+//   return top.pinia;
+// }
 top.pinia = createPinia(); // jangan dihapus agar window bisa pakai ini
 mainApp.use(top.pinia);
 // top.auth = auth();

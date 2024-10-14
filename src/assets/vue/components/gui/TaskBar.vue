@@ -1,22 +1,23 @@
 <script>
 import { auth } from "../../../js/Auth";
 import StartMenu from "../menu/StartMenu.vue";
-import { mainStore } from '../../../js/MainStore';
-import AuthMenu from "../menu/AuthMenu.vue";
 import FloatMenu from "../../components/menu/FloatMenu.vue";
 import Randomstring from 'randomstring';
+import {promiseState} from '../../../js/Auth.js';
+import Auth from "./sub/Auth.vue";
 export default {
   data() {
     return {
-      mainStore: mainStore(),
-      auth: auth(),
-
       // menu
       componentId: Randomstring.generate({ charset: 'alphabetic' }),
-      authmenu: false,
     }
   },
-  components: { StartMenu, AuthMenu, FloatMenu },
+  components: { StartMenu, Auth, FloatMenu },
+  computed:{
+    isAuthenticated(){
+      return (promiseState(auth().isAuth)) === "<fulfilled>: true" ? true : false;
+    }
+  },
   methods: {
     startMenu() {
       document.dispatchEvent(new Event('start-menu'));
@@ -32,28 +33,12 @@ export default {
     }
   },
   mounted() {
-    // window.taskbar = this;
-    this.auth.check()
-    .then(r => {
-      if(!r){
-        const e = new Event('new-window');
-        e.data = {
-          alert: {
-            props: {
-              title: "Login Status",
-              type: r ? "note" : "caution",
-              instruction: "You are " + (r ? '' : 'not ') + "logged in!"
-            }
-          }
-        }
-        top.dispatchEvent(e);
-      }
-    })
+    window.taskbar = this;
   }
 }
 </script>
 <template>
-  <div :id="componentId" class="taskbar h-full w-full absolute z-[200]">
+  <div :id="componentId" class="taskbar h-full w-full absolute z-[50]">
     <nav class="z-[200] bottom-0 h-full w-full bg-gray-500 text-white flex items-center shadow-md">
       <!-- start menu -->
       <div class="flex h-full mr-2 float-start">
@@ -74,10 +59,7 @@ export default {
 
       <!-- other, eg: login state -->
       <div class="h-full flex items-center justify-end w-full">
-        <div id="auth-menu"
-          :class="[auth.isAuth ? 'bg-blue-600' : 'bg-red-600', 'relative h-6 w-6 mr-0 float-end text-center rounded-full hover:bg-gray-700 hover:cursor-pointer']">
-          <span class="material-symbols-outlined text-base font-bold">account_circle</span>
-        </div>
+        <Auth/>
         <div class="hover:bg-gray-700 w-3 text-transparent cursor-pointer h-full" @click="hideshow">_</div>
       </div>
     </nav>
@@ -85,9 +67,6 @@ export default {
       <div class="list">
         <div @click="close">close</div>
       </div>
-    </FloatMenu>
-    <FloatMenu :trigger="[{ triggerId: 'auth-menu', on: 'click' }]">
-      <AuthMenu />
     </FloatMenu>
   </div>
 </template>

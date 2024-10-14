@@ -2,13 +2,16 @@
 import ContinuousLoadingCircle from '../../sub/ContinuousLoadingCircle.vue';
 import WorkerListTree from '../../../../js/worker/ListTree.js?worker'
 import config from '../../../../config.json';
-import { auth } from '../../../../js/Auth';
+import { auth, promiseState } from '../../../../js/Auth';
 import { isProxy, toRaw } from 'vue';
 import { installCheckbox, cancel, select } from '../../../../js/gui/Checkbox';
 import FloatMenu from '../../menu/FloatMenu.vue';
 import Randomstring from 'randomstring';
 
-function fetchList() {
+async function fetchList() {
+  if(promiseState(auth().isAuth) !== "<fulfilled>: true"){
+    await auth().isAuth;
+  }
   const worker = new WorkerListTree;
   worker.onmessage = (e) => {
     this.data.level = e.data[1];

@@ -23,6 +23,7 @@ export { unlogged };
 export default {
   data() {
     return {
+      // auth: auth(),
       'email': '',
       'password': '',
       'componentId': 'fppas',

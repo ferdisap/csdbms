@@ -1,7 +1,7 @@
 import axios from "axios";
 import { mainStore } from "./MainStore";
 import configApp from '../config.json';
-import { auth } from "./Auth";
+import { auth, promiseState } from "./Auth";
 import { dialog } from "../vue/components/window/child/Dialog.vue";
 
 function openLoginPage() {
@@ -9,9 +9,9 @@ function openLoginPage() {
   top.newWindow.dialog = dialog();
   return top.newWindow.dialog.result()
   .then((data) => {
-    auth().isAuth = true
     auth().setAuthToken(data.token_type + " " + data.access_token);
     axios.defaults.headers.common['Authorization'] = auth().getAuthToken();
+    auth().requestChecking();
     return data;
   })
 }
@@ -20,7 +20,7 @@ export {openLoginPage}
 
 async function beforeRequest(config) {
 
-  if (!(auth().isAuth)) {
+  if (promiseState(auth().isAuth) !== "<fulfilled>: true") {
     if(await openLoginPage()){
       config.headers['Authorization'] = auth().getAuthToken();
     }

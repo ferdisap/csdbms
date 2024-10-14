@@ -29,7 +29,7 @@ import { history, clearUrl } from './sub/WindowHistory';
  * 'new-window', 'close-window', 'toggle-window', 'sizing-window' yang di dispatch di element inside the window (sizing-window dimatikan karna nanti tidak bisa ubah icon di title bar).
  * 
  * when open a sub window (dialog, alert, properties) access the element with (".app-window").dialog.result() by the promise result
- * z-index top-window berkisar 80-200, dekstop 60-80,
+ * z-index top-window berkisar 80-200, dekstop 60-80, taskbar 50
  * 
  * TIPS:
  * (success tested in prod) dari window.vue, jika ingin mengakses custom object di appnya maka run >>> this._.appContext.app.customObject
@@ -324,6 +324,7 @@ class Window {
       if(document.dialog) throw Error("Cannot open dialog window.");
       document.dialog = runDialog();
       dialog.blockerId = this.addTopWindowBlocker(document.getElementById(this.rootAppId));
+      document.getElementById(dialog.blockerId).style.zIndex = 50;
     }
 
     // set zIndex
@@ -367,6 +368,7 @@ class Window {
       if(document.alert) throw Error("Cannot open alert window.");
       document.alert = runAlert();
       alert.blockerId = this.addTopWindowBlocker(document.getElementById(this.rootAppId));
+      document.getElementById(alert.blockerId).style.zIndex = 50;
     }
 
     // add event

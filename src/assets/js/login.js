@@ -7,7 +7,7 @@ import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';
 import {auth} from '../js/Auth';
 
 const app = createApp(App);
-app.use(createPinia());
+app.use(createPinia()); // tidak bisa mengakses pinia yang sama (top.opener.pinia) karena undefined walaupun pakai setTimeout 
 
 app.use(new ErrorResponseMessage());
 
@@ -19,6 +19,7 @@ auth().check()
       app.mount('#app');
     }
   })
+
 
 
 

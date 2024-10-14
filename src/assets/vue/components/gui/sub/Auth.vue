@@ -1,18 +1,14 @@
 <script>
-import { auth } from '../../../js/Auth';
-import { openLoginPage } from '../../../js/axiosInterceptor';
+import { auth } from '../../../../js/Auth';
+import { openLoginPage } from '../../../../js/axiosInterceptor';
+import FloatMenu from '../../menu/FloatMenu.vue';
 export default {
   data() {
     return {
-      auth: auth()
+      isAuthenticated: false,
     }
   },
-  props: {
-    isAuth: {
-      type: Boolean,
-      default: false,
-    }
-  },
+  components:{ FloatMenu },
   methods: {
     logout() {
       auth().logout()
@@ -28,6 +24,7 @@ export default {
             }
           }
           top.dispatchEvent(e);
+          this.isAuthenticated = false;
         })
     },
     login() {
@@ -44,17 +41,31 @@ export default {
             }
           }
           top.dispatchEvent(e);
+          this.isAuthenticated = true;
           return r;
         })
     }
   },
+  mounted() {
+    top.auth = auth();
+    auth().check()
+    .then(r => {
+      this.isAuthenticated = r;
+    })
+  }
 }
 </script>
 <template>
-  <div v-if="$props.isAuth" class="list" @click="logout">
-    <div>logout</div>
+  <div id="auth-menu"
+    :class="[isAuthenticated ? 'bg-blue-600' : 'bg-red-600', 'relative h-6 w-6 mr-0 float-end text-center rounded-full hover:bg-gray-700 hover:cursor-pointer']">
+    <span class="material-symbols-outlined text-base font-bold">account_circle</span>
   </div>
-  <div v-else class="list" @click="login">
-    <div>login</div>
-  </div>
+  <FloatMenu :trigger="[{ triggerId: 'auth-menu', on: 'click' }]">
+    <div v-if="isAuthenticated" class="list" @click="logout">
+      <div>logout</div>
+    </div>
+    <div v-else class="list" @click="login">
+      <div>login</div>
+    </div>
+  </FloatMenu>
 </template>

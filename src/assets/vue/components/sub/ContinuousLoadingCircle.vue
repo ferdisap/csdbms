@@ -1,6 +1,4 @@
 <script>
-import { mainStore } from '../../../js/MainStore.js'
-
 /**
  * HOW TO USE
  * attach <ContinuousLoadingCircle /> in your vue template
@@ -10,7 +8,6 @@ import { mainStore } from '../../../js/MainStore.js'
 export default {
   data(){
     return {
-      mainStore: mainStore(),
       show: false,
   }
   },
@@ -23,7 +20,7 @@ export default {
 }
 </script>
 <template>
-   <div class="clc" @fetch="show = !show" v-if="show">
+   <div class="clc" v-if="show">
     <div class="clc-buffer" />
   </div>
 </template>
