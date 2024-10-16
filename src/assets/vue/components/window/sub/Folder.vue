@@ -159,7 +159,7 @@ export default {
     changePath: function () {
       alert("change path")
     },
-    deleteObject: function () {
+    deleteObject: async function () {
       // get filename
       const cbHome = this.$el.querySelector(".cb-home");
       let filename = cbHome.cbValues;
@@ -172,11 +172,10 @@ export default {
 
       // display dialog
       const e = new Event("new-window");
-      const f = filename;
-      top.f = f;
+      const f = Object.assign([],filename);
       f.forEach(function (part, index) {
         this[index] = `<code class="filename">${part}</code>`
-      }, filename);
+      }, f);
       e.data = {
         window: {
           app: this.$el.closest(".app-window"),
@@ -197,8 +196,8 @@ export default {
 
       top.dispatchEvent(e);
 
-      return;
-
+      const result = await this.$el.closest('.app-window').dialog.result()
+      if(!result) return;
 
       // fetch
       axios({

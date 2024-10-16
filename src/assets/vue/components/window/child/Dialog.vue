@@ -67,8 +67,8 @@ export default {
   <div class="h-full w-full border shadow-md">
     <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" :cache-button="false"/>
     <div class="px-3 py-1">
-      <div class="text-lg mt-2" v-html="$props.instruction"></div>
-      <div class="mt-2 h-20" v-if="$slots.content">
+      <div class="text-lg mt-2 max-h-20 overflow-auto" v-html="$props.instruction"></div>
+      <div class="mt-2 h-20 overflow-auto" v-if="$slots.content">
         <slot name="content"></slot>
       </div>
 
