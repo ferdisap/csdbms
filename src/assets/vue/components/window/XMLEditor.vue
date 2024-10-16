@@ -5,7 +5,7 @@ import Randomstring from 'randomstring';
 import { ref } from 'vue';
 import TitleBar from '../gui/TitleBar.vue';
 import axios from 'axios';
-import Flash from "../sub/Flash.vue";
+import { formDataToObject } from "../../../js/util/helper";
 
 /**
  * cara pakai:
@@ -78,24 +78,26 @@ export default {
       editor: new XMLEditor(),
     }
   },
-  components:{ TitleBar, Flash },
+  components:{ TitleBar },
   props: {
     filename: {
       type: String
     },
   },
   methods:{
+    // jika PUT method, maka masih belum tau caranya membaca data di laravel kalau request pakai formdata, 
+    //jadi saat ini masih di convert form data nnya ke json
     submit(event){
       event.preventDefault();
       const fd = new FormData(event.target);
       fd.set('xmleditor', this.editor.text);
       if(this.$props.filename) axios.post("/api/s1000d/csdb/update/" + this.$props.filename, fd)
-      else axios.put("/api/s1000d/csdb/create",fd);
+      else axios.put("/api/s1000d/csdb/create", formDataToObject(fd));
     }
   },
   mounted() {
     this.editor.attachEditor();
-    this.editor.fetchRaw(this.$props.filename);
+    if(this.$props.filename) this.editor.fetchRaw(this.$props.filename);
   },
 }
 </script>
@@ -108,7 +110,6 @@ export default {
 <template>
   <div class="xmleditor h-full w-full border shadow-md">
     <TitleBar :title="'XMLEditor ' + $props.filename"/>
-    <Flash/>
     <div class="h-[calc(100%-3rem)] w-full">
       <form @submit.stop.prevent="submit($event)" class="h-full">
         <input v-show="$props.filename" name="filename" type="text" class="hidden" :value="$props.filename" />

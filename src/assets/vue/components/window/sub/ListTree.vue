@@ -7,9 +7,10 @@ import { isProxy, toRaw } from 'vue';
 import { installCheckbox, cancel, select } from '../../../../js/gui/Checkbox';
 import FloatMenu from '../../menu/FloatMenu.vue';
 import Randomstring from 'randomstring';
+import { isArray } from '../../../../js/util/helper';
 
 async function fetchList() {
-  if(promiseState(auth().isAuth) !== "<fulfilled>: true"){
+  if (promiseState(auth().isAuth) !== "<fulfilled>: true") {
     await auth().isAuth;
   }
   const worker = new WorkerListTree;
@@ -18,6 +19,7 @@ async function fetchList() {
     this.data.list = e.data[0];
     worker.terminate();
   }
+  this.clp(true);
   worker.postMessage({
     mode: 'fetchData',
     data: {
@@ -34,13 +36,63 @@ async function fetchList() {
   })
 }
 
+function render(stringhtml) {
+  const container = this.$el.querySelector(".listtree-tree");
+  container.innerHTML = stringhtml;
+  top.ihtml = stringhtml;
+  installCheckbox(container);
+
+  // open/close details
+  container.querySelectorAll("*[expand-collapse-btn]").forEach(el => {
+    el.component = new WeakRef(this);
+    if(!el.expandCollapseListener){
+      el.addEventListener('click', function(event){
+        event.preventDefault();
+        const path = this.getAttribute('expand-collapse-btn');
+        const details = this.closest('details');
+        details.open = !details.open;
+        // set icon
+        details.firstElementChild.firstElementChild.innerHTML = details.open ? 'keyboard_arrow_down' : 'chevron_right'
+        if (!this.component.deref().$data.open) {
+          const expandCollapseListTreeFromLocalStorage = top.sessionStorage.getItem(window.location.origin + window.location.pathname + window.location.search);
+          if (expandCollapseListTreeFromLocalStorage) {
+            this.component.deref().$data.open = JSON.parse(expandCollapseListTreeFromLocalStorage)
+          } else {
+            this.component.deref().$data.open = {};
+          }
+        }
+        this.component.deref().$data.open[path] = details.open;
+        top.sessionStorage.setItem(window.location.origin + window.location.pathname + window.location.search, JSON.stringify(this.component.deref().$data.open))
+      }.bind(el))
+      el.expandCollapseListener = true;
+    }
+  })
+
+  // onclick folder
+  container.querySelectorAll("summary > .folder").forEach(el => {
+    if(!el.clickFolder){
+      // add here listener
+      el.addEventListener('click',() => console.log('click Folder'))
+      el.clickFolder = true
+    }
+  })
+  // onclick filename
+  container.querySelectorAll("details .filename").forEach(el => {
+    if(!el.clickFilename){
+      // add here listener
+      el.addEventListener('click',() => console.log('click FIlename'))
+      el.clickFilename = true
+    }
+  })
+}
+
 function createListTreeHTML() {
   const hrefForPdf = '#';
   const hrefForHtml = '#';
   const hrefForOther = '#';
   const worker = new WorkerListTree;
   worker.onmessage = (e) => {
-    this.html = e.data;
+    render.call(this, e.data);
     this.clp(false);
     worker.terminate();
   };
@@ -58,30 +110,41 @@ function createListTreeHTML() {
   });
 }
 
-async function start() {  
-  this.clp(true)
+async function start() {
   this.data = new Proxy({}, {
     set: (t, k, v) => {
       t[k] = v;
       if (k === 'list') {
-          setTimeout(createListTreeHTML.apply(this));
-        };
-        return true;
+        setTimeout(createListTreeHTML.apply(this));
+      };
+      return true;
     }
   });
   this._.props.open = JSON.parse(top.sessionStorage.getItem(window.location.origin + window.location.pathname + window.location.search));
   fetchList.apply(this);
 }
+
+
+
+
+
+
+
+
+
+
+// ############
+
 export default {
   components: { ContinuousLoadingCircle, FloatMenu },
   data() {
     return {
       data: {},
       html: '',
-      componentId: Randomstring.generate({charset:'alphabetic'}),
+      componentId: Randomstring.generate({ charset: 'alphabetic' }),
     }
   },
-  props:{
+  props: {
     open: {
       type: Object,
       default: {},
@@ -121,27 +184,29 @@ export default {
       if (foundLevel && !(this.data.level[foundLevel[0]].find(v => v === model.path))) { // agar tidak terduplikasi path nya
         this.data.level[foundLevel[0]].push(model.path)
       }
-    },    
+    },
     /**
      * digunakan untuk emit.on('ListTree-refresh')
      */
-     refresh(data) {
+    refresh(data) {
       //data adalah model SQL Csdb Object atau array contain csdb object (bukan meta objek nya)
-      if(isArray(data)){
+      if (isArray(data)) {
         data.forEach((obj) => {
           this.deleteList(obj.filename)
           this.pushList(obj);
         });
-      } else{
+      } else if (data) {
         this.deleteList(data.filename)
         this.pushList(data);
+      } else {
+        fetchList.apply(this);
       }
       createListTreeHTML.apply(this);
     },
     clickFolder(data) {
       console.log('click folder', data);
     },
-    clickFilename(data){
+    clickFilename(data) {
       console.log('click filename', data);
     },
     cancel: cancel,
@@ -175,12 +240,12 @@ export default {
         },
         methods: {
           expandCollapse(path) {
-            const details = this.$el.parentElement.querySelector(`details[path=${path.replace("/","\\/")}]`);
+            const details = this.$el.parentElement.querySelector(`details[path=${path.replace("/", "\\/")}]`);
             details.open = !details.open;
             // set icon
             details.firstElementChild.firstElementChild.innerHTML = details.open ? 'keyboard_arrow_down' : 'chevron_right'
             if (!this.$parent.data.open) {
-              
+
               const expandCollapseListTreeFromLocalStorage = top.sessionStorage.getItem(window.location.origin + window.location.pathname + window.location.search);
               if (expandCollapseListTreeFromLocalStorage) {
                 this.$parent.data.open = JSON.parse(expandCollapseListTreeFromLocalStorage)
@@ -192,7 +257,7 @@ export default {
             top.sessionStorage.setItem(window.location.origin + window.location.pathname + window.location.search, JSON.stringify(this.$parent.data.open))
           }
         },
-        mounted(){
+        mounted() {
           installCheckbox(this.$el.parentElement);
         }
       }
@@ -208,11 +273,15 @@ export default {
 <template>
   <div :id="componentId" class="listtree">
     <div class="listtree-list">
-      <component v-if="html" :is="tree" />
-    </div>    
-    <FloatMenu :trigger="[{triggerId: componentId, on:'contextmenu'}]">
+      <!-- <component v-if="html" :is="tree" /> -->
+      <div class="listtree-tree"></div>
+    </div>
+    <FloatMenu :trigger="[{ triggerId: componentId, on: 'contextmenu' }]">
       <div class="list" @click="select">
         <div>select</div>
+      </div>
+      <div class="list" @click="refresh()">
+        <div>refresh</div>
       </div>
       <div class="list" @click="cancel">
         <div>cancel</div>

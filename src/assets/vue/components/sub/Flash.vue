@@ -18,10 +18,9 @@ export default {
     },
     addBag(data = {}) {
       if (data.message) {
-        if (!(this.bag.find((b) => b.message == data.message))) {
-          this.bag.push(data);
-          setTimeout(() => this.popBag(data), 10000);
-        }
+        this.bag.push(data);
+        setTimeout(() => this.popBag(data), 10000);
+        // if (!(this.bag.find((b) => b.message == data.message))) {}
       }
     },
     popBag(value) {
@@ -38,9 +37,7 @@ export default {
     }
   },
   mounted() {
-    document.addEventListener('flash', (e) => {
-      this.addBag(e.data)
-    })
+    document.addEventListener('flash', (e) => this.addBag(e.data));
   },
 }
 </script>

@@ -1,6 +1,10 @@
 <script>
 import { auth } from '../../../js/Auth';
 import { openLoginPage } from '../../../js/axiosInterceptor';
+
+/**
+ * @deprecated
+*/
 export default {
   data() {
     return {

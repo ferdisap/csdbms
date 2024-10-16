@@ -1,3 +1,5 @@
+import { addGetLogic, addSetLogic } from "../util/ObjectProperty";
+
 /**
  * @param {HTMLElement} home 
  */
@@ -23,22 +25,22 @@ function setPropertyValues(cbHome) {
     };
     Object.defineProperty(cbHome, 'selectionMode', {
       set: function (v) {
-        if(v){
+        if (v) {
           this.addEventListener('mousedown', disable, true);
-          this.addEventListener('pointerup', disable, true);
+          // this.addEventListener('pointerup', disable, true);
           this.addEventListener('mouseup', disable, true);
           this.addEventListener('click', disable, true);
           this.addEventListener('dblclick', disable, true);
         } else {
           this.removeEventListener('mousedown', disable, true);
-          this.removeEventListener('pointerup', disable, true);
+          // this.removeEventListener('pointerup', disable, true);
           this.removeEventListener('mouseup', disable, true);
           this.removeEventListener('click', disable, true);
           this.removeEventListener('dblclick', disable, true)
         }
         this.sm = v;
       },
-      get: function(){
+      get: function () {
         return this.sm;
       }
     })
@@ -48,19 +50,24 @@ function setPropertyValues(cbHome) {
 }
 
 function setPropertyValue(cbHome) {
-  const cbWindows = [...cbHome.querySelectorAll(".cb-window")];
-  for (let i = 0; i < cbWindows.length; i++) {
-    // set property value
-    try {
-      Object.defineProperty(cbWindows[i], 'cbValue', {
-        get: function () {
-          return this.querySelector("input[type=checkbox]").value; // pointing to ".cb-window > input[type='checkbox']"
-        }
-      })
-      // set display to none
-      cbWindows[i].style.display = 'none';
-    } catch (error) {
+  const cbRooms = cbHome.querySelectorAll('.cb-room');
+  for (let i = 0; i < cbRooms.length; i++) {
+    const cbWindow = cbRooms[i].querySelector(".cb-window");
+    if (cbWindow) {
+      try {
+        Object.defineProperty(cbWindow, 'cbValue', {
+          get: function () {
+            return this.querySelector("input[type=checkbox]").value; // pointing to ".cb-window > input[type='checkbox']"
+          }
+        })
+      } catch (error) { }
+      if (!cbRooms[i].cbWindow) {
+        cbRooms[i].cbWindow = new WeakRef(cbWindow);
+        addGetLogic(cbRooms[i], 'cbWindow', (ctx, value) => value.deref());
+      }
 
+      // set display to none
+      cbWindow.style.display = 'none';
     }
   }
 }
@@ -71,9 +78,12 @@ function setPropertyValue(cbHome) {
  */
 function push(el) {
   if (!el.matches("input[type=checkbox]")) {
-    const cb = el.closest(".cb-room").querySelector("input[type='checkbox']");
+    const cbRoom = el.closest(".cb-room");
+    const cb = cbRoom.querySelector("input[type='checkbox']");
+    // cbRoom.closest(".cb-home").cbRoom = new WeakRef(cbRoom);
     return cb.checked = !cb.checked;
   } else {
+    // el.closest(".cb-home").cbRoom = new WeakRef(el.closest(".cb-room"))
     return el.checked = !el.checked
   }
 }
@@ -83,7 +93,7 @@ export { push }
  * di install di cb-room
  * @param {Event} event 
  */
-function disablePointerDown(event) {
+function onPointerUp(event) {
   event.stopPropagation(); // kalau ga di stop, maka kalau cbroom nya di ada event click maka akan berjalan juga eventnya
   if (event.which === 1) { // left click
     event.preventDefault();
@@ -91,7 +101,7 @@ function disablePointerDown(event) {
   }
 }
 
-function disablePointerDownCbAll(event) {
+function onPointerUpCbAll(event) {
   event.stopPropagation();
   if (event.which === 1) { // left click
     event.preventDefault();
@@ -112,13 +122,13 @@ function showAll(cbHome) {
   for (let i = 0; i < cbWindows.length; i++) {
     cbWindows[i].style.display = '';
     const cbRoom = cbWindows[i].closest(".cb-room");
-    cbRoom.addEventListener('pointerdown', disablePointerDown);
+    cbRoom.addEventListener('pointerup', onPointerUp);
   };
   const cbWindowAll = cbHome.querySelector(".cb-window-all");
   if (cbWindowAll) {
     cbWindowAll.style.display = '';
-      const cbRoom = cbWindowAll.closest(".cb-room");
-      cbRoom.addEventListener('pointerdown', disablePointerDownCbAll);
+    const cbRoom = cbWindowAll.closest(".cb-room");
+    cbRoom.addEventListener('pointerup', onPointerUpCbAll);
   }
   cbHome.selectionMode = true;
 }
@@ -133,15 +143,15 @@ function hideAll(cbHome, select = false) {
     cbWindows[i].querySelector("input[type=checkbox]").checked = select;
     cbWindows[i].style.display = 'none';
     const cbRoom = cbWindows[i].closest(".cb-room");
-    cbRoom.removeEventListener('pointerdown', disablePointerDown);
+    cbRoom.removeEventListener('pointerup', onPointerUp);
   }
   const cbWindowAll = cbHome.querySelector(".cb-window-all");
   if (cbWindowAll) {
-      cbWindowAll.style.display = 'none';
-      const cb = cbWindowAll.querySelector("input[type=checkbox]");
-      cb.checked = select;
-      const cbRoom = cbWindowAll.closest(".cb-room");
-      cbRoom.removeEventListener('pointerdown', disablePointerDownCbAll);
+    cbWindowAll.style.display = 'none';
+    const cb = cbWindowAll.querySelector("input[type=checkbox]");
+    cb.checked = select;
+    const cbRoom = cbWindowAll.closest(".cb-room");
+    cbRoom.removeEventListener('pointerup', onPointerUpCbAll);
   }
   cbHome.selectionMode = false;
   cbHome.addEventListener('pointerdown', pointerDetent);
@@ -160,6 +170,10 @@ function pointerDetent(event) {
     }, 500);
 
     event.target.addEventListener('pointerup', (e) => {
+      clearTimeout(to);
+    }, { once: true });
+
+    event.target.addEventListener('pointermove', (e) => {
       clearTimeout(to);
     }, { once: true });
   }
@@ -187,6 +201,13 @@ function installCheckbox(cbHome) {
   // set attribute
   cbHome.classList.add("cb-home")
 
+  // add current cbRoom select by pointer
+  if (!cbHome.current) {
+    cbHome.current = new WeakRef(cbHome.querySelector(".cb-room"));
+    addSetLogic(cbHome, "current", (ctx, value) => new WeakRef(value));
+    addGetLogic(cbHome, "current", (ctx, value) => value.deref());
+  }
+
   // define property values on cbHome
   setPropertyValues(cbHome);
 
@@ -200,6 +221,15 @@ function installCheckbox(cbHome) {
   const cbWindowsAll = cbHome.querySelectorAll(".cb-window-all");
   for (let i = 0; i < cbWindowsAll.length; i++) {
     cbWindowsAll[i].style.display = 'none';
+  }
+
+  // add mark border on cbRoom, saat di coba, event terdispatch 2x padahal script ini dijalankan sekali hanya untuk listtree
+  const cbRooms = cbHome.querySelectorAll(".cb-room");
+  for (let i = 0; i < cbRooms.length; i++) {
+    if (!cbRooms[i].addedListenerForMark) {
+      cbRooms[i].addEventListener('pointerup', mark.bind(cbRooms[i]))
+      cbRooms[i].addedListenerForMark = true;
+    }
   }
 }
 
@@ -224,5 +254,24 @@ function select() {
       }
     }
   };
+}
+function mark(event) {
+  event.stopPropagation();
+  const cbHome = this.closest(".cb-home");
+  const currentTagName = this.nodeName;
+  const ptarget = cbHome.current;
+  const previousTagName = ptarget.tagName;
+
+  switch (previousTagName) {
+    case 'DETAILS': ptarget.firstElementChild.style.backgroundColor = ""; break;
+    default: ptarget.style.backgroundColor = ""; break;
+  }
+
+  switch (currentTagName) {
+    case 'DETAILS': this.firstElementChild.style.backgroundColor = "rgb(188 220 241)"; break;
+    default: this.style.backgroundColor = "rgb(188 220 241)"; break;
+  }
+
+  cbHome.current = this;
 }
 export { cancel, select }

@@ -49,13 +49,13 @@ export default {
   methods: {
     ok() {
       if(this._.appContext.app.windowId) top.document.getElementById(this._.appContext.app.windowId).alert.ok();
-      else top.document.alert.ok();
+      else top.document.alertResult[this.$el.parentElement.id].ok();
       this.$el.dispatchEvent(new Event('close-window'));
     },
   },
-  // mounted(){
-  //   top.al = this;
-  // }
+  mounted(){
+    top.al = this;
+  }
 }
 </script>
 <template>

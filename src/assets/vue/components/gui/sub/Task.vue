@@ -17,5 +17,6 @@ export default {
 }
 </script>
 <template>
-  <div class="task min-w-24 h-full flex items-center text-base shadow-md px-2 hover:bg-gray-700 text-nowrap" @click.stop="toggle">{{ $props.title }}</div>  
+  <!-- <div class="task min-w-24 h-full flex items-center text-base shadow-md px-2 hover:bg-gray-700 text-nowrap" @click.stop="toggle">{{ $props.title }}</div>   -->
+  <div class="task min-w-24 h-full flex items-center text-base shadow-md px-2 hover:bg-gray-700 text-nowrap">{{ $props.title }}</div>  
 </template>

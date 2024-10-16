@@ -22,20 +22,55 @@ function getAccessorDescriptor(obj, prop) {
   return desc;
 }
 
+/**
+ * harus ditulis sebelum addGetLogic
+ * logic harus mereturn sebuah value yang akan di set;
+ * @param {*} obj 
+ * @param {*} prop 
+ * @param {*} logic akan menghasilkan parameter ctx,value
+ */
 function addSetLogic(obj, prop, logic) {
   const oldDescriptor = getAccessorDescriptor(obj, prop);
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Object.defineProperty(obj, prop, {
     ...oldDescriptor,
     set(newValue) {
+      oldDescriptor.set.call(this, logic(this, newValue));
+    }
+  });
+}
+export {addSetLogic}
+
+function addSetLogic2(obj, prop, logic) {
+  const oldDescriptor = getAccessorDescriptor(obj, prop);
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Object.defineProperty(obj, prop, {
+    ...oldDescriptor,
+    set(newValue) {
       oldDescriptor.set.call(this, newValue);
-//    ^^^^^^^^^^^^^^^^^
       logic(this, newValue);
     }
   });
 }
+export {addSetLogic2}
 
-export {addSetLogic};
+/**
+ * 
+ * @param {*} obj 
+ * @param {*} prop 
+ * @param {*} logic akan menghasilkan parameter ctx,value
+ */
+function addGetLogic(obj, prop, logic) {
+  const oldDescriptor = getAccessorDescriptor(obj, prop);
+  Object.defineProperty(obj, prop, {
+    get() {
+      return logic(this, oldDescriptor.get.call(this));
+    }
+  });
+}
+
+export {addGetLogic}
+
 
 // src: https://stackoverflow.com/questions/74720929/wanting-to-change-a-setter-of-a-single-input-field-how-to-advance-to-check-if-t
 // EXAMPLE

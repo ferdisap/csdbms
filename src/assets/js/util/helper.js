@@ -141,7 +141,7 @@ function isCharacterKeyPress(evt) {
  * @param {*} text 
  * @returns 
  */
-function copy(event, text) {
+function copy(text, event) {
   if (text) {
     navigator.clipboard.writeText(text); // output promise
     return;
@@ -150,7 +150,7 @@ function copy(event, text) {
   const selection = window.getSelection();
   if (event) a = event.target;
   else if (selection.type === 'Range') a = selection.anchorNode;
-  else if (this.ContextMenu && this.ContextMenu.anchorNode) a = this.ContextMenu.anchorNode;
+  else if (top.FloatMenu && top.FloatMenu.event) a = top.FloatMenu.event.target;
 
   if (a) {
     const range = new Range();
@@ -162,6 +162,9 @@ function copy(event, text) {
     range.setEndAfter(a);
 
     // Add range to window selection
+    if (selection.rangeCount > 0) {
+      selection.removeAllRanges();
+    }
     selection.addRange(range);
 
     // tergantung window.isSecureContext. kalau php artisan serve, maka true, jika IIS false karena belum tau caranya

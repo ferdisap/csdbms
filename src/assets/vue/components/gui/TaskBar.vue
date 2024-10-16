@@ -41,15 +41,11 @@ export default {
   <div :id="componentId" class="taskbar h-full w-full absolute z-[50]">
     <nav class="z-[200] bottom-0 h-full w-full bg-gray-500 text-white flex items-center shadow-md">
       <!-- start menu -->
-      <div class="flex h-full mr-2 float-start">
-        <div @click.prevent.stop="startMenu"
-          class="min-w-6 h-full relative flex items-center px-1 hover:bg-gray-700 hover:cursor-pointer">
+      <div class="flex h-full mr-2 float-start relative">
+        <div @click.prevent.stop="startMenu" class="min-w-6 h-full relative flex items-center px-1 hover:bg-gray-700 hover:cursor-pointer">
           <span class="material-symbols-outlined ">menu</span>
           <StartMenu />
         </div>
-        <!-- <div class="min-w-6 h-full flex items-center px-1 hover:bg-gray-700 hover:cursor-pointer">
-          <span class="material-symbols-outlined ">search</span>
-        </div> -->
       </div>
 
       <!-- window task -->

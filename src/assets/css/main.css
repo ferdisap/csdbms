@@ -38,9 +38,9 @@ body{
   div.cb-room:hover, tr.cb-room:hover{
     @apply bg-gray-100
   }
-  div.cb-room:active, tr.cb-room:active {
+  /* div.cb-room:active, tr.cb-room:active {
     @apply bg-blue-400
-  }
+  } */
   details.cb-room:active > summary, details.cb-room:hover > summary {
     @apply bg-none
   }
@@ -127,5 +127,11 @@ body{
   }
   .button-safe {
     @apply text-white py-1 px-3 font-semibold shadow-sm mx-2 bg-green-400 hover:bg-green-600 rounded-full
+  }
+}
+
+@layer components {
+  code.filename {
+    @apply text-pink-500 bg-gray-100 text-sm p-1 mr-2 rounded-sm
   }
 }

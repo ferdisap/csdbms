@@ -64,9 +64,13 @@ function ListTree() {
             const cb = `<span class="cb-window"><input type="checkbox" value="${model.filename}"/></span>`;
             href = href.replace(':filename', model.filename);
             const viewType = isICN ? 'other' : 'pdf';
+            // listobj = listobj + `
+            //      <div class="cb-room" ${style}>
+            //        ${cb}${logo}<a href="${href}" @click.prevent="$parent.clickFilename({path:'${model.path}',filename: '${model.filename}', viewType:'${viewType}'})">${model.filename}</a>
+            //      </div>`
             listobj = listobj + `
                  <div class="cb-room" ${style}>
-                   ${cb}${logo}<a href="${href}" @click.prevent="$parent.clickFilename({path:'${model.path}',filename: '${model.filename}', viewType:'${viewType}'})">${model.filename}</a>
+                   ${cb}${logo}<a href="${href}" class="filename">${model.filename}</a>
                  </div>`
           }
         }
@@ -75,7 +79,6 @@ function ListTree() {
       const path_yang_sudah = [];
       const fn = (start_l = 1, leveldata = {}, dataobj = {}, callback, parentPath = '') => {
         let details = '';
-        let defaultMarginLeft = 5;
         if (leveldata[start_l]) {
 
           for (const path of leveldata[start_l]) { // untuk setiap path 'csdb' dan 'xxx'
@@ -93,6 +96,7 @@ function ListTree() {
             }
             let isOpen = this.open ? this.open[path] : false;
             isOpen = isOpen ? 'open' : '';
+            // isOpen = isOpen ? 'true' : 'false';
             const cbAll = `<span class="cb-window-all"><input type="checkbox" value=""/></span>`;
 
             // CSS
@@ -105,12 +109,19 @@ function ListTree() {
             // <details ${isOpen} style="margin-left:${start_l * 3 + defaultMarginLeft}px;" path="${path}" @click="clickDetails($el)">
             // <details ${isOpen} class="cb-room" style="margin-left:${start_l * 3 + defaultMarginLeft}px;" path="${path}">
             // margin diganti dengan css tailwind ml-3
+            // details = details + `
+            // <details ${isOpen} class="cb-room" path="${path}">
+            //   <summary class="list-none flex">
+            //   <span @click.prevent="expandCollapse('${path}')" class="material-symbols-outlined chevron">chevron_right</span> 
+            //    ${cbAll}
+            //    <a href="#" @click.prevent="$parent.clickFolder({path: '${path}'})">${currFolder}</a>
+            //  </summary>`;
             details = details + `
             <details ${isOpen} class="cb-room" path="${path}">
               <summary class="list-none flex">
-              <span @click.prevent="expandCollapse('${path}')" class="material-symbols-outlined chevron">chevron_right</span> 
+              <span expand-collapse-btn="${path}" class="material-symbols-outlined chevron">chevron_right</span> 
                ${cbAll}
-               <a href="#" @click.prevent="$parent.clickFolder({path: '${path}'})">${currFolder}</a>
+               <a href="#" class="folder">${currFolder}</a>
              </summary>`;
 
             if (leveldata[start_l + 1]) {

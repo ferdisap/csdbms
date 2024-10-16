@@ -1,24 +1,18 @@
 <script>
 import { installCheckbox, cancel, select } from '../../../../js/gui/Checkbox';
-import { copy } from '../../../../js/util/helper.js';
-// import Sort from "../../../techpub/components/Sort.vue";
+import { copy, isArray } from '../../../../js/util/helper.js';
 import Sort from '../../gui/Sort.vue';
 import ContinuousLoadingCircle from "../../sub/ContinuousLoadingCircle.vue";
 import FloatMenu from '../../menu/FloatMenu.vue';
-// import {
-//   getObjs, storingResponse, goto, back, clickFolder, clickFilename, download, validate,
-//   sortTable, search, removeList, remove, pushFolder, dispatch, changePath, deleteObject, refresh
-// } from './FolderVue'
 import axios from "axios";
 import Randomstring from 'randomstring';
-
 export default {
   components: { FloatMenu, Sort, ContinuousLoadingCircle },
   data() {
     return {
       data: {},
       open: {},
-      componentId: Randomstring.generate({ charset: 'alphabetic' })      
+      componentId: Randomstring.generate({ charset: 'alphabetic' })
     }
   },
   props: {
@@ -84,7 +78,7 @@ export default {
     },
     back: async function (path = undefined) {
       if (!path) path = this.currentPath.replace(/\/\w+\/?$/, "");
-      this.getObjs({ path: path });
+      this.getObjs(path);
     },
     clickFolder: function (path) {
       this.back(path);
@@ -165,21 +159,63 @@ export default {
     changePath: function () {
       alert("change path")
     },
-    deleteObject: async function () {
-      // fetch
+    deleteObject: function () {
+      // get filename
+      const cbHome = this.$el.querySelector(".cb-home");
+      let filename = cbHome.cbValues;
+      if (!filename.length) {
+        if (cbHome.current.cbWindow) {
+          filename = [cbHome.current.cbWindow.cbValue]
+        }
+        else return;
+      }
 
+      // display dialog
+      const e = new Event("new-window");
+      const f = filename;
+      top.f = f;
+      f.forEach(function (part, index) {
+        this[index] = `<code class="filename">${part}</code>`
+      }, filename);
+      e.data = {
+        window: {
+          app: this.$el.closest(".app-window"),
+        },
+        dialog: {
+          props: {
+            title: 'Delete CSDB Object',
+            instruction: `
+            <h1>Are you sure want to delete ${filename.length}ea csdb object?</h1>
+            <br>
+            <div>
+              ${f.join("")}
+            </div>
+            `
+          }
+        }
+      }
+
+      top.dispatchEvent(e);
+
+      return;
+
+
+      // fetch
       axios({
         url: "/api/s1000d/csdb/delete",
         method: 'DELETE',
-        data: { filename: this.$el.querySelector(".cb-home").cbValues },
+        // data: { filename: this.$el.querySelector(".cb-home").cbValues },
+        data: { filename: filename },
       })
         .then(response => {
           // hapus list di folder, tidak seperti listtree yang ada level dan list model, dan emit csdbDelete
           const csdbDeleted = [];
-          response.data.success.forEach((filename) => {
+          console.log(top.rsp = response)
+          response.data.data.success.forEach((filename) => {
             let csdb = this.removeList(filename);
             if (csdb) csdbDeleted.push(csdb); // aman walau pakai csdb ada dalam proxy
             else csdbDeleted.push({ filename: filename, path: '' }); // path TBD. karena CB.value() hanya mengembalikan value saja
+            console.log(csdb);
           });
         })
     },
@@ -251,22 +287,12 @@ export default {
         else this.getObjs(this.$props.path)
       }
     },
-    remove: function (data) {
-      if (isArray(data)) {
-        data.forEach((obj) => {
-          if (obj.path) {
-            this.removeList(obj.filename);
-          }
-        });
-      } else {
-        this.getObjs(this.$props.path)
-      }
-    },
 
     copy: copy,
   },
   mounted() {
     this.getObjs(this.$props.path);
+    top.folder = this;
   },
 }
 </script>
@@ -285,8 +311,10 @@ export default {
           data-tooltip="back">keyboard_backspace</button>
         <h1 class="text-2xl inline w-full"><span>#/</span>{{ currentPath.toUpperCase() }}</h1>
         <div class="space-x-4 w-full flex">
-          <input @change="search()" v-model="this.data.sc" placeholder="find filename" type="text" class="w-full inline bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-          <button class="material-icons mx-3 text-gray-500 text-base has-tooltip-arrow inline" data-tooltip="info" @click="$root.info({ name: 'searchCsdbObject' })">info</button>
+          <input @change="search()" v-model="this.data.sc" placeholder="find filename" type="text"
+            class="w-full inline bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+          <button class="material-icons mx-3 text-gray-500 text-base has-tooltip-arrow inline" data-tooltip="info"
+            @click="$root.info({ name: 'searchCsdbObject' })">info</button>
         </div>
       </div>
 
@@ -295,9 +323,12 @@ export default {
           <thead class="text-base text-left border-b-2 h-10">
             <tr class="leading-3 text-base cb-room">
               <th style="display:none" class="cb-window-all"><input type="checkbox"></th>
-              <th class="text-base">Name <Sort :function="sortTable"></Sort></th>
-              <th class="text-base">Path <Sort :function="sortTable"></Sort></th>
-              <th class="text-base">Last History <Sort :function="sortTable"></Sort></th>
+              <th class="text-base">Name <Sort :function="sortTable"></Sort>
+              </th>
+              <th class="text-base">Path <Sort :function="sortTable"></Sort>
+              </th>
+              <th class="text-base">Last History <Sort :function="sortTable"></Sort>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -317,7 +348,8 @@ export default {
                 <span class="text-base"> {{ obj.filename }} </span>
               </td>
               <td class="leading-3 text-base"> {{ obj.path }} </td>
-              <td class="leading-3 text-base"> {{ (obj.last_history.description) }}, {{ obj.last_history.created_at }} </td>
+              <td class="leading-3 text-base"> {{ (obj.last_history.description) }}, {{ obj.last_history.created_at }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -339,14 +371,14 @@ export default {
 
     <ContinuousLoadingCircle />
 
-    <FloatMenu :trigger="[{triggerId: componentId, on:'contextmenu'}]">
+    <FloatMenu :trigger="[{ triggerId: componentId, on: 'contextmenu' }]">
       <div class="list" @click="updateList">
         <div>refresh</div>
       </div>
       <div class="list" @click="open">
         <div>open</div>
       </div>
-      <div class="list" @click="remove">
+      <div class="list" @click="deleteObject">
         <div>delete</div>
       </div>
       <div class="list" @click="cancel">
@@ -355,6 +387,5 @@ export default {
       <div class="list" @click="select">
         <div>select</div>
       </div>
-    </FloatMenu>
-  </div>
-</template>
+  </FloatMenu>
+</div></template>

@@ -8,23 +8,20 @@ function openLoginPage() {
   top.newWindow = top.open("/login.html", "login", "popup,height=800,width=800,left=100");
   top.newWindow.dialog = dialog();
   return top.newWindow.dialog.result()
-  .then((data) => {
-    auth().setAuthToken(data.token_type + " " + data.access_token);
-    axios.defaults.headers.common['Authorization'] = auth().getAuthToken();
-    auth().requestChecking();
-    return data;
-  })
+    .then((data) => {
+      auth().setAuthToken(data.token_type + " " + data.access_token);
+      document.getElementById('auth-menu').dispatchEvent(new Event('authenticated'));
+      axios.defaults.headers.common['Authorization'] = auth().getAuthToken();
+      auth().requestChecking();
+      return data;
+    })
 }
 
-export {openLoginPage}
+export { openLoginPage }
 
 async function beforeRequest(config) {
-
-  if (await promiseState(auth().isAuth) !== "<fulfilled>: true") {
-    if(await openLoginPage()){
-      config.headers['Authorization'] = auth().getAuthToken();
-    }
-  }
+  if (await promiseState(auth().isAuth) !== "<fulfilled>: true") await openLoginPage();
+  config.headers['Authorization'] = auth().getAuthToken();
   return config;
 }
 
@@ -49,18 +46,32 @@ function onResponseSuccess(response) {
   return response;
 }
 
+function on401(axiosError) {
+  const e = new Event('flash');
+  e.data = {
+    type: 'warning',
+    message: axiosError.response.data.message
+  }
+  document.dispatchEvent(e)
+}
+
 function onResponseError(axiosError) {
-  if (axiosError.code && axiosError.response.data && axiosError.response.data.errors) {
-    for (const key of Object.keys(axiosError.response.data.errors)) {
-      top.ersp.set(key, axiosError.response.data.errors[key]);
-    }
-    const e = new Event('flash');
-    e.data = {
-      type: axiosError.response.data.infotype,
-      message: `<i>${axiosError.message}</i>` + '<br/>' + axiosError.response.data.message,
-      errors: axiosError.response.data.errors,
-    }
-    document.dispatchEvent(e)
+  switch (axiosError.status) {
+    case 401: on401(axiosError); break;
+    default:
+      if (axiosError.code && axiosError.response.data && axiosError.response.data.errors) {
+        for (const key of Object.keys(axiosError.response.data.errors)) {
+          top.ersp.set(key, axiosError.response.data.errors[key]);
+        }
+        const e = new Event('flash');
+        e.data = {
+          type: axiosError.response.data.infotype,
+          message: `<i>${axiosError.message}</i>` + '<br/>' + axiosError.response.data.message,
+          errors: axiosError.response.data.errors,
+        }
+        document.dispatchEvent(e)
+      }
+      break;
   }
   throw axiosError;
 }

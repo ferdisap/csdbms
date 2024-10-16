@@ -15,6 +15,15 @@ export default {
         },
       })
     },
+    newXMLEditor(event){
+      event.preventDefault();
+      this.$window.create({
+        window: {name: 'XMLEditor'},
+        task: {
+          props: {title: 'XMLEditor'}
+        },
+      })
+    },
     newHelloWorld(event){
       event.preventDefault();
       this.$window.create({
@@ -60,11 +69,17 @@ export default {
 }
 </script>
 <template>
-  <div v-show="state" class="w-48 h-96 top-[-24rem] text-black bg-neutral-200 absolute left-0 z-[90] p-2">
+  <!-- <div v-show="state" class="w-48 h-96 top-[-24rem] text-black bg-neutral-200 absolute left-0 z-[200] p-2"> -->
+  <div v-show="state" class="fixed bottom-[calc(3.5%)] left-0 w-48 h-96 text-black bg-neutral-200 p-2">
     <a href="/explore" @click="newExplorer"
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
       <span class="material-symbols-outlined">explore</span>
       <span class="font-semibold">Explore</span>
+    </a>
+    <a href="/explore" @click="newXMLEditor"
+      class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
+      <span class="material-symbols-outlined">explore</span>
+      <span class="font-semibold">XML Editor</span>
     </a>
     <!-- <RouterLink @click="newHelloWorld()" :to="$router.resolve({name: 'HelloWorld'})['fullPath']"
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">

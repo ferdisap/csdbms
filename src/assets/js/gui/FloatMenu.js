@@ -11,7 +11,25 @@ export default class FloatMenu {
 
   active = []; // contain menu id. index element refers to menu level
   menus = new WeakMap();
+
+  event; // Event pertama kali harusnya nanti anchor tidak diperlukan lagi
+  set event(v){
+    this.event = new WeakRef(v);
+  }
+  get event(){
+    return this.event.deref();
+  }
+
+  /**
+   * @deprecated
+   */
   anchor; // HTMLElement
+  set anchor(v){
+    this.anchor = new WeakRef(v);
+  }
+  get anchor(){
+    return this.anchor.deref();
+  }
 
   constructor() {
     // BB, AA, bb, aa, cc
@@ -21,10 +39,12 @@ export default class FloatMenu {
     // document.addEventListener('pointerdown', ()=> console.log('BB'))
     // document.addEventListener('click', ()=> console.log('cc'))
     
-    document.addEventListener('click', ()=> this.off())
+    // document.addEventListener('click', ()=> this.off())
+    document.addEventListener('click', ()=> this.off(), true);
     // document.addEventListener('pointerup', ()=> this.off())
     // document.addEventListener('contextmenu', ()=>this.off(),true); // kalau capture artinya akan di listen oleh top to bottom element
-    document.addEventListener('contextmenu', ()=>this.off()); // kalau capture artinya akan di listen oleh top to bottom element
+    // document.addEventListener('contextmenu', ()=>this.off()); // kalau capture artinya akan di listen oleh top to bottom element
+    document.addEventListener('contextmenu', ()=>this.off(), true); // kalau capture artinya akan di listen oleh top to bottom element
   }
 
   /**
@@ -61,6 +81,7 @@ export default class FloatMenu {
       e.stopPropagation();
       e.preventDefault();
       this.anchor = e.target;
+      this.event = e;
 
       const previousId = this.active[level];
       let currentMenu = document.getElementById(triggerElement.menu[eventName]);
@@ -76,12 +97,16 @@ export default class FloatMenu {
       } 
 
       // turn off previous
-      if(previousMenu) previousMenu.style.display = 'none';
+      if(previousMenu) {
+        previousMenu.style.display = 'none'
+        previousMenu.copiable = false;
+      };
       // turn on current
       this.active[level] = currentMenu.id;
       currentMenu.style.display = '';
       const coordinate = this.#getPosition(currentMenu, level, e);
       this.setPosition(currentMenu, coordinate.x, coordinate.y);
+      if(window.getSelection().type === 'Range') currentMenu.copiable = true;
     });
   }
 
@@ -137,20 +162,30 @@ export default class FloatMenu {
       if(menu) {
         menu.style.display = 'none';
         this.active[menu.level] = undefined;
+        menu.copiable = false;
       }
     } else {
       for (let i = 0; i < this.active.length; i++) {
-        document.getElementById(this.active[i]).style.display = 'none';
+        const menu = document.getElementById(this.active[i]);
+        menu.style.display = 'none';
+        menu.copiable = false;
       }
       this.active = [];
     }
-    this.anchor = undefined;
+
+    this.isCopiable = false;
   }
 
   on(menuId) {
     const menu = document.getElementById(menuId);
     menu.style.display = '';
     this.active[menu.level] = undefined;
+
+    console.log(window.getSelection().type === 'Range');
+
+    if(window.getSelection().type === 'Range'){
+      menu.copiable = true;
+    }
   }
 
 

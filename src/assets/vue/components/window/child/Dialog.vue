@@ -1,5 +1,6 @@
 <script>
 import TitleBar from '../../gui/TitleBar.vue';
+import FloatMenu from '../../menu/FloatMenu.vue';
 
 /**
  * Dialog selalu return resolve karena pada dasarnya user akan mengunakan 'await dialog.result()'
@@ -22,7 +23,7 @@ export default {
       showOptions: true,
     }
   },
-  components: { TitleBar },
+  components: { TitleBar, FloatMenu },
   props: {
     title: {
       type: String,
@@ -67,7 +68,7 @@ export default {
     <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" :cache-button="false"/>
     <div class="px-3 py-1">
       <div class="text-lg mt-2" v-html="$props.instruction"></div>
-      <div class="mt-2 h-20">
+      <div class="mt-2 h-20" v-if="$slots.content">
         <slot name="content"></slot>
       </div>
 
@@ -84,5 +85,7 @@ export default {
         <button @click="this.no" class="bg-slate-200 shadow-md px-2 py-1 rounded-md font-bold">No</button>
       </div>
     </div>
+
+    <!-- <FloatMenu :trigger="[{triggerId: ''}]"></FloatMenu> -->
   </div>
 </template>

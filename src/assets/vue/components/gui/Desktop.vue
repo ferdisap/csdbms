@@ -111,7 +111,6 @@ export default {
         </table>
       </div>
     </div>
-    <!-- <FloatMenu :trigger="[{triggerId: 'title-cached-window-body', on:'contextmenu'}]"> -->
     <FloatMenu :trigger="[{ triggerId: 'app-desktop', on: 'contextmenu' }]">
       <div class="list" @click="updateList">
         <div>refresh</div>

@@ -52,6 +52,7 @@ export default {
     .then(r => {
       this.isAuthenticated = r;
     })
+    this.$el.addEventListener('authenticated', () => this.isAuthenticated = true)
   }
 }
 </script>
@@ -60,7 +61,7 @@ export default {
     :class="[isAuthenticated ? 'bg-blue-600' : 'bg-red-600', 'relative h-6 w-6 mr-0 float-end text-center rounded-full hover:bg-gray-700 hover:cursor-pointer']">
     <span class="material-symbols-outlined text-base font-bold">account_circle</span>
   </div>
-  <FloatMenu :trigger="[{ triggerId: 'auth-menu', on: 'click' }]">
+  <FloatMenu :trigger="[{ triggerId: 'auth-menu', on: 'click' }]" :use-copy-btn="false">
     <div v-if="isAuthenticated" class="list" @click="logout">
       <div>logout</div>
     </div>
