@@ -8,7 +8,7 @@ import axios from "axios";
 import Randomstring from 'randomstring';
 import SearchCsdb from '../../sub/SearchCsdb.vue';
 import { addSetLogic } from '../../../../js/util/ObjectProperty';
-import { isNumber } from '../../../../js/util/helper.js';
+import { isNumber, indexFromParent } from '../../../../js/util/helper.js';
 
 export default {
   components: { FloatMenu, Sort, ContinuousLoadingCircle, SearchCsdb },
@@ -113,8 +113,7 @@ export default {
         }
       };
       let table = event.target.closest('.cb-home');
-      let th = event.target.closest('th');
-      const index = [...th.parentElement.children].indexOf(th)
+      const index = indexFromParent(event.target.closest('th'));
       if (index === 0) {
         let filerows = [...table.querySelectorAll('.file-row')].sort(comparer(index));
         let folderrows = [...table.querySelectorAll('.folder-row')].sort(comparer(index));

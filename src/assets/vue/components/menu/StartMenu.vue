@@ -95,6 +95,11 @@ export default {
       <span class="material-symbols-outlined">explore</span>
       <span class="font-semibold">Trash</span>
     </a>
+    <a href="#" @click="newDML"
+      class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
+      <span class="material-symbols-outlined">explore</span>
+      <span class="font-semibold">Data Management List</span>
+    </a>
     <!-- <RouterLink @click="newHelloWorld()" :to="$router.resolve({name: 'HelloWorld'})['fullPath']"
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
       <span class="material-symbols-outlined">explore</span>
