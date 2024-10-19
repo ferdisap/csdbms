@@ -26,7 +26,7 @@ export default {
         <ListTree/>
       </div>
       <div class="w-[calc(100%-18rem)] h-full">
-        <Folder/>
+        <Folder status="act"/>
       </div>
     </div>
   </div>

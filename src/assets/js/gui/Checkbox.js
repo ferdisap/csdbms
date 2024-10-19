@@ -40,9 +40,9 @@ function setPropertyValues(cbHome) {
         }
         this.sm = v;
       },
-      get: function () {
-        return this.sm;
-      }
+      // get: function () {
+      //   return this.sm;
+      // }
     })
   } catch (e) {
 

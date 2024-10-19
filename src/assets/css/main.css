@@ -135,3 +135,28 @@ body{
     @apply text-pink-500 bg-gray-100 text-sm p-1 mr-2 rounded-sm
   }
 }
+
+/* Alert.vue */
+@layer components {
+  .alert .instruction {
+    @apply text-sm
+  }
+  .alert .instruction h1 {
+    @apply text-lg text-center font-bold mb-2
+  }
+  .alert .instruction h2 {
+    @apply text-base font-bold mb-1
+  }
+  .alert .instruction h3 {
+    @apply text-sm font-bold
+  }
+  .alert .instruction p {
+    @apply mt-1 mb-1
+  }
+  .alert ol, .alert li {
+    @apply list-[revert] m-[revert] p-[revert]
+  }
+  .alert code {
+    @apply text-pink-500 bg-gray-100 p-1
+  }
+}

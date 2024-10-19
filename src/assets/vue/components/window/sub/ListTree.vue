@@ -225,46 +225,9 @@ export default {
     level() {
       return this.data.level ?? {}
     },
-    tree() {
-      return {
-        template: this.html,
-        data() {
-          return {
-            CB: this.$parent.CB,
-          }
-        },
-        computed: {
-          parent() {
-            return this.$parent;
-          }
-        },
-        methods: {
-          expandCollapse(path) {
-            const details = this.$el.parentElement.querySelector(`details[path=${path.replace("/", "\\/")}]`);
-            details.open = !details.open;
-            // set icon
-            details.firstElementChild.firstElementChild.innerHTML = details.open ? 'keyboard_arrow_down' : 'chevron_right'
-            if (!this.$parent.data.open) {
-
-              const expandCollapseListTreeFromLocalStorage = top.sessionStorage.getItem(window.location.origin + window.location.pathname + window.location.search);
-              if (expandCollapseListTreeFromLocalStorage) {
-                this.$parent.data.open = JSON.parse(expandCollapseListTreeFromLocalStorage)
-              } else {
-                this.$parent.data.open = {};
-              }
-            }
-            this.$parent.data.open[path] = details.open;
-            top.sessionStorage.setItem(window.location.origin + window.location.pathname + window.location.search, JSON.stringify(this.$parent.data.open))
-          }
-        },
-        mounted() {
-          installCheckbox(this.$el.parentElement);
-        }
-      }
-    }
   },
   async mounted() {
-    top.lt = this;
+    // top.lt = this;
     start.apply(this);
   },
 }
@@ -273,7 +236,6 @@ export default {
 <template>
   <div :id="componentId" class="listtree">
     <div class="listtree-list">
-      <!-- <component v-if="html" :is="tree" /> -->
       <div class="listtree-tree"></div>
     </div>
     <FloatMenu :trigger="[{ triggerId: componentId, on: 'contextmenu' }]">

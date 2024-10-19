@@ -6,35 +6,30 @@ import ContinuousLoadingCircle from "../../sub/ContinuousLoadingCircle.vue";
 import FloatMenu from '../../menu/FloatMenu.vue';
 import axios from "axios";
 import Randomstring from 'randomstring';
+import SearchCsdb from '../../sub/SearchCsdb.vue';
+import { addSetLogic } from '../../../../js/util/ObjectProperty';
+import { isNumber } from '../../../../js/util/helper.js';
+
 export default {
-  components: { FloatMenu, Sort, ContinuousLoadingCircle },
+  components: { FloatMenu, Sort, ContinuousLoadingCircle, SearchCsdb },
   data() {
     return {
       data: {},
       open: {},
-      componentId: Randomstring.generate({ charset: 'alphabetic' })
+      componentId: Randomstring.generate({ charset: 'alphabetic' }),
+      selectionMode: false,
     }
   },
   props: {
     path: {
       type: String,
       default: 'csdb'
+    },
+    status: {
+      type: String,
     }
   },
   computed: {
-    models() {
-      return this.data.csdb;
-    },
-    folders() {
-      return this.data.folders;
-    },
-    sc() {
-      return this.data.sc;
-    },
-    currentPath() {
-      return this.$props.path;
-      // return this.data.current_path ? this.data.current_path : '';
-    },
     pagination() {
       return this.data.paginationInfo;
     },
@@ -48,10 +43,11 @@ export default {
   methods: {
     getObjs: function (path, data = {}) {
       this.clp(true);
+      data.stt = this.$props.status;
       axios({
         url: "/api/s1000d/path/" + path,
         method: 'GET',
-        data: data
+        params: data
       })
         .then(response => this.storingResponse(response))
         .finally(() => {
@@ -60,7 +56,7 @@ export default {
     },
     storingResponse: function (response) {
       if (response.statusText === 'OK' || ((response.status >= 200) && (response.status < 300))) {
-        this.data.csdb = response.data.pagination.data; // array contain object csdb
+        this.data.csdbs = response.data.pagination.data; // array contain object csdb
         this.data.folders = response.data.paths; // array contain string path
         this._.props.path = response.data.path;
         this.data.paginationInfo = response.data.pagination;
@@ -77,14 +73,13 @@ export default {
       }
     },
     back: async function (path = undefined) {
-      if (!path) path = this.currentPath.replace(/\/\w+\/?$/, "");
+      if (!path) path = this.$props.path.replace(/\/\w+\/?$/, "");
       this.getObjs(path);
     },
     clickFolder: function (path) {
       this.back(path);
     },
     clickFilename: async function (filename) {
-      console.log("filename clicked", filename)
       const event = new Event("new-window");
       event.data = {
         window: {
@@ -101,51 +96,54 @@ export default {
       }
       top.dispatchEvent(event);
     },
+    openTr() {
+      const cbHome = this.$el.querySelector('.cb-home');
+      if (cbHome.current && cbHome.current.matches(".file-row")) this.clickFilename(cbHome.current.cbWindow.cbValue)
+      else this.clickFolder(cbHome.current.cbWindow.cbValue);
+    },
     sortTable: function sortTable(event) {
       const getCellValue = function (row, index) {
-        return $(row).children('td').eq(index).text();
+        const td = row.querySelectorAll('td')[index];
+        return td ? td.textContent : '';
       };
       const comparer = function (index) {
         return function (a, b) {
           let valA = getCellValue(a, index), valB = getCellValue(b, index);
-          // return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.toString().localeCompare(valB);
           return isNumber(valA) && isNumber(valB) ? valA - valB : valA.toString().localeCompare(valB);
         }
       };
-      let table = $(event.target).parents('table').eq(0);
-      let th = $(event.target).parents('th').eq(0);
-      if (th.index() === 0) {
-        let filerows = table.find('.file-row').toArray().sort(comparer(th.index()));
-        let folderrows = table.find('.folder-row').toArray().sort(comparer(th.index()));
+      let table = event.target.closest('.cb-home');
+      let th = event.target.closest('th');
+      const index = [...th.parentElement.children].indexOf(th)
+      if (index === 0) {
+        let filerows = [...table.querySelectorAll('.file-row')].sort(comparer(index));
+        let folderrows = [...table.querySelectorAll('.folder-row')].sort(comparer(index));
         this.asc = !this.asc;
         if (!this.asc) {
           filerows = filerows.reverse();
           folderrows = folderrows.reverse();
         }
         for (let i = 0; i < folderrows.length; i++) {
-          table.append(folderrows[i]);
+          table.appendChild(folderrows[i]);
         }
         for (let i = 0; i < filerows.length; i++) {
-          table.append(filerows[i]);
+          table.appendChild(filerows[i]);
         }
       } else {
-        let filerows = table.find('.file-row').toArray().sort(comparer(th.index()));
+        let filerows = [...table.querySelectorAll('.file-row')].sort(comparer(index));
         this.asc = !this.asc;
         if (!this.asc) {
           filerows = filerows.reverse();
         }
         for (let i = 0; i < filerows.length; i++) {
-          table.append(filerows[i]);
+          table.appendChild(filerows[i]);
         }
       }
     },
-    search: function () {
-      this.getObjs(this.$props.path, { sc: this.data.sc });
-    },
     removeList: function (filename) {
-      let csdb = this.data.csdb.find((obj) => obj.filename === filename);
-      let index = this.data.csdb.indexOf(csdb);
-      this.data.csdb.splice(index, 1);
+      const csdb = this.data.csdbs.find((obj) => obj.filename === filename);
+      const index = this.data.csdbs.indexOf(csdb);
+      this.data.csdbs.splice(index, 1);
       return csdb;
     },
     dispatch: async function (cond = 0) {
@@ -172,13 +170,14 @@ export default {
 
       // display dialog
       const e = new Event("new-window");
-      const f = Object.assign([],filename);
+      const f = Object.assign([], filename);
       f.forEach(function (part, index) {
         this[index] = `<code class="filename">${part}</code>`
       }, f);
+      const windowEl = this.$el.closest(".app-window");
       e.data = {
         window: {
-          app: this.$el.closest(".app-window"),
+          app: windowEl
         },
         dialog: {
           props: {
@@ -193,11 +192,10 @@ export default {
           }
         }
       }
-
+      // top.edel = e;
       top.dispatchEvent(e);
-
-      const result = await this.$el.closest('.app-window').dialog.result()
-      if(!result) return;
+      const result = await windowEl.dialog.result()
+      if (!result) return;
 
       // fetch
       axios({
@@ -207,22 +205,30 @@ export default {
         data: { filename: filename },
       })
         .then(response => {
-          // hapus list di folder, tidak seperti listtree yang ada level dan list model, dan emit csdbDelete
-          const csdbDeleted = [];
-          console.log(top.rsp = response)
-          response.data.data.success.forEach((filename) => {
-            let csdb = this.removeList(filename);
-            if (csdb) csdbDeleted.push(csdb); // aman walau pakai csdb ada dalam proxy
-            else csdbDeleted.push({ filename: filename, path: '' }); // path TBD. karena CB.value() hanya mengembalikan value saja
-            console.log(csdb);
-          });
+          response.data.data.success.forEach((filename) => this.removeList(filename));
         })
+        .finally(this.cancel)
     },
-    pushFolder: function (path) {
-      if (path.split("/").length > this.$props.path.split("/").length) {
-        this.data.folders.push(path);
-        this.data.folders = array_unique(this.data.folders);
+    restore: async function () {
+      // get filename
+      const cbHome = this.$el.querySelector(".cb-home");
+      let filename = cbHome.cbValues;
+      if (!filename.length) {
+        if (cbHome.current.cbWindow) {
+          filename = [cbHome.current.cbWindow.cbValue]
+        }
+        else return;
       }
+      // fetch
+      axios({
+        url: "/api/s1000d/csdb/restore",
+        method: 'POST',
+        data: { filename: filename },
+      })
+        .then(response => {
+          response.data.data.success.forEach((filename) => this.removeList(filename));
+        })
+        .finally(this.cancel)
     },
     download: async function (filenames) {
       alert("download")
@@ -273,25 +279,19 @@ export default {
     // checkbox
     select: select,
     cancel: cancel,
-
-    // emit
-    refresh: function (data) {
-      // let to = 0;
-      if (isArray(data)) {
-        data.forEach((obj) => {
-          this.getObjs({ path: obj.path })
-        });
-      } else {
-        if (data && data.path) this.getObjs(data.path)
-        else this.getObjs(this.$props.path)
-      }
-    },
-
-    copy: copy,
+    onSearchSuccess: function (response) {
+      this.storingResponse(response);
+      installCheckbox(this.$el.querySelector(".cb-home"));
+      this.clp(false);
+    }
   },
   mounted() {
+    addSetLogic(this.$el.querySelector(".cb-home"), 'sm', (ctx, value) => {
+      this.selectionMode = value;
+      return value;
+    })
     this.getObjs(this.$props.path);
-    top.folder = this;
+    // top.folder = this;
   },
 }
 </script>
@@ -308,13 +308,8 @@ export default {
       <div class="h-[50px] mb-3 flex items-center space-x-4">
         <button @click="back()" class="material-symbols-outlined has-tooltip-right hover:bg-gray-100 block"
           data-tooltip="back">keyboard_backspace</button>
-        <h1 class="text-2xl inline w-full"><span>#/</span>{{ currentPath.toUpperCase() }}</h1>
-        <div class="space-x-4 w-full flex">
-          <input @change="search()" v-model="this.data.sc" placeholder="find filename" type="text"
-            class="w-full inline bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-          <button class="material-icons mx-3 text-gray-500 text-base has-tooltip-arrow inline" data-tooltip="info"
-            @click="$root.info({ name: 'searchCsdbObject' })">info</button>
-        </div>
+        <h1 class="text-2xl inline w-full"><span>#/</span>{{ this.$props.path.toUpperCase() }}</h1>
+        <SearchCsdb :path="$props.path" @start="() => clp(true)" @success="onSearchSuccess" :status="$props.status" />
       </div>
 
       <div class="h-[calc(100%-90px)] overflow-y-auto">
@@ -331,7 +326,7 @@ export default {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="path in folders" cb-room="folder" @dblclick="clickFolder(path)"
+            <tr v-for="path in data.folders" @dblclick="clickFolder(path)"
               class="cb-room folder-row text-base hover:bg-blue-300 cursor-pointer">
               <td class="cb-window"><input type="checkbox" :value="path"></td>
               <td class="leading-3 text-base" colspan="6">
@@ -339,7 +334,7 @@ export default {
                 <span class="text-base">{{ path.split("/").at(-1) }} </span>
               </td>
             </tr>
-            <tr v-for="obj in models" cb-room @dblclick.prevent="clickFilename(obj.filename)"
+            <tr v-for="obj in data.csdbs" @dblclick.prevent="clickFilename(obj.filename)"
               class="cb-room file-row text-base hover:bg-blue-300 cursor-pointer">
               <td class="cb-window"><input file type="checkbox" :value="obj.filename"></td>
               <td class="leading-3 text-base">
@@ -371,20 +366,29 @@ export default {
     <ContinuousLoadingCircle />
 
     <FloatMenu :trigger="[{ triggerId: componentId, on: 'contextmenu' }]">
-      <div class="list" @click="updateList">
-        <div>refresh</div>
+      <div v-if="$props.status === 'act'">
+        <div v-if="!selectionMode" class="list" @click="openTr">
+          <div>open</div>
+        </div>
+        <div class="list" @click="deleteObject">
+          <div>delete</div>
+        </div>
       </div>
-      <div class="list" @click="open">
-        <div>open</div>
+      <div v-else-if="$props.status === 'dct'">
+        <div class="list" @click="restore">
+          <div>restore</div>
+        </div>
       </div>
-      <div class="list" @click="deleteObject">
-        <div>delete</div>
-      </div>
-      <div class="list" @click="cancel">
-        <div>cancel</div>
-      </div>
+      <hr>
       <div class="list" @click="select">
         <div>select</div>
       </div>
-  </FloatMenu>
-</div></template>
+      <div v-if="selectionMode" class="list" @click="cancel">
+        <div>cancel</div>
+      </div>
+      <div class="list" @click="updateList">
+        <div>refresh</div>
+      </div>
+    </FloatMenu>
+  </div>
+</template>

@@ -40,12 +40,8 @@ export default {
         installCheckbox(document.getElementById('desktop-cb'));
       }, 0)
     },
-    open(event) {
-      let anchor = event.target.closest("*[app-id]");
-      if (!anchor) anchor = top.FloatMenu.anchor.closest("*[app-id]");
-      if (anchor) {
-        openWindow({ appId: anchor.getAttribute('app-id') });
-      }
+    open() {
+      openWindow({ appId: document.getElementById("desktop-cb").current.cbWindow.cbValue });
     },
     setToTop(event) {
       const windowEl = event.target;
@@ -60,13 +56,16 @@ export default {
       wmove.attach(trigger, null, null, trigger.parentElement)
     },
     remove() {
-      const tr = top.FloatMenu.anchor.closest("*[app-id]");
-      if (tr) {
-        const cached = JSON.parse(localStorage.getItem('cached-window'));
-        delete cached[tr.getAttribute('app-id')]
-        localStorage.setItem('cached-window', JSON.stringify(cached));
-        tr.remove();
+      const cbHome = document.getElementById("desktop-cb");
+      let appIds = cbHome.cbValues;
+      if(!appIds.length){
+        if (cbHome.current.cbWindow) appIds = [cbHome.current.cbWindow.cbValue];
+        else return;
       }
+      const cached = JSON.parse(localStorage.getItem('cached-window'));
+      appIds.forEach(id => delete cached[id]);
+      localStorage.setItem('cached-window', JSON.stringify(cached));
+      this.updateList();
     },
     cancel: cancel,
     select: select,
@@ -100,7 +99,7 @@ export default {
             </tr>
           </thead>
           <tbody id="title-cached-window-body">
-            <tr v-for="(item, i) in cachedWindow.list" @dblclick="open" :app-id="item.appId" class="cb-room">
+            <tr v-for="(item, i) in cachedWindow.list" @dblclick="open" class="cb-room">
               <td style="display:none" class="cb-window"><input type="checkbox" :value="item.appId"></td>
               <td>{{ i + 1 }}</td>
               <td>{{ item.name }}</td>

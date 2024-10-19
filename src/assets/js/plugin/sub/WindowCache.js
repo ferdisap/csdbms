@@ -30,6 +30,7 @@ class WindowCache {
     handleChildren(component._.root.subTree.children);
 
     const appId = component._.root.appContext.app.appId;
+    const windowEl = component.$el.closest('.app-window');
     const obj = {
       uid: component._.root.uid, // bukan app uid tapi first/root component uid
       name: component._.appContext.app.name,
@@ -38,7 +39,16 @@ class WindowCache {
       url: new URL(window.location.href),
       props: component._.root.props,
       child: Object.fromEntries(props.entries()),
+      style: {
+        position: windowEl.style.position,
+        height: windowEl.style.height,
+        width: windowEl.style.width,
+        top: windowEl.style.top,
+        left: windowEl.style.left,
+        backgroundColor: windowEl.style.backgroundColor,
+      }
     }
+    top.comp = component;
 
     const cached = JSON.parse(localStorage.getItem('cached-window')) ?? {};
     cached[appId] = obj;
@@ -48,10 +58,10 @@ class WindowCache {
     return;
   }
 
-  #create(appId) {    
+  #create(appId) {
     const cached = JSON.parse(localStorage.getItem('cached-window'))[appId]
-    if(!cached) return;
-    top.history.pushState({},"",cached.url)
+    if (!cached) return;
+    top.history.pushState({}, "", cached.url)
     const evt = new Event("new-window");
     evt.data = {
       window: {
@@ -60,9 +70,10 @@ class WindowCache {
         name: cached.name,
         loadFromCache: true,
         props: cached.props,
+        style: cached.style,
       },
       task: {
-        props:{
+        props: {
           title: cached.name,
         }
       }
@@ -90,7 +101,7 @@ function useCache() {
   }
 }
 
-export {useCache}
+export { useCache }
 
 const cache = {
   install: (app) => {

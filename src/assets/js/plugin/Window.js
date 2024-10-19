@@ -4,6 +4,7 @@ import HelloWorld from '../../vue/components/window/HelloWorld.vue';
 import Explorer from '../../vue/components/window/Explorer.vue';
 import DML from '../../vue/components/window/DML.vue';
 import XMLEditor from '../../vue/components/window/XMLEditor.vue';
+import Trash from '../../vue/components/window/Trash.vue';
 import Alert from '../../vue/components/window/child/Alert.vue';
 import WindowDialog from './sub/WindowDialog';
 import Property from '../../vue/components/window/child/Property.vue';
@@ -110,105 +111,47 @@ class Window {
     let window, task, dialog, alert, property;
     // create window
     if (config.window) {
-      window = this.newWindow(config.window);
+      window = createWindow.call(this,config.window);
+      this.mountWindow(window, config.window.style);
     }
     if (config.task) {
-      task = this.newTask(config.task);
+      task = createApp(Task, config.task.props);
       task.appId = "tsk" + Randomstring.generate({ charset: 'alphabetic' })
-      task.windowId = window ? window.appId : undefined;
+      task.windowId = window ? window.appId : undefined;      
+      this.mountTask(task);
     }
     if (config.dialog) {
-      dialog = this.newDialog(config.dialog);
+      dialog = new WindowDialog(config.dialog);
       dialog.appId = "dlg" + Randomstring.generate({ charset: 'alphabetic' })
       dialog.windowId = window ? window.appId : undefined;
+      this.mountDialog(dialog, config.dialog.style);
     }
     if (config.alert) {
-      alert = this.newAlert(config.alert);
+      alert = createApp(Alert, config.alert.props);
       alert.appId = "alt" + Randomstring.generate({ charset: 'alphabetic' })
       alert.windowId = window ? window.appId : undefined;
+      this.mountAlert(alert, config.alert.style);
     }
     if (config.property) {
-      property = this.newAlert(config.property);
+      property = new WindowProperty(config.property);
       property.appId = "prp" + Randomstring.generate({ charset: 'alphabetic' })
       property.windowId = window ? window.appId : undefined;
+      this.mountProperty(property);
     }
     // register
     if (window && task) {
-      this.registerWindowTask(window, task);
+      this.tm.set(window, task);
       this.resetZIndex();
     }
     if (window && dialog) {
-      this.registerWindowDialog(window, dialog);
+      this.dm.set(window, dialog);
     }
     if (window && alert) {
-      this.registerWindowAlert(window, alert);
+      this.am.set(window, alert);
     }
     if (window && property) {
-      this.registerWindowProperty(window, property);
+      this.am.set(window, property);
     }
-    this.startWindow(window, task, dialog, alert, property);
-    return window;
-  }
-
-  // ##########################################################################################
-
-  /**
-   * @param {Object} config key = title:string
-   * @returns 
-   */
-  newTask(config = {}) {
-    return createApp(Task, config.props);
-  }
-  newDialog(config = {}) {
-    return new WindowDialog(config);
-  }
-  newAlert(config = {}) {
-    return createApp(Alert, config.props);
-  }
-  newProperty(config = {}) {
-    return new WindowProperty(config);
-  }
-  newWindow(config = {}) {
-    return createWindow.call(this,config);
-  }
-
-  // ##########################################################################################
-
-  registerWindowTask(window, task) {
-    // this.wm.set(task, window);
-    this.tm.set(window, task);
-  }
-  registerWindowDialog(window, dialog) {
-    this.dm.set(window, dialog);
-  }
-  registerWindowAlert(window, alert) {
-    this.am.set(window, alert);
-  }
-  registerWindowProperty(window, property) {
-    this.am.set(window, property);
-  }
-
-  // ##########################################################################################
-
-  startWindow(window, task, dialog, alert, property) {
-    if (task) {
-      const task = this.tm.get(window);
-      this.mountTask(task);
-    }
-    if (dialog) {
-      if(this.dm.has(window)) this.mountDialog(this.dm.get(window));
-      else this.mountDialog(dialog);      
-    }
-    if (alert) {
-      if(this.am.has(window)) this.mountDialog(this.am.get(window));
-      this.mountAlert(alert);
-    }
-    if (property) {
-      if(this.pm.has(window)) this.mountDialog(this.pm.get(window));
-      this.mountProperty(property);
-    }
-    // mount task and window here
-    if(window) this.mountWindow(window);
   }
 
   // ##########################################################################################
@@ -247,7 +190,7 @@ class Window {
 
   // ##########################################################################################
 
-  mountWindow(window) {
+  mountWindow(window, style) {
     // check wheter windows has mounted or not
     if (window._container) return;
 
@@ -256,17 +199,27 @@ class Window {
     el.classList.add(this.windowClassGeneral);
     el.classList.add(this.windowClassTop);
     el.id = window.appId;
-    el.style.position = 'absolute';
     el.isMaximize = true;
-    el.style.height = '100%';
-    el.style.width = '100%';
-    el.style.top = '0px';
     el.ptop = '0px';
     el.pleft = '0px';
-    el.style.left = '0px';
     el.enableMoving = true;
     el.enableSizing = true;
-    el.style.backgroundColor = '#ffffff';
+
+    if(style){
+      el.style.position = style.position;
+      el.style.height = style.height;
+      el.style.width = style.width;
+      el.style.top = style.top;
+      el.style.left = style.left;
+      el.style.backgroundColor = style.backgroundColor;
+    } else {
+      el.style.position = 'absolute';
+      el.style.height = '100%';
+      el.style.width = '100%';
+      el.style.top = '0px';
+      el.style.left = '0px';
+      el.style.backgroundColor = '#ffffff';
+    }
 
     container.appendChild(el);
     window.mount('#' + el.id);
@@ -279,10 +232,12 @@ class Window {
     el.style.zIndex = this.zIndex.length + 80;
 
     el.addEventListener('click', this.setToTop.bind(this, el), true); // di buat true agar ini dijalankan lebih dulu daripada close() saat ada event, misal tombol close di TitleBar.vue
-    el.addEventListener('new-window', (e) => {
-      e.data.config.window = { app: window };
-      this.create(e.data.config);
-    }, true)
+    // kalau mau open window dialog, pakai top.dispatchEvent saja
+    // el.addEventListener('new-window', (e) => {
+    //   e.stopPropagation();
+    //   e.data.config.window = { app: window };
+    //   this.create(e.data.config);
+    // }, true)
     el.addEventListener('close-window', this.close.bind(this), true); // ref mountDialog(), jika sama sama tidak capture=true, close-window tidak berjalan
     el.addEventListener('toggle-window', (e) => this.toggle(e.data), true);
     // el.addEventListener('sizing-window', this.sizing.bind(this),true);
@@ -303,7 +258,7 @@ class Window {
     // event click
     el.addEventListener('click', this.toggle.bind(this,{task:el},undefined))
   }
-  mountDialog(dialog) {
+  mountDialog(dialog, style) {
     const container = document.getElementById(this.rootAppWindowContainerId);
     const el = document.createElement('div');
     el.classList.add(this.windowClassGeneral);
@@ -311,12 +266,20 @@ class Window {
     el.id = dialog.appId;
     el.isMaximize = false;
     el.enableSizing = false;
-    el.style.position = 'absolute';
-    el.style.width = '400px';
-    // el.style.height = '200px';
-    el.style.top = ((top.innerHeight / 2) - 100) + 'px';
-    el.style.left = ((top.innerWidth / 2) - 200) + 'px';
-    el.style.backgroundColor = '#ffffff';
+
+    if(style){
+      Object.keys(style).forEach(key => {
+        el.style[key] = style[key]
+      })
+    } else {
+      el.style.position = 'absolute';
+      el.style.width = '400px';
+      el.style.height = '';
+      el.style.top = (((top.innerHeight / 2) - 100) + 'px');
+      el.style.left = (((top.innerWidth / 2) - 200) + 'px');
+      el.style.backgroundColor = '#ffffff';
+    }
+    
     dialog.id = el.id;
     this.ed.set(el, dialog);
 
@@ -357,7 +320,7 @@ class Window {
     container.appendChild(el);
     dialog.mount('#' + el.id);
   }
-  mountAlert(alert) {
+  mountAlert(alert, style) {
     const container = document.getElementById(this.rootAppWindowContainerId);
     const el = document.createElement('div');
     el.classList.add(this.windowClassGeneral);
@@ -365,11 +328,19 @@ class Window {
     el.id = alert.appId;
     el.isMaximize = false;
     el.enableSizing = false;
-    el.style.position = 'absolute';
-    el.style.width = '400px';
-    el.style.top = ((top.innerHeight / 2) - 100) + 'px';
-    el.style.left = ((top.innerWidth / 2) - 200) + 'px';
-    el.style.backgroundColor = '#ffffff';
+
+    if(style){
+      Object.keys(style).forEach(key => {
+        el.style[key] = style[key]
+      })
+    } else {
+      el.style.position = 'absolute';
+      el.style.width = '400px';
+      el.style.top = (((top.innerHeight / 2) - 100) + 'px');
+      el.style.left = (((top.innerWidth / 2) - 200) + 'px');
+      el.style.backgroundColor = '#ffffff';
+    }
+
     alert.id = el.id
     this.ea.set(el, alert);
 
@@ -752,6 +723,12 @@ function createWindow(config) {
       break;
     case 'DML':
       component = DML;
+      break;
+    case 'Trash':
+      component = Trash;
+      break;
+    default:
+      throw new Error('cannot create window');
       break;
   }
   // jika di create dari windowCache diambil dari config

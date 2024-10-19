@@ -58,14 +58,15 @@ export default {
   }
 }
 </script>
+
 <template>
-  <div class="h-full w-full border shadow-md">
+  <div class="alert h-full w-full border shadow-md">
     <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" :cache-button="false" :close-button="false" :bg-color="titleBgColor"/>
     <div class="px-3 py-1">
       <div class="min-h-20 text-lg mt-2">
         <div class="flex">
           <span class="material-symbols-outlined">{{ alertType }}</span>
-          <div class="ml-2" v-html="$props.instruction"></div>
+          <div class="instruction ml-2" v-html="$props.instruction"></div>
         </div>
       </div>
 
