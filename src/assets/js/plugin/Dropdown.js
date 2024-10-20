@@ -19,11 +19,11 @@ function installDropdown(ddInput) {
   ddInput.addEventListener('focusin', onFocusIn.bind(ddInput));
   ddInput.addEventListener('keydown', onKeyPress.bind(ddInput));
   ddInput.addEventListener('focusout', function (e) {
-    e.target.to_focusout = setTimeout(() => {
+    e.target.to_focusout = setTimeout(function(){
       const container = this.parentElement.querySelector("#" + this.listContainerId);
       if (container) container.style.display = 'none'
-    }, 0);
-  }.bind(this));
+    }.bind(this), 100);
+  }.bind(ddInput));
   ddInput.listContainerId = Randomstring.generate({ charset: 'alphabetic' });
   ddInput.dd = {
     keys: ddInput.getAttribute('dd-input').split(","),
@@ -47,9 +47,15 @@ function onKeyPress(event) {
   let isSearch;
 
   switch (event.keyCode) {
-    case 40: return move.call(this, event.target, true); // move down
-    case 38: return move.call(this, event.target, false); // move up
-    case 13: return select.call(this, event.target);
+    case 40: 
+      event.preventDefault();
+      return move.call(this, event.target, true); // move down
+    case 38: 
+      event.preventDefault();
+      return move.call(this, event.target, false); // move up
+    case 13: 
+      event.preventDefault();
+      return select.call(this, event.target);
     case 27: return cancel.call(this, event.target); // escape key
     case 8: isSearch = true; break; // backspace
     case 46: isSearch = true; break; // delete
@@ -84,7 +90,7 @@ function move(el, down = true) {
 
 
 function select(evtTarget) {
-  console.log('select');
+  if(evtTarget === this) return searching.call(this, evtTarget);
   // evtTarget = evtTarget.closest("div");
   const indexInResults = indexFromParent(evtTarget.closest("div")); // number
   // untuk setiap target, akan di render value of keys nya
@@ -162,10 +168,6 @@ function render() {
 
   // create new container
   container = fromHTML.call(this, template.call(this));
-
-  // setEvent
-  // container.addEventListener('click', this.onClick.bind(this), true);
-  // container.addEventListener('keyup', this.onKeyPress.bind(this), true);
 
   this.parentElement.style.position = 'relative';
   this.parentElement.append(container);

@@ -37,8 +37,12 @@ export default {
         const selection = window.getSelection();
         if (selection.rangeCount > 0) selection.removeAllRanges();
         selection.addRange(range);
-        // tergantung window.isSecureContext. kalau php artisan serve, maka true, jika IIS false karena belum tau caranya
-        navigator.clipboard.writeText(range.toString()); // output promise
+        // tergantung window.isSecureContext. kalau php artisan serve, maka true, jika IIS false karena belum tau caranya        
+        if(top.FloatMenu.event.target instanceof HTMLInputElement){
+          navigator.clipboard.writeText(top.FloatMenu.event.target.value); // output promise
+        } else {
+          navigator.clipboard.writeText(range.toString()); // output promise
+        }
       }
     }
   },
@@ -50,7 +54,7 @@ export default {
     if(this.$props.useCopyBtn){
       this.$el.component = new WeakRef(this);
       addSetLogic(document.getElementById(this.componentId), 'copiable', (ctx, value) => {
-        top.copyel = ctx;
+        // top.copyel = ctx;
         // ga bisa akses __vnode di production, jadi terpaksa pakai WeakRef
         // if(value && ctx) ctx.__vnode.ctx.data.range = window.getSelection().getRangeAt(0).cloneRange();
         // else setTimeout(() => ctx.__vnode.ctx.data.range =  '');

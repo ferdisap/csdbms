@@ -3,5 +3,10 @@
     "path": "/api/s1000d/all",
     "methods": ["GET"],
     "#": "baru dipakai di Dropdown.js"
+  },
+  "api.create_dml" : {
+    "path": "/api/s1000d/dml/create",
+    "methods": ["PUT"],
+    "#": "baru dipakai di DML.vue"
   }
 }

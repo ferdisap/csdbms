@@ -1,27 +1,17 @@
 import { createApp } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
 import setInterceptor from './axiosInterceptor';
 import { createPinia } from 'pinia';
-import RoutesVue from './RoutesVue';
-// import mitt from 'mitt';
 import '../css/main.css'
 import Main from '../vue/Main.vue';
-import { auth } from './Auth';
-import { mainStore } from './MainStore';
-// import ErrorResponseMessage from './plugin/ErrorResponseMessage.js';  
 import {createErsp} from './plugin/ErrorResponseMessage.js';  
 import FloatMenu from './gui/FloatMenu';
 import window from './plugin/Window';
 import cache from './plugin/sub/WindowCache';
-// import { installCheckbox } from './gui/Checkbox';
-// import axios from 'axios';
-// import jsCookie from 'js-cookie';
+import TextEditorElement from './gui/TextEditorElement';
 
-// top.jsCookie = jsCookie;
+// dipakai untuk comment, remarks. Nanti dibuat lagi untuk xmlEditor
+customElements.get('text-editor') || customElements.define('text-editor', TextEditorElement);
 
-// top.installCheckbox = installCheckbox;
-
-// top.axios = axios;
 
 // create app
 top.mainApp = createApp(Main);

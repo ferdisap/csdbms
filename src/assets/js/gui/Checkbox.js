@@ -1,28 +1,35 @@
 import { addGetLogic, addSetLogic } from "../util/ObjectProperty";
 
-/**
- * @param {HTMLElement} home 
- */
-function getValues(cbHome) {
-  const cb = [...cbHome.querySelectorAll(".cb-window > input[type='checkbox']")];
-  for (let i = 0; i < cb.length; i++) {
-    if (cb[i].checked) cb[i] = cb[i].value;
-    else cb[i] = undefined;
-  }
-  return cb.filter(v => v);
-}
+// /**
+//  * @param {HTMLElement} home 
+//  */
+// function getValues(cbHome) {
+//   const cb = [...cbHome.querySelectorAll(".cb-window > input[type='checkbox']:checked")];
+//   for (let i = 0; i < cb.length; i++) {
+//     if (cb[i].checked) cb[i] = cb[i].value;
+//     else cb[i] = undefined;
+//   }
+//   return cb.filter(v => v);
+// }
+
+// function getCbChecked(cbHome) {
+//   return [...cbHome.querySelectorAll(".cb-window > input[type='checkbox']")];
+// }
+// export {getCbChecked}
+
+const disable = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+};
 
 function setPropertyValues(cbHome) {
   try {
     Object.defineProperty(cbHome, 'cbValues', {
-      get: function () {
-        return getValues(this);
-      }
+      get: () => [...cbHome.querySelectorAll(".cb-window > input[type='checkbox']:checked")].map(cb => cb.value),
     })
-    const disable = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
+    Object.defineProperty(cbHome, 'cb', {
+      get: () => [...cbHome.querySelectorAll(".cb-window > input[type='checkbox']:checked")],
+    })
     Object.defineProperty(cbHome, 'selectionMode', {
       set: function (v) {
         if (v) {
@@ -164,7 +171,6 @@ function pointerDetent(event) {
   if (event.which === 1) { // left click
 
     const to = setTimeout(() => {
-      push(event.target);
       showAll(event.target.closest(".cb-home"));
       event.target.closest(".cb-home").removeEventListener('pointerdown', pointerDetent);
     }, 500);
