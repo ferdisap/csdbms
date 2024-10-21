@@ -201,8 +201,8 @@ function getPropertyInputName(tr) {
 
 function setPropertyInputName(tr, data) {
   Object.keys(data).forEach(key => {
-    if(data[key] instanceof Array){
-      tr.querySelectorAll(`*[property-input-ref='${key}[]']`).forEach((el,i) => {
+    if (data[key] instanceof Array) {
+      tr.querySelectorAll(`*[property-input-ref='${key}[]']`).forEach((el, i) => {
         el.textContent = data[key][i];
       })
     } else {
@@ -239,7 +239,6 @@ function getAllValues() {
     })
     values.entries.push(obj);
   })
-  console.log(values);
   return values;
 }
 
@@ -301,6 +300,16 @@ export default {
         })
         .finally(() => this.clp(false))
     },
+    mergeDML(event) {
+      this.clp(true);
+      axios.put("/api/s1000d/dml/merge/" + this.$props.filename, formDataToObject(new FormData(event.target)))
+        .then(response => {
+          top.rsp = response;
+          this._.props.filename = response.data.csdb.filename;
+          this.showContent(response.data.csdb.filename)
+        })
+        .finally(() => this.clp(false))
+    },
     showContent(filename) {
       this.clp(true);
       axios({
@@ -343,7 +352,7 @@ export default {
     },
     edit() {
       const cbRoom = top.FloatMenu.event.target.closest(".cb-room");
-      if(cbRoom.parentElement.tagName === 'THEAD') return;
+      if (cbRoom.parentElement.tagName === 'THEAD') return;
       const windowEl = this.$el.parentElement.closest(".app-window");
       openPropertyWindow(windowEl);
       windowEl.property.data = getPropertyInputName(cbRoom);
@@ -358,7 +367,7 @@ export default {
       if (cbs.length) {
         cbs.forEach(cb => cb.closest(".cb-room").remove());
       } else {
-        if(cbHome.current.parentElement.tagName === 'THEAD') return;
+        if (cbHome.current.parentElement.tagName === 'THEAD') return;
         cbHome.current.remove();
       }
       hideAll(cbHome);
@@ -377,6 +386,7 @@ export default {
     if (this.isDML) {
       this.showContent(this.$props.filename)
       installDropdown(this.$el.querySelector("input[name='ident-brexDmRef']"));
+      installDropdown(this.$el.querySelector("input[dd-name='filename']"));
     } else {
       this._.props.filename = undefined;
       installDropdown(this.$el.querySelector("input[name='brexDmRef']"));
@@ -454,9 +464,8 @@ export default {
         <h1 class="text-center text-3xl mt-2 h-12 text-blue-500 underline font-extrabold">
           {{ DMLType === 'p' ? ('Partial DML') : (DMLType === 'c' ? 'Complete DML' : (DMLType === 's' ? 'Status DML' : '')
           ) }}</h1>
-        <div class="w-full h-[calc(100%-3rem)] flex justify-center px-4">
-          <form @submit.prevent="updateDML"
-            class="w-full border bg-white px-2 h-[calc(100%-10px)] overflow-auto min-w-[100%] max-w-[75%]">
+        <div class="h-[calc(100%-3rem)] flex justify-center px-4">
+          <form @submit.prevent="updateDML" class="border bg-white px-2 h-[calc(100%-10px)] overflow-auto max-w-[75%]">
             <!-- dmlIdentAndStatus -->
             <div class="dmlIdentAndStatusSection mb-3" :id="dmlIdentStatusId">
               <div class="mb-2 flex space-x-2">
@@ -483,7 +492,7 @@ export default {
                   <input type="number" name="ident-securityClassification" :value="DMLObject.securityClassification"
                     class="w-20 bg-white border p-2" />
                 </div>
-                <div class="mr-2">
+                <div class="mr-2 w-96">
                   <div class="font-bold italic mb-1">BREX</div>
                   <input dd-input="filename" dd-target="self" dd-type="csdbs" dd-route="api.get_csdbs"
                     name="ident-brexDmRef" :value="DMLObject.BREX"
@@ -518,8 +527,19 @@ export default {
             </div>
             <!-- submit button -->
             <div v-if="DMLType !== 's'" class="text-center mt-3 mb-3">
-              <button type="submit" class="button bg-violet-400 text-white hover:bg-violet-600">Submit</button>
+              <button type="submit" class="button bg-violet-400 text-white hover:bg-violet-600">Update</button>
             </div>
+          </form>
+
+          <form @submit.prevent="mergeDML" class="border p-2 text-center max-w-[250px] h-[calc(100%-10px)] overflow-auto">
+            <div class="text-center">
+              <label class="font-semibold mb-2 block">Merge DML</label>
+              <input placeholder="search filename" type="text" class="p-2 w-full ml-1text-sm rounded-lg border"
+                dd-name="filename" dd-input="filename,path" dd-type="csdbs" dd-route="api.get_csdbs"
+                dd-target="mergesourcecontainer-append">
+            </div>
+            <textarea rows="15" id="mergesourcecontainer" merge-source-container name="source" class="w-full block p-2 my-2 border"></textarea>
+            <button type="submit" class="button text-center bg-violet-400 text-white hover:bg-violet-600">Merge</button>
           </form>
         </div>
       </div>

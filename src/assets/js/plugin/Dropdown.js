@@ -266,7 +266,7 @@ function getContainerResultTemplate(configs = [{ __element: '', __class: '', __s
   const dataResults = this.dd.results;
   let html = '<div ' + 'id=' + this.listContainerId + ' class="w-full absolute z-50 bg-gray-50 shadow-md rounded-md">';
   for (let o = 0; o < dataResults.length; o++) {
-    html += `<div class="text-sm border-b p-2 cursor-pointer hover:bg-blue-300">`;
+    html += `<div class="text-sm border-b p-2 cursor-pointer hover:bg-blue-300 text-left">`;
     for (let c = 0; c < configs.length; c++) {
       let inner = makeInner(configs[c]);
       let match = findText(/:[\w\.]+/g, inner);
