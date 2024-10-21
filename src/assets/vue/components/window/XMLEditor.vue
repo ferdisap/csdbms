@@ -6,6 +6,7 @@ import { ref } from 'vue';
 import TitleBar from '../gui/TitleBar.vue';
 import axios from 'axios';
 import { formDataToObject } from "../../../js/util/helper";
+import ContinuousLoadingCircle from "../sub/ContinuousLoadingCircle.vue";
 
 /**
  * cara pakai:
@@ -78,7 +79,7 @@ export default {
       editor: new XMLEditor(),
     }
   },
-  components:{ TitleBar },
+  components:{ ContinuousLoadingCircle, TitleBar },
   props: {
     filename: {
       type: String
@@ -91,8 +92,16 @@ export default {
       event.preventDefault();
       const fd = new FormData(event.target);
       fd.set('xmleditor', this.editor.text);
-      if(this.$props.filename) axios.post("/api/s1000d/csdb/update/" + this.$props.filename, fd)
-      else axios.put("/api/s1000d/csdb/create", formDataToObject(fd));
+      if(this.$props.filename) {
+        this.clp(true);
+        axios.post("/api/s1000d/csdb/update/" + this.$props.filename, fd)
+        .finally(()=>this.clp(false))
+      }
+      else {
+        this.clp(true);
+        axios.put("/api/s1000d/csdb/create", formDataToObject(fd))
+        .finally(()=>this.clp(false))
+      }
     }
   },
   mounted() {
@@ -131,5 +140,6 @@ export default {
       </form>
     </div>
 
+    <ContinuousLoadingCircle/>
   </div>
 </template>

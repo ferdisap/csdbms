@@ -55,29 +55,29 @@ function defaultTemplateEntry(entry = {}, trId = '', cbValue = '', no = '') {
   const rm = entry.remarks ? entry.remarks.join("<br/>") : '';
   let str = `
       <tr class="dmlEntry cb-room hover:bg-blue-300 cursor-pointer" ${trId ? 'id="' + trId + '"' : ''}>
-        <td class="cb-window">
+        <td class="cb-window" style="display:none">
           <input file="true" id="${cbId}" value="${cbValue}" type="checkbox">
         </td>
-        <td modal-input-ref="no">${no}</td>
-        <td modal-input-ref="entryIdent" class="dmlEntry-ident">${entry.ident ?? ''}</td>
+        <td property-input-ref="no">${no}</td>
+        <td property-input-ref="entryIdent" class="dmlEntry-ident">${entry.ident ?? ''}</td>
         <td>
-          <span modal-input-ref="dmlEntryType" class="text-sm">${entry.dmlEntryType ?? ''}</span>
+          <span property-input-ref="dmlEntryType" class="text-sm">${entry.dmlEntryType ?? ''}</span>
           <span> | </span>
-          <span modal-input-ref="issueType" class="text-sm" >${entry.issueType ?? ''}</span>
+          <span property-input-ref="issueType" class="text-sm" >${entry.issueType ?? ''}</span>
         </td>
-        <td modal-input-ref="securityClassification">${entry.securityClassification ?? ''}</td>
+        <td property-input-ref="securityClassification">${entry.securityClassification ?? ''}</td>
         <td>
-          <span modal-input-ref="enterpriseName" class="text-sm">${entry.enterpriseName ?? ''}</span>   
+          <span property-input-ref="enterpriseName" class="text-sm">${entry.enterpriseName ?? ''}</span>   
           <span> | </span>
-          <span modal-input-ref="enterpriseCode" class="text-sm italic">${entry.enterpriseCode ?? ''}</span></td>
+          <span property-input-ref="enterpriseCode" class="text-sm italic">${entry.enterpriseCode ?? ''}</span></td>
         <td>
-          <span modal-input-ref="answerToEntry" style="display:none">${entry.answerToEntry}</span>
-          <div modal-input-ref="answer[]">${answer}</div>
+          <span property-input-ref="answerToEntry" style="display:none">${entry.answerToEntry}</span>
+          <div property-input-ref="answer[]">${answer}</div>
         </td>
-        <td modal-input-ref="remarks[]">${rm}</td>
+        <td property-input-ref="remarks[]">${rm}</td>
       </tr>`;
   return str.replace(/\s{2,}/g, '');
-  // <td modal-input-ref="remarks[]">aaa<br/>bbbb</td>
+  // <td property-input-ref="remarks[]">aaa<br/>bbbb</td>
 }
 
 function createEntryVueTemplate(entryData = {}) {
@@ -163,6 +163,85 @@ function DML(json) {
   }
 }
 
+function openPropertyWindow(windowEl) {
+  const event = new Event("new-window");
+  event.data = {
+    window: {
+      app: windowEl,
+    },
+    property: {
+      name: 'PropertyDmlEntry',
+      style: {
+        position: 'absolute',
+        width: '600px',
+        height: 'auto',
+        top: (((top.innerHeight / 2) - 400) + 'px'),
+        left: (((top.innerWidth / 2) - 300) + 'px'),
+        backgroundColor: '#ffffff',
+      }
+    }
+  }
+  top.dispatchEvent(event);
+}
+
+function getPropertyInputName(tr) {
+  const pir = tr.querySelectorAll("*[property-input-ref]");
+  const data = {};
+  for (let i = 0; i < pir.length; i++) {
+    const name = pir[i].getAttribute("property-input-ref");
+    if (name.substr(name.length - 2) === '[]') {
+      if (!data[name]) data[name] = [];
+      data[name].push(pir[i].textContent);
+    } else {
+      data[name] = pir[i].textContent;
+    }
+  }
+  return data;
+}
+
+function setPropertyInputName(tr, data) {
+  Object.keys(data).forEach(key => {
+    if(data[key] instanceof Array){
+      tr.querySelectorAll(`*[property-input-ref='${key}[]']`).forEach((el,i) => {
+        el.textContent = data[key][i];
+      })
+    } else {
+      tr.querySelector(`*[property-input-ref='${key}']`).textContent = data[key];
+    }
+  })
+}
+
+function getAllValues() {
+  const values = {};
+  const allNamed = this.$el.querySelectorAll('.dmlIdentAndStatusSection *[name]');
+  const allEntries = this.$el.querySelectorAll('table tbody tr');
+  values.ident = {};
+  allNamed.forEach(el => {
+    let key = el.name;
+    let value = el.value;
+    if (key.substring(key.length - 2) === '[]') {
+      key = key.substring(0, key.length - 2)
+      value = value.split(/<br\/>|<br>/g); // atau di replace dengan "\n" sesuai backend nya sekarang pakai array (split)
+    };
+    values.ident[key] = value;
+  })
+  values.entries = []
+  allEntries.forEach((tr, i) => {
+    const obj = {};
+    tr.querySelectorAll("*[property-input-ref]").forEach(input => {
+      let key = input.getAttribute('property-input-ref');
+      let value = input.textContent;
+      if (key.substring(key.length - 2) === '[]') {
+        key = key.substring(0, key.length - 2)
+        value = value.split(/<br\/>|<br>/g); // atau di replace dengan "\n" sesuai backend nya sekarang pakai array (split)
+      };
+      obj[key] = value;
+    })
+    values.entries.push(obj);
+  })
+  console.log(values);
+  return values;
+}
 
 export default {
   components: { ContinuousLoadingCircle, FloatMenu, Remarks, TitleBar },
@@ -212,9 +291,9 @@ export default {
         })
         .finally(() => this.clp(false))
     },
-    updateDML(event) {
+    updateDML() {
       this.clp(true);
-      axios.put("/api/s1000d/dml/xx", formDataToObject(new FormData(event.target)))
+      axios.post("/api/s1000d/dml/update/" + this.$props.filename, getAllValues.call(this))
         .then(response => {
           top.rsp = response;
           this._.props.filename = response.data.csdb.filename;
@@ -241,12 +320,45 @@ export default {
         })
         .finally(() => this.clp(false))
     },
+    add() {
+      const windowEl = this.$el.parentElement.closest(".app-window");
+      openPropertyWindow(windowEl);
+      windowEl.property.result()
+        .then(data => {
+          const cbRoom = top.FloatMenu.event.target.closest(".cb-room");
+          const trString = defaultTemplateEntry({
+            ident: data.entryIdent,
+            dmlEntryType: data.dmlEntryType,
+            issueType: data.issueType,
+            securityClassification: data.securityClassification,
+            enterpriseName: data.enterpriseName,
+            enterpriseCode: data.enterpriseCode,
+            answerToEntry: data.answerToEntry,
+            answer: data.answer,
+            remarks: data.remarks,
+          }, '', data.entryIdent);
+          cbRoom.insertAdjacentHTML('afterend', trString);
+          installCheckbox(cbRoom.closest('.cb-home')); k
+        });
+    },
+    edit() {
+      const cbRoom = top.FloatMenu.event.target.closest(".cb-room");
+      if(cbRoom.parentElement.tagName === 'THEAD') return;
+      const windowEl = this.$el.parentElement.closest(".app-window");
+      openPropertyWindow(windowEl);
+      windowEl.property.data = getPropertyInputName(cbRoom);
+      windowEl.property.result()
+        .then(data => {
+          setPropertyInputName(cbRoom, data);
+        });
+    },
     remove() {
       const cbHome = this.$el.querySelector('.cb-home');
       const cbs = cbHome.cb;
       if (cbs.length) {
         cbs.forEach(cb => cb.closest(".cb-room").remove());
       } else {
+        if(cbHome.current.parentElement.tagName === 'THEAD') return;
         cbHome.current.remove();
       }
       hideAll(cbHome);
@@ -265,7 +377,6 @@ export default {
     if (this.isDML) {
       this.showContent(this.$props.filename)
       installDropdown(this.$el.querySelector("input[name='ident-brexDmRef']"));
-      // console.log(this.$el.querySelector("input[name='ident-brexDmRef']"));
     } else {
       this._.props.filename = undefined;
       installDropdown(this.$el.querySelector("input[name='brexDmRef']"));
@@ -340,9 +451,12 @@ export default {
         </div>
       </div>
       <div v-else class="h-full w-full">
-        <h1 class="text-center text-3xl mt-2 h-12 text-blue-500 underline font-extrabold">{{ DMLType === 'p' ? 'Partial DML' : (DMLType === 'c' ? 'Complete DML' : (DMLType === 's' ? 'Status DML' : '') ) }}</h1>
+        <h1 class="text-center text-3xl mt-2 h-12 text-blue-500 underline font-extrabold">
+          {{ DMLType === 'p' ? ('Partial DML') : (DMLType === 'c' ? 'Complete DML' : (DMLType === 's' ? 'Status DML' : '')
+          ) }}</h1>
         <div class="w-full h-[calc(100%-3rem)] flex justify-center px-4">
-          <form @submit.prevent="updateDML" class="w-full border bg-white px-2 h-full overflow-auto min-w-[100%] max-w-[75%]">
+          <form @submit.prevent="updateDML"
+            class="w-full border bg-white px-2 h-[calc(100%-10px)] overflow-auto min-w-[100%] max-w-[75%]">
             <!-- dmlIdentAndStatus -->
             <div class="dmlIdentAndStatusSection mb-3" :id="dmlIdentStatusId">
               <div class="mb-2 flex space-x-2">
@@ -371,7 +485,8 @@ export default {
                 </div>
                 <div class="mr-2">
                   <div class="font-bold italic mb-1">BREX</div>
-                  <input dd-input="filename" dd-target="self" dd-type="csdbs" dd-route="api.get_csdbs" name="ident-brexDmRef" :value="DMLObject.BREX" 
+                  <input dd-input="filename" dd-target="self" dd-type="csdbs" dd-route="api.get_csdbs"
+                    name="ident-brexDmRef" :value="DMLObject.BREX"
                     placeholder="eg.: DMC-MALE-A-00-00-00-00A-022A-D_000-01_EN-EN" class="w-full border p-2 rounded-md"
                     autocomplete="off" aria-autocomplete="none" />
                 </div>
@@ -386,7 +501,7 @@ export default {
               <table class="cb-home" :id="dmlContentId">
                 <thead>
                   <tr class="cb-room">
-                    <th class="cb-window-all"><input type="checkbox" /></th>
+                    <th class="cb-window-all" style="display:none"><input type="checkbox" /></th>
                     <th>No</th>
                     <th>Ident</th>
                     <th>Type</th>
@@ -403,25 +518,34 @@ export default {
             </div>
             <!-- submit button -->
             <div v-if="DMLType !== 's'" class="text-center mt-3 mb-3">
-              <button type="submit"
-                class="button bg-violet-400 text-white hover:bg-violet-600">Submit</button>
+              <button type="submit" class="button bg-violet-400 text-white hover:bg-violet-600">Submit</button>
             </div>
           </form>
         </div>
       </div>
     </div>
     <FloatMenu v-if="isDML" :trigger="[{ triggerId: dmlContentId, on: 'contextmenu' }]">
+      <div v-if="!selectionMode">
+        <div class="list" @click="add">
+          <div>add</div>
+        </div>
+        <div class="list" @click="edit">
+          <div>edit</div>
+        </div>
+      </div>
+      <div v-else>
+        <div v-if="selectionMode" class="list" @click="cancelCB">
+          <div>cancel</div>
+        </div>
+      </div>
       <div class="list" @click="selectCB">
         <div>select</div>
-      </div>
-      <div v-if="selectionMode" class="list" @click="cancelCB">
-        <div>cancel</div>
       </div>
       <div class="list" @click="remove">
         <div>remove</div>
       </div>
     </FloatMenu>
-    <FloatMenu v-if="isDML" :trigger="[{ triggerId: dmlIdentStatusId, on: 'contextmenu' }]"/>
+    <FloatMenu v-if="isDML" :trigger="[{ triggerId: dmlIdentStatusId, on: 'contextmenu' }]" />
     <ContinuousLoadingCircle />
   </div>
 </template>
@@ -473,4 +597,5 @@ export default {
 
 .dml table th:nth-child(8) {
   width: 15%
-}</style>
+}
+</style>

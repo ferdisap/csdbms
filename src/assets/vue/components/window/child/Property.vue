@@ -17,10 +17,10 @@ const property = function () {
     reject = j;
   })
 
-  const yes = (component) => resolve(component._.props);
+  const yes = (data) => resolve(data);
   const no = () => reject(false);
   const result = () => promise;
-  return { yes, no, result };
+  return { yes, no, result, data: null };
 }
 export {property}
 
@@ -48,19 +48,23 @@ export default {
     },
   },
   methods: {
+    getOwnerWindow(){
+      return top.document.getElementById(this._.appContext.app.windowId)
+    },
     yes() {
-      top.document.getElementById(this._.appContext.app.windowId).dialog.yes();
+      const data = formDataToObject(new FormData(this.$el.parentElement.querySelector("form")));
+      this.getOwnerWindow().property.yes(data);
       this.$el.dispatchEvent(new Event('close-window'));
     },
     no(){
-      top.document.getElementById(this._.appContext.app.windowId).dialog.no();
+      this.getOwnerWindow().property.no();
       this.$el.dispatchEvent(new Event('close-window'));
     }
   },
 }
 </script>
 <template>
-  <div class="h-full w-full border shadow-md">
+  <div class="property h-full w-full border shadow-md">
     <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" :cache-button="false"/>
     <div class="px-3 py-1">
       <div class="mt-2">

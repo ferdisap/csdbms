@@ -5,6 +5,7 @@ const createFrameMove = (basicElement) => {
   frame.style.backgroundColor = 'transparent';
   frame.style.zIndex = (basicElement.style.zIndex - 1);
   basicElement.parentElement.appendChild(frame);
+  frame.enableSizing = basicElement.enableSizing;
   return frame;
 }
 
@@ -58,7 +59,7 @@ export default class WindowMove {
     const pleft = target.style.left;
     const ptop = target.style.top;
     // suaya jika framenya di geser maximal ke kiri, layar akan dibagi 2 dan ditaruh di kiri
-    if(l <= -5 && !this.persistenSize) {
+    if(target.enableSizing && l <= -5 && !this.persistenSize) {
       const h = target.closest('#app-content-container').getBoundingClientRect().height;
       target.style.left = '0px';
       target.style.top = '0px';
@@ -66,7 +67,7 @@ export default class WindowMove {
       target.style.height = h + 'px';
     } 
     // suaya jika framenya di geser maximal ke kiri, layar akan dibagi 2 dan ditaruh di kanan
-    else if((l + rect.width) >= (w + 5) && !this.persistenSize){
+    else if(target.enableSizing && (l + rect.width) >= (w + 5) && !this.persistenSize){
       const h = target.closest('#app-content-container').getBoundingClientRect().height;
       target.style.left = w/2 + 'px';
       target.style.top = '0px';
@@ -74,14 +75,14 @@ export default class WindowMove {
       target.style.height = h + 'px';
     }
     // supaya windownya full jika mouse diarahkan ke atas
-    else if(pointerupY < -5){
+    else if(target.enableSizing && pointerupY < -5){
       target.style.left = '0px';
       target.style.top = '0px';
       target.style.width = '100%';
       target.style.height = '100%';
     }
     // supaya windownya full jika mouse diarahkan ke bawah (dikurang 2 karena tinggi titlebar 48, jadi asumsikan kliknya ditengah2 title bar jadi 24)
-    else if(( pointerupY + rect.height - 24)  > (this.appRect.height + 5)){
+    else if(target.enableSizing && ( pointerupY + rect.height - 24)  > (this.appRect.height + 5)){
       target.style.left = pleft;
       target.style.top = ptop;
       target.style.height = this.pheight;
@@ -109,10 +110,11 @@ export default class WindowMove {
       frame.style.zIndex = windowEl.style.zIndex + 1;
 
       if(beforeMove) beforeMove();
-      this.pleft = windowEl.style.left;
-      this.ptop = windowEl.style.top;
-      this.pheight = windowEl.style.height
-      this.pwidth = windowEl.style.width
+      const windowElRect = windowEl.getBoundingClientRect();
+      this.pleft = windowElRect.left + 'px';
+      this.ptop = windowElRect.top + 'px';
+      this.pheight = windowElRect.height + 'px';
+      this.pwidth = windowElRect.width + 'px';
 
       windowEl.style.opacity = '50%';
       this.setXY(frame, frame.getBoundingClientRect(), edown.clientX, edown.clientY, emove.clientX, emove.clientY);
