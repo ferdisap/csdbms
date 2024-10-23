@@ -12,10 +12,10 @@ export default {
     }
   },
   components: { TitleBar, ListTree, Folder, Tes },
-  // mounted(){
-    // top.exp = this;
+  mounted(){
+    top.exp = this;
     // top.auth = this.auth;
-  // }
+  }
 }
 </script>
 <template>

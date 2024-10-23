@@ -31,6 +31,7 @@ class TextEditorElement extends HTMLElement {
       // extensions: [keymap.of(defaultKeymap), EditorView.lineWrapping, lineNumbers(), gutter({ class: "cm-mygutter" })],
       parent: this
     });
+    this._internals.setFormValue(text);
   }
 
   get value() {

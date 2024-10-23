@@ -20,6 +20,7 @@ import WindowProperty from './sub/WindowProperty';
 import { history, clearUrl } from './sub/WindowHistory';
 import setInterceptor from '../axiosInterceptor';
 import ErrorResponseMessage from './ErrorResponseMessage';
+import { addGetLogic } from '../util/ObjectProperty';
 // import { createRouter, createWebHistory } from 'vue-router';
 // import RoutesVue from './../RoutesVue';
 
@@ -52,17 +53,17 @@ import ErrorResponseMessage from './ErrorResponseMessage';
 class Window {
   zIndex = []; // appId (windowId)
 
-  em = new WeakMap(); // k = windowEl, v = window
+  em = new WeakMap(); // k = windowEl, v = window // deprecated
 
   // wm = new WeakMap(); // k = task, v = window // nanti dihapus
-  tm = new WeakMap(); // k = window, v = task
-  te = new WeakMap(); // k = taskEl, v = task
+  tm = new WeakMap(); // k = window, v = task // deprecated
+  te = new WeakMap(); // k = taskEl, v = task // deprecated
 
-  dm = new WeakMap(); // k = window, v = dialog
-  ed = new WeakMap(); // k = dialogEl, v = dialog;
+  dm = new WeakMap(); // k = window, v = dialog // deprecated
+  ed = new WeakMap(); // k = dialogEl, v = dialog; // deprecated
 
-  am = new WeakMap(); // k = window, v = alert
-  ea = new WeakMap(); // k = alertEl, v = alert;
+  am = new WeakMap(); // k = window, v = alert // deprecated
+  ea = new WeakMap(); // k = alertEl, v = alert; // // deprecated
 
   pm = new WeakMap(); // k = window, v = property
   ep = new WeakMap(); // k = propertyEl, v = property;
@@ -85,7 +86,7 @@ class Window {
 
   // dipakai di task
   getTaskByElement(taskEl) {
-    return this.te.get(taskEl);
+    return taskEl.__vue_app__;
   }
 
   constructor() {
@@ -108,50 +109,116 @@ class Window {
    * @returns {void}
    */
   create(config = {}) {
-    let window, task, dialog, alert, property;
+    let parent, window, task, dialog, alert, property;
     // create window
+    const _window = (data) => {
+      const window = createWindow.call(this, data);
+      this.mountWindow(window, data.style);
+      window.type = 'window';
+      return window;
+    }
+    const _task = (data, parentId) => {
+      const task = createApp(Task, data.props);
+      task.appId = "tsk" + Randomstring.generate({ charset: 'alphabetic' })
+      task.windowId = parentId ? parentId : undefined;
+      this.mountTask(task);
+      task.type = 'task';
+      return task;
+    }
+    const _dialog = (data, parentId) => {
+      const dialog = new WindowDialog(data, parentId);
+      dialog.appId = "dlg" + Randomstring.generate({ charset: 'alphabetic' })
+      dialog.windowId = parentId ? parentId : undefined;
+      this.mountDialog(dialog, data.style);
+      dialog.type = 'dialog';
+      return dialog
+    }
+    const _alert = (data, parentId) => {
+      const alert = createApp(Alert, data.props);
+      alert.appId = "alt" + Randomstring.generate({ charset: 'alphabetic' })
+      alert.windowId = parentId ? parentId : undefined;
+      this.mountAlert(alert, data.style);
+      alert.type = 'alert';
+      return alert;
+    }
+    const _property = (data, parentId) => {
+      if(data.app && data.app instanceof HTMLElement) return data.app.__vue_app__;
+      const property = new WindowProperty(data, parentId);
+      property.appId = "prp" + Randomstring.generate({ charset: 'alphabetic' })
+      property.windowId = parentId ? parentId : undefined;
+      this.mountProperty(property, data.style);
+      property.type = 'property';
+      return property;
+    };
+
+    switch (config.parent.type) {
+      case 'window':
+        parent = _window(config.parent);
+        break;
+      case 'alert':
+        parent = _alert(config.parent);
+      case 'dialog':
+        parent = _dialog(config.parent);
+      case 'property':
+        parent = _property(config.parent);
+      default:
+        break;
+    }
+
+    let windowType;
     if (config.window) {
-      window = createWindow.call(this, config.window);
-      this.mountWindow(window, config.window.style);
+      window = _window(config.window);
+      windowType = 'window';
     }
     if (config.task) {
-      task = createApp(Task, config.task.props);
-      task.appId = "tsk" + Randomstring.generate({ charset: 'alphabetic' })
-      task.windowId = window ? window.appId : undefined;
-      this.mountTask(task);
+      window = _task(config.task, parent ? parent.appId : null);
+      windowType = 'task';
     }
     if (config.dialog) {
-      dialog = new WindowDialog(config.dialog);
-      dialog.appId = "dlg" + Randomstring.generate({ charset: 'alphabetic' })
-      dialog.windowId = window ? window.appId : undefined;
-      this.mountDialog(dialog, config.dialog.style);
+      window = _dialog(config.dialog, parent ? parent.appId : null);
+      windowType = 'dialog';
     }
     if (config.alert) {
-      alert = createApp(Alert, config.alert.props);
-      alert.appId = "alt" + Randomstring.generate({ charset: 'alphabetic' })
-      alert.windowId = window ? window.appId : undefined;
-      this.mountAlert(alert, config.alert.style);
+      window = _alert(config.alert, parent ? parent.appId : null);
+      windowType = 'alert';
     }
     if (config.property) {
-      property = new WindowProperty(config.property);
-      property.appId = "prp" + Randomstring.generate({ charset: 'alphabetic' })
-      property.windowId = window ? window.appId : undefined;
-      this.mountProperty(property, config.property.style);
+      window = _property(config.property, parent ? parent.appId : null);
+      windowType = 'property';
     }
+
+    const register = (parent, window, windowType) => {
+      switch (windowType) {
+        // case 'window':
+        //   window.task = new WeakRef(window);
+        case 'task':
+          parent.task = new WeakRef(window);
+          window.parent = new WeakRef(parent);
+          try {
+            addGetLogic(parent, 'task', (ctx, v) => v.deref());
+          } catch (error) {}
+          try {
+            addGetLogic(window, 'parent', (ctx, v) => v.deref());
+          } catch (error){}
+          this.resetZIndex();
+          break;
+        default:
+          parent.child = new WeakRef(window);
+          window.parent = new WeakRef(parent);
+          try {            
+            addGetLogic(parent, 'child', (ctx, v) => v.deref());
+          } catch (error) {}
+          try {            
+            addGetLogic(window, 'parent', (ctx, v) => v.deref());
+          } catch (error) {}
+      }
+    }
+
+    // top.prt = parent;
+    // top.child = window;
+
     // register
-    if (window && task) {
-      this.tm.set(window, task);
-      this.resetZIndex();
-    }
-    if (window && dialog) {
-      this.dm.set(window, dialog);
-    }
-    if (window && alert) {
-      this.am.set(window, alert);
-    }
-    if (window && property) {
-      this.pm.set(window, property);
-    }
+    register(parent,window,windowType);
   }
 
   // ##########################################################################################
@@ -221,11 +288,10 @@ class Window {
     }
 
     el.isMaximize = (el.style.width === '100%' && el.style.height === '100%') ? true : false;
-    
+
     container.appendChild(el);
     window.mount('#' + el.id);
-    this.em.set(el, window);
-    
+
 
     this.enableSizing(el);
     this.enableMoving(el);
@@ -254,7 +320,6 @@ class Window {
     task.id = el.id
     container.appendChild(el);
     task.mount('#' + el.id);
-    this.te.set(el, task);
     this.setBorderBottomTask(el)
 
     // event click
@@ -283,7 +348,6 @@ class Window {
     }
 
     dialog.id = el.id;
-    this.ed.set(el, dialog);
 
     if (dialog.windowId) {
       // push z Index
@@ -341,7 +405,6 @@ class Window {
     }
 
     alert.id = el.id
-    this.ea.set(el, alert);
 
     el.style.zIndex = 200; // maximum value of top-window is in range of 80-200
 
@@ -391,8 +454,8 @@ class Window {
     }
 
     property.id = el.id
-    this.ep.set(el, property);
 
+    top.pp = property;
     if (property.windowId) {
       if (this.zIndex[this.zIndex.length - 1] !== property.windowId) {
         this.zIndex[this.zIndex.indexOf(property.windowId)] = undefined;
@@ -421,7 +484,7 @@ class Window {
     // append and mount property to document
     container.appendChild(el);
     property.mount('#' + el.id);
-    
+
     // configure to enable moving window
     this.enableMoving(el);
   }
@@ -431,13 +494,14 @@ class Window {
   addTopWindowBlocker(topWindowEl, subWindowId) {
     const blocker = document.createElement('div');
     const id = Randomstring.generate({ charset: 'alphabetic' });
+    const rect = topWindowEl.getBoundingClientRect();
     blocker.classList.add(this.windowClassBlocker);
     blocker.setAttribute('id', id);
     blocker.style.position = 'fixed';
-    blocker.style.height = topWindowEl.style.height ? topWindowEl.style.height : '100%';
-    blocker.style.width = topWindowEl.style.width ? topWindowEl.style.width : '100%';
-    blocker.style.top = topWindowEl.style.top ? topWindowEl.style.top : "0px";
-    blocker.style.left = topWindowEl.style.left ? topWindowEl.style.left : "0px";
+    blocker.style.height = rect.height + 'px';
+    blocker.style.width = rect.width + 'px';
+    blocker.style.top = rect.top + 'px';
+    blocker.style.left = rect.left + 'px';
     blocker.style.backgroundColor = '#9090908a';
     blocker.addEventListener('pointerdown', (e) => {
       e.preventDefault();
@@ -456,43 +520,26 @@ class Window {
 
   unmountWindow(window) {
     window.unmount();
-    const windowEl = document.getElementById(window.appId);
-    if (windowEl) {
-      this.em.delete(windowEl);
-      windowEl.remove();
-    }
+    document.getElementById(window.appId).remove();
   }
   unmountTask(task) {
     task.unmount();
-    const taskEl = document.getElementById(task.appId);
-    if (taskEl) {
-      this.te.delete(taskEl);
-      taskEl.remove();
-    }
+    document.getElementById(task.appId).remove();
   }
   unmountDialog(dialog) {
     dialog.unmount();
-    const dialogEl = document.getElementById(dialog.appId);
-    if (dialogEl) {
-      this.ed.delete(dialogEl);
-    }
-    dialogEl.remove();
+    document.getElementById(dialog.appId).remove();
+    delete dialog.parent.child;
   }
   unmountAlert(alert) {
     alert.unmount();
-    const alertEl = document.getElementById(alert.appId);
-    if (alertEl) {
-      this.ea.delete(alertEl);
-    }
-    alertEl.remove();
+    document.getElementById(alert.appId).remove();
+    delete alert.parent.child;
   }
   unmountProperty(property) {
     property.unmount();
-    const propertyEl = document.getElementById(property.appId);
-    if (propertyEl) {
-      this.ep.delete(propertyEl);
-    }
-    propertyEl.remove();
+    document.getElementById(property.appId).remove();
+    delete property.parent.child;
   }
 
   // ##########################################################################################
@@ -507,56 +554,44 @@ class Window {
     }
   }
   stopTopWindow(window) {
-    const task = this.tm.get(window);
-    if (this.tm.delete(window)) {
-      this.stopTask(task);
-      this.zIndex[this.zIndex.indexOf(window.appId)] = undefined;
+    const task = window.task;
+    delete window.task;
+    delete task.parent;
+    this.stopTask(task);
+    this.zIndex[this.zIndex.indexOf(window.appId)] = undefined;
 
-      // selanjutnya close child window (dialog, alert, property)
-      if (this.dm.has(window)) this.stopDialog(this.dm.get(window));
-      if (this.am.has(window)) this.stopAlert(this.am.get(window));
-      if (this.pm.has(window)) this.stopProperty(this.pm.get(window));
-      this.unmountWindow(window);
-
-      clearUrl()
+    // selanjutnya close child window (dialog, alert, property)
+    if(window.child){
+      switch (window.child.type) {
+        case 'dialog': this.stopDialog(window.child);break;      
+        case 'alert': this.stopAlert(window.child);break;
+        case 'property': this.stopProperty(window.child);break;
+      }
     }
+    this.unmountWindow(window);
+    clearUrl()
   }
   stopTask(task) {
-    const windowEl = document.getElementById(task.windowId);
-    if (windowEl && this.em.has(windowEl)) {
-      this.stopTopWindow(this.em.get(windowEl));
-    }
+    delete task.parent;
+    if(task.parent) this.stopTopWindow(task.parent);
     this.unmountTask(task);
   }
   // matikan child window dan top window;
   stopDialog(dialog) {
-    const windowEl = document.getElementById(dialog.windowId);
-    if (windowEl && this.em.has(windowEl)) {
-      this.dm.delete(this.em.get(windowEl));
-      //hapus property di windowEl nya yang digunakan untuk akses result alert. Kalau tidak dihapus, reuslt akan selalu <pending> jika tidak di OK atau Yes melainkan di pencet close button di title barnya
-      delete windowEl.dialog;
-    }
+    delete document.getElementById(dialog.windowId).dialog;
     if (document.dialogResult) delete document.dialogResult[dialog.id];
     this.zIndex[this.zIndex.indexOf(dialog.appId)] = undefined;
     this.removeTopWindowBlocker(dialog.blockerId);
     this.unmountDialog(dialog);
   }
   stopAlert(alert) {
-    const windowEl = document.getElementById(alert.windowId);
-    if (windowEl && this.em.has(windowEl)) {
-      this.am.delete(this.em.get(windowEl));
-      delete windowEl.alert;
-    }
+    delete document.getElementById(alert.windowId).alert;
     if (document.alertResult) delete document.alertResult[alert.id];
     this.removeTopWindowBlocker(alert.blockerId);
     this.unmountAlert(alert);
   }
   stopProperty(property) {
-    const windowEl = document.getElementById(property.windowId);
-    if (windowEl && this.em.has(windowEl)) {
-      this.pm.delete(this.em.get(windowEl));
-      delete windowEl.property;
-    }
+    delete document.getElementById(property.windowId).property;
     if (document.propertyResult) delete document.propertyResult[property.id];
     this.removeTopWindowBlocker(property.blockerId);
     this.unmountProperty(property);
@@ -572,11 +607,10 @@ class Window {
    */
   toggle(el = {}, display = undefined) {
     const taskEl = el.task;
-    const windowEl = el.window ?? document.getElementById(this.te.get(taskEl).windowId);
-    const window = this.em.get(windowEl);
+    const windowEl = el.window ?? document.getElementById(el.task.windowId);
+    const window = windowEl.__vue_app__;
     if (!window) return; // jika ada alert/dialog/property maka tidak bisa toggle
     const isTop = (this.zIndex.indexOf(window.appId) + 1) === this.zIndex.length;
-    // console.log(isTop);
     if (isTop) {
       // show/hide window (threatment undefined == null kalau pakai syntax seperti dibawah)
       const styleDisplay = display !== undefined ? display : (windowEl.style.display === 'none' ? '' : 'none');
@@ -588,7 +622,7 @@ class Window {
       this.zIndex.push(window.appId);
       windowEl.style.zIndex = (this.zIndex.length) + 80;
     }
-    this.setBorderBottomTask(taskEl ?? document.getElementById(this.tm.get(window).appId), windowEl.style.display);
+    this.setBorderBottomTask(taskEl ?? document.getElementById(window.task.appId), windowEl.style.display);
 
     // set previous index window to top
     if (windowEl.style.display === 'none') {
@@ -612,14 +646,12 @@ class Window {
     windowEl.style.zIndex = (this.zIndex.length) + 80;
 
     // push history
-    if (this.em.has(windowEl)) {
-      const window = this.em.get(windowEl);
-      window.config.globalProperties.$history.pushState();
+    const window = windowEl.__vue_app__;
+    if(window.config.globalProperties.$history) window.config.globalProperties.$history.pushState();
 
-      // set to top all child window such as dialog, alert property
-      if (this.dm.has(window)) this.setToTop(document.getElementById(this.dm.get(window).appId));
-      else if (this.am.has(window)) this.setToTop(document.getElementById(this.am.get(window).appId));
-      else if (this.pm.has(window)) this.setToTop(document.getElementById(this.pm.get(window).appId));
+    // set to top all child window such as dialog, alert property
+    if(window.child){
+      this.setToTop(document.getElementById(window.child.appId));
     }
   }
 
@@ -678,11 +710,11 @@ class Window {
     event.stopPropagation();
     const target = event.target.closest(`.${this.windowClassGeneral}`);
     switch (target.id.substr(0, 3)) {
-      case "top": this.stopTopWindow(this.em.get(target)); break;
-      case "tsk": this.stopTask(this.te.get(target)); break;
-      case "dlg": this.stopDialog(this.ed.get(target)); break;
-      case "alt": this.stopAlert(this.ea.get(target)); break;
-      case "prp": this.stopProperty(this.ep.get(target)); break;
+      case "top": this.stopTopWindow(target.__vue_app__); break;
+      case "tsk": this.stopTask(target.__vue_app__); break;
+      case "dlg": this.stopDialog(target.__vue_app__); break;
+      case "alt": this.stopAlert(target.__vue_app__); break;
+      case "prp": this.stopProperty(target.__vue_app__); break;
     }
   }
 
@@ -695,7 +727,6 @@ class Window {
     this.zIndex.filter(v => v).reverse().forEach(appId => {
       const windowEl = document.getElementById(appId);
       // hide All
-      // console.log(event.data.state, windowEl.style.display);
       // if (!event.data.state && windowEl.style.display !== 'none') {
       if (!event.data.state) {
         this.toggle({ window: windowEl }, 'none');
@@ -732,7 +763,7 @@ function createWindow(config) {
 
   if (config.app) {
     // jika buat dialog, dll windownya sudah ada jadi ga buat lagi
-    if (config.app instanceof HTMLElement) return this.em.get(config.app);
+    if (config.app instanceof HTMLElement) return config.app.__vue_app__;
     return config.app;
   };
 

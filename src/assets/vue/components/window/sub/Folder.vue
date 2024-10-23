@@ -10,6 +10,33 @@ import SearchCsdb from '../../sub/SearchCsdb.vue';
 import { addSetLogic } from '../../../../js/util/ObjectProperty';
 import { isNumber, indexFromParent } from '../../../../js/util/helper.js';
 
+function openDetailObjectPropertyWindow(windowEl, filename, path, storage) {
+  const event = new Event("new-window");
+  event.data = {
+    parent: {
+      type: 'window',
+      app: windowEl,
+    },
+    property: {
+      name: 'PropertyDetailObject',
+      props: {
+        filename: filename,
+        path: path,
+        storage: storage,
+      },
+      style: {
+        position: 'absolute',
+        width: '600px',
+        height: 'auto',
+        top: (((top.innerHeight / 2) - 400) + 'px'),
+        left: (((top.innerWidth / 2) - 300) + 'px'),
+        backgroundColor: '#ffffff',
+      }
+    }
+  }
+  top.dispatchEvent(event);
+}
+
 export default {
   components: { FloatMenu, Sort, ContinuousLoadingCircle, SearchCsdb },
   data() {
@@ -79,22 +106,38 @@ export default {
     clickFolder: function (path) {
       this.back(path);
     },
-    clickFilename: async function (filename) {
-      const event = new Event("new-window");
-      event.data = {
-        window: {
-          name: 'XMLEditor',
-          props: {
-            filename: filename
-          }
-        },
-        task: {
-          props: {
-            title: 'XMLEditor'
+    clickFilename: async function (filename, path, storage) {
+      openDetailObjectPropertyWindow(this.$el.parentElement.closest(".app-window"), filename, path, storage);
+      return;
+    },
+    edit() {
+      // get filename
+      const cbHome = this.$el.querySelector(".cb-home");
+      let filename = cbHome.cbValues;
+      if (!filename.length) {
+        if (cbHome.current.cbWindow) {
+          filename = [cbHome.current.cbWindow.cbValue]
+        }
+        else return;
+      }
+
+      filename.forEach(f => {
+        const event = new Event("new-window");
+        event.data = {
+          window: {
+            name: 'XMLEditor',
+            props: {
+              filename: f,
+            }
+          },
+          task: {
+            props: {
+              title: 'XMLEditor'
+            }
           }
         }
-      }
-      top.dispatchEvent(event);
+        top.dispatchEvent(event);
+      })
     },
     openTr() {
       const cbHome = this.$el.querySelector('.cb-home');
@@ -290,7 +333,7 @@ export default {
       return value;
     })
     this.getObjs(this.$props.path);
-    // top.folder = this;
+    top.folder = this;
   },
 }
 </script>
@@ -333,7 +376,7 @@ export default {
                 <span class="text-base">{{ path.split("/").at(-1) }} </span>
               </td>
             </tr>
-            <tr v-for="obj in data.csdbs" @dblclick.prevent="clickFilename(obj.filename)"
+            <tr v-for="obj in data.csdbs" @dblclick.prevent="clickFilename(obj.filename, obj.path, obj.owner.storage)"
               class="cb-room file-row text-base hover:bg-blue-300 cursor-pointer">
               <td class="cb-window"><input file type="checkbox" :value="obj.filename"></td>
               <td class="leading-3 text-base">
@@ -341,7 +384,7 @@ export default {
                 <span class="text-base"> {{ obj.filename }} </span>
               </td>
               <td class="leading-3 text-base"> {{ obj.path }} </td>
-              <td class="leading-3 text-base"> {{ (obj.last_history.description) }}, {{ obj.last_history.created_at }}
+              <td class="leading-3 text-base"> {{ (obj.last_history.code) }}, {{ obj.last_history.created_at }}
               </td>
             </tr>
           </tbody>
@@ -368,6 +411,9 @@ export default {
       <div v-if="$props.status === 'act'">
         <div v-if="!selectionMode" class="list" @click="openTr">
           <div>open</div>
+        </div>
+        <div v-if="!selectionMode" class="list" @click="edit">
+          <div>edit</div>
         </div>
         <div class="list" @click="deleteObject">
           <div>delete</div>

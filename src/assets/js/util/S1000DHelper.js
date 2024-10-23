@@ -1,6 +1,22 @@
 import jp from 'jsonpath';
 import axios from 'axios';
 
+function getCsdbData(fullPath){
+  //const fulPath = `mbb38/CSDB/DML/DML-MALE-0001Z-P-2024-00004_000-01.xml`;
+  const m = /(\w+)\/([\w\/]+)\/(?<=\/)([\w\-.]+)|(\w+)\/([\w\/]+)/.exec(fullPath).filter(v => v);
+  if(m[3] && !m[3].includes(".")) {
+    m[2] += "/" + m[3];
+    m[3] = undefined;
+  }
+  return {
+      storage: m[1],
+      path: m[2],
+      filename: m[3]
+  }
+}
+
+export {getCsdbData}
+
 async function fetchJsonFile(data = {}, routename){
   return await axios({
     route: {

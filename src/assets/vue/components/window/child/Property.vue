@@ -46,6 +46,10 @@ export default {
       type: String,
       default: 'Property Window'
     },
+    useButton: {
+      type: Boolean,
+      default: true,
+    },
   },
   methods: {
     getOwnerWindow(){
@@ -66,12 +70,12 @@ export default {
 <template>
   <div class="property h-full w-full border shadow-md">
     <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" :cache-button="false"/>
-    <div class="px-3 py-1">
+    <div class="px-3 py-1 h-[calc(100%-3rem)] overflow-auto">
       <div class="mt-2">
         <slot name="content"></slot>
       </div>
 
-      <div class="text-center mt-2 mb-2 space-x-2">
+      <div v-if="useButton" class="text-center mt-2 mb-2 space-x-2">
         <button @click="this.yes" class="bg-slate-200 shadow-md px-2 py-1 rounded-md font-bold">Yes</button>
         <button @click="this.no" class="bg-slate-200 shadow-md px-2 py-1 rounded-md font-bold">No</button>
       </div>

@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import setInterceptor from './axiosInterceptor';
 import { createPinia } from 'pinia';
+import '../css/comment.css'
 import '../css/main.css'
 import Main from '../vue/Main.vue';
 import {createErsp} from './plugin/ErrorResponseMessage.js';  

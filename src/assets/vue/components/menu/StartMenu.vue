@@ -9,7 +9,7 @@ export default {
     newExplorer(event){
       event.preventDefault();
       this.$window.create({
-        window: {name: 'Explorer'},
+        parent: {type: 'window', name: 'Explorer'},
         task: {
           props: {title: 'Explorer'}
         },
@@ -18,7 +18,7 @@ export default {
     newXMLEditor(event){
       event.preventDefault();
       this.$window.create({
-        window: {name: 'XMLEditor'},
+        parent: {type: 'window', name: 'XMLEditor'},
         task: {
           props: {title: 'XMLEditor'}
         },
@@ -27,7 +27,7 @@ export default {
     newHelloWorld(event){
       event.preventDefault();
       this.$window.create({
-        window: {name: 'HelloWorld', props:{foo:'bue'}},
+        parent: {type: 'window', name: 'HelloWorld', props:{foo:'bue'}},
         task: {
           props: {title: 'Hello World'
         }}
@@ -36,7 +36,7 @@ export default {
     newDML(event){
       event.preventDefault();
       this.$window.create({
-        window: {name: 'DML'},
+        parent: {type: 'window', name: 'DML'},
         task: {
           props: {title: 'DML'
         }}
@@ -45,7 +45,7 @@ export default {
     newTrash(event){
       event.preventDefault();
       this.$window.create({
-        window: {name: 'Trash'},
+        parent: {type: 'window', name: 'Trash'},
         task: {
           props: {title: 'Trash'
         }}

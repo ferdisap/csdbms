@@ -1,3 +1,5 @@
+const array_unique = (arr) => arr.filter((value, index, a) => a.indexOf(value) === index);
+
 function ListTree() {
   return {
     data: {},
@@ -14,7 +16,7 @@ function ListTree() {
           let json = await response.json();
           // resolve(setListTreeData(json.csdbs)); // jika ingin pakai modul
           // resolve(this.setListTreeData(json.csdbs));
-          resolve(this.setListTreeData(json.csdbs));
+          resolve(this.setListTreeData(json.csdbs)); //[storage,path,filename]
         } else {
           reject([]);
         }
@@ -27,13 +29,13 @@ function ListTree() {
     setListTreeData: function (responseData) {
       // sortir berdasarkan path
       responseData = responseData.sort((a, b) => {
-        return a.path > b.path ? 1 : (a.path < b.path ? -1 : 0);
+        return a[1] > b[1] ? 1 : (a[1] < b[1] ? -1 : 0); // 1 adalah path
       });
       // sortir object dan level path nya eg: "/csdb/n219/amm" berarti level 3
       let obj = {};
       let levels = {};
       for (const v of responseData) {
-        let path = v.path
+        let path = v[1]
         let split = path.split("/");
         let l = split.length;
 
@@ -46,9 +48,15 @@ function ListTree() {
         levels[l].indexOf(path) < 0 ? levels[l].push(path) : '';
 
         obj[path] = obj[path] || [];
-        obj[path].push(v);
+        obj[path].push({
+          filename: v[2],
+          path: v[1],
+          storage: v[0],
+        });
 
       }
+      
+      Object.keys(levels).forEach(l => levels[l] = array_unique(levels[l]));
       return [obj, levels];
     },
 
@@ -61,7 +69,8 @@ function ListTree() {
             const isICN = model.filename.substr(0, 3) === 'ICN';
             const logo = isICN ? `<span class="material-symbols-outlined item">mms</span>&#160;` : `<span class="material-symbols-outlined item">description</span>&#160;`;
             let href = isICN ? this.hrefForOther : this.hrefForPdf;
-            const cb = `<span class="cb-window"><input type="checkbox" value="${model.filename}"/></span>`;
+            // const cb = `<span class="cb-window"><input type="checkbox" value="${model.filename}"/></span>`;
+            const cb = `<span class="cb-window"><input type="checkbox" value="${model.storage}/${model.path}/${model.filename}"/></span>`;
             href = href.replace(':filename', model.filename);
             const viewType = isICN ? 'other' : 'pdf';
             // listobj = listobj + `
@@ -87,6 +96,7 @@ function ListTree() {
             let currFolder = pathSplit[start_l - 1];
             pathSplit.splice(pathSplit.indexOf(currFolder), 1);
             let parentP = pathSplit.join("/");
+            const storage = dataobj[path][0]['storage']; // sengaja ambil index ke 0 karena semua csdb storagenya sama
 
             if (path_yang_sudah.indexOf(path) >= 0
               || path_yang_sudah.indexOf(parentP) >= 0
@@ -117,7 +127,7 @@ function ListTree() {
             //    <a href="#" @click.prevent="$parent.clickFolder({path: '${path}'})">${currFolder}</a>
             //  </summary>`;
             details = details + `
-            <details ${isOpen} class="cb-room" path="${path}">
+            <details ${isOpen} class="cb-room" path="${storage}/${path}">
               <summary class="list-none flex">
               <span expand-collapse-btn="${path}" class="material-symbols-outlined chevron">chevron_right</span> 
                ${cbAll}

@@ -8,6 +8,7 @@ import { installCheckbox, cancel, select } from '../../../../js/gui/Checkbox';
 import FloatMenu from '../../menu/FloatMenu.vue';
 import Randomstring from 'randomstring';
 import { isArray } from '../../../../js/util/helper';
+import {getCsdbData} from '../../../../js/util/S1000DHelper.js'
 
 async function fetchList() {
   if (promiseState(auth().isAuth) !== "<fulfilled>: true") {
@@ -17,6 +18,7 @@ async function fetchList() {
   worker.onmessage = (e) => {
     this.data.level = e.data[1];
     this.data.list = e.data[0];
+    
     worker.terminate();
   }
   this.clp(true);
@@ -72,7 +74,7 @@ function render(stringhtml) {
   container.querySelectorAll("summary > .folder").forEach(el => {
     if(!el.clickFolder){
       // add here listener
-      el.addEventListener('click',() => console.log('click Folder'))
+      el.addEventListener('click',() => console.log('click Folder', getCsdbData(el.closest(".cb-room").getAttribute('path'))))
       el.clickFolder = true
     }
   })
@@ -80,7 +82,8 @@ function render(stringhtml) {
   container.querySelectorAll("details .filename").forEach(el => {
     if(!el.clickFilename){
       // add here listener
-      el.addEventListener('click',() => console.log('click FIlename'))
+      // el.addEventListener('click',() => console.log('click Filename: ', el.closest(".cb-room").cbWindow.cbValue), getCsdbData(el.closest(".cb-room").cbWindow.cbValue))
+      el.addEventListener('click',() => console.log('click Filename: ', getCsdbData(el.closest(".cb-room").cbWindow.cbValue)))
       el.clickFilename = true
     }
   })
@@ -227,7 +230,7 @@ export default {
     },
   },
   async mounted() {
-    // top.lt = this;
+    top.lt = this;
     start.apply(this);
   },
 }

@@ -48,13 +48,13 @@ class WindowCache {
         backgroundColor: windowEl.style.backgroundColor,
       }
     }
-    top.comp = component;
+    // top.comp = component;
 
     const cached = JSON.parse(localStorage.getItem('cached-window')) ?? {};
     cached[appId] = obj;
     localStorage.setItem('cached-window', JSON.stringify(cached));
 
-    top.props = props;
+    // top.props = props;
     return;
   }
 
@@ -64,7 +64,8 @@ class WindowCache {
     top.history.pushState({}, "", cached.url)
     const evt = new Event("new-window");
     evt.data = {
-      window: {
+      parent: {
+        type: 'window',
         appId: appId,
         uid: cached.uid,
         name: cached.name,

@@ -19,7 +19,7 @@ function installDropdown(ddInput) {
   ddInput.addEventListener('focusin', onFocusIn.bind(ddInput));
   ddInput.addEventListener('keydown', onKeyPress.bind(ddInput));
   ddInput.addEventListener('focusout', function (e) {
-    e.target.to_focusout = setTimeout(function(){
+    e.target.to_focusout = setTimeout(function () {
       const container = this.parentElement.querySelector("#" + this.listContainerId);
       if (container) container.style.display = 'none'
     }.bind(this), 100);
@@ -47,13 +47,13 @@ function onKeyPress(event) {
   let isSearch;
 
   switch (event.keyCode) {
-    case 40: 
+    case 40:
       event.preventDefault();
       return move.call(this, event.target, true); // move down
-    case 38: 
+    case 38:
       event.preventDefault();
       return move.call(this, event.target, false); // move up
-    case 13: 
+    case 13:
       event.preventDefault();
       return select.call(this, event.target);
     case 27: return cancel.call(this, event.target); // escape key
@@ -90,7 +90,7 @@ function move(el, down = true) {
 
 
 function select(evtTarget) {
-  if(evtTarget === this) return searching.call(this, evtTarget);
+  if (evtTarget === this) return searching.call(this, evtTarget);
   // evtTarget = evtTarget.closest("div");
   const indexInResults = indexFromParent(evtTarget.closest("div")); // number
   // untuk setiap target, akan di render value of keys nya
@@ -132,7 +132,7 @@ function cancel(evtTarget) {
 }
 
 function searching(evtTarget) {
-  if(!evtTarget.value) return;
+  if (!evtTarget.value) return;
   const searchValue = evtTarget.value.replace(/.+,/gm, '').trim();
   const params = { sc: '' };
   for (let i = 0; i < this.dd.keys.length; i++) {
@@ -145,21 +145,32 @@ function searching(evtTarget) {
     params: params
   })
     .then(response => {
-      this.dd.results = (
-        this.dd.type ? (
-          response.data[this.dd.type] ? response.data[this.dd.type] : (
-            response.data.results ? response.data.results : (
-              response.data.result ? response.data.result : []
-            )
-          )
-        ) : (
-          response.data.results ? response.data.results : (
-            response.data.result ? response.data.result : []
-          )
-        )
-      );
+      this.dd.results = setResults(this.dd.type, response.data);
       render.call(this);
     })
+}
+
+function setResults(type, data) {
+  if(type === 'csdbs'){
+    data.csdbs.forEach((csdb,i) => {
+        data.csdbs[i] = {
+        storage: csdb[0],
+        path: csdb[1],
+        filename: csdb[2],
+      }
+    })
+  }
+  return type ? (
+    data[type] ? data[type] : (
+      data.results ? data.results : (
+        data.result ? data.result : []
+      )
+    )
+  ) : (
+    data.results ? data.results : (
+      data.result ? data.result : []
+    )
+  )
 }
 
 function render() {

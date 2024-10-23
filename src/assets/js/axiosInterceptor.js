@@ -78,7 +78,7 @@ function onResponseError(axiosError) {
 
 function setInterceptor(app) {
   axios.defaults.baseURL = configApp.CSDB_HOST;
-  axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+  // axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
   axios.interceptors.request.use(beforeRequest.bind(app), onRequestError.bind(app));
   axios.interceptors.response.use(onResponseSuccess.bind(app), onResponseError.bind(app));
 }
