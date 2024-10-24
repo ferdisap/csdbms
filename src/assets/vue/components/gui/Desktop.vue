@@ -10,7 +10,11 @@ export default {
   components: { FloatMenu, WidgetDate, WidgetSavedWindow },
   mounted() {
     const url = new URL(top.location);
-    if (url.searchParams.has('id')) openWindow({appId: url.searchParams.get('id')});
+    if (url.searchParams.has('id')) {
+      const evt = new Event('open-cached-window');
+      evt.data = {appId: url.searchParams.get('id')};
+      document.dispatchEvent(evt)
+    }
   }
 }
 </script>

@@ -41,7 +41,9 @@ export default {
       }, 0)
     },
     open() {
-      openWindow({ appId: document.getElementById("desktop-cb").current.cbWindow.cbValue });
+      const evt = new Event('open-cached-window');
+      evt.data = { appId: document.getElementById("desktop-cb").current.cbWindow.cbValue };
+      document.dispatchEvent(evt)
     },
     setToTop(event) {
       const windowEl = event.target;
@@ -58,7 +60,7 @@ export default {
     remove() {
       const cbHome = document.getElementById("desktop-cb");
       let appIds = cbHome.cbValues;
-      if(!appIds.length){
+      if (!appIds.length) {
         if (cbHome.current.cbWindow) appIds = [cbHome.current.cbWindow.cbValue];
         else return;
       }

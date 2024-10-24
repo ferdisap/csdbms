@@ -82,22 +82,22 @@ export default {
   <div v-show="state" class="fixed bottom-[calc(3.5%)] left-0 w-48 h-96 text-black bg-neutral-200 p-2">
     <a href="#" @click="newExplorer"
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
-      <span class="material-symbols-outlined">explore</span>
+      <i class="material-symbols-outlined">explore</i>
       <span class="font-semibold">Explore</span>
     </a>
     <a href="#" @click="newXMLEditor"
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
-      <span class="material-symbols-outlined">explore</span>
+      <i class="material-symbols-outlined">border_color</i>
       <span class="font-semibold">XML Editor</span>
     </a>
     <a href="#" @click="newTrash"
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
-      <span class="material-symbols-outlined">explore</span>
+      <i class="material-symbols-outlined">delete</i>
       <span class="font-semibold">Trash</span>
     </a>
     <a href="#" @click="newDML"
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
-      <span class="material-symbols-outlined">explore</span>
+      <i class="material-symbols-outlined">lan</i>
       <span class="font-semibold">Data Management List</span>
     </a>
     <!-- <RouterLink @click="newHelloWorld()" :to="$router.resolve({name: 'HelloWorld'})['fullPath']"

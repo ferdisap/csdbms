@@ -41,7 +41,7 @@ export default {
             }
           }
           top.dispatchEvent(e);
-          this.isAuthenticated = true;
+          this.isAuthenticated = r;
           return r;
         })
     }
@@ -58,7 +58,7 @@ export default {
 </script>
 <template>
   <div id="auth-menu"
-    :class="[isAuthenticated ? 'bg-blue-600' : 'bg-red-600', 'relative h-6 w-6 mr-0 float-end text-center rounded-full hover:bg-gray-700 hover:cursor-pointer']">
+    :class="[isAuthenticated ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-600 hover:bg-red-700', 'relative h-6 w-6 mr-0 float-end text-center rounded-full hover:cursor-pointer']">
     <span class="material-symbols-outlined text-base font-bold">account_circle</span>
   </div>
   <FloatMenu :trigger="[{ triggerId: 'auth-menu', on: 'click' }]" :use-copy-btn="false">

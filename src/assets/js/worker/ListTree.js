@@ -67,7 +67,7 @@ function ListTree() {
         if (models) { // ada kemungkinan models undefined karena path "csdb/n219/amm", csdb/n219 nya tidak ada csdbobject nya
           for (const model of models) {
             const isICN = model.filename.substr(0, 3) === 'ICN';
-            const logo = isICN ? `<span class="material-symbols-outlined item">mms</span>&#160;` : `<span class="material-symbols-outlined item">description</span>&#160;`;
+            const logo = isICN ? `<i class="material-symbols-outlined item">mms</i>&#160;` : `<i class="material-symbols-outlined item">description</i>&#160;`;
             let href = isICN ? this.hrefForOther : this.hrefForPdf;
             // const cb = `<span class="cb-window"><input type="checkbox" value="${model.filename}"/></span>`;
             const cb = `<span class="cb-window"><input type="checkbox" value="${model.storage}/${model.path}/${model.filename}"/></span>`;
@@ -129,7 +129,7 @@ function ListTree() {
             details = details + `
             <details ${isOpen} class="cb-room" path="${storage}/${path}">
               <summary class="list-none flex">
-              <span expand-collapse-btn="${path}" class="material-symbols-outlined chevron">chevron_right</span> 
+              <i expand-collapse-btn="${path}" class="material-symbols-outlined chevron">chevron_right</i> 
                ${cbAll}
                <a href="#" class="folder">${currFolder}</a>
              </summary>`;

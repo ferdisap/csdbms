@@ -1,6 +1,5 @@
 <script>
 import { installCheckbox, cancel, select } from '../../../../js/gui/Checkbox';
-import { copy, isArray } from '../../../../js/util/helper.js';
 import Sort from '../../gui/Sort.vue';
 import ContinuousLoadingCircle from "../../sub/ContinuousLoadingCircle.vue";
 import FloatMenu from '../../menu/FloatMenu.vue';
@@ -9,6 +8,8 @@ import Randomstring from 'randomstring';
 import SearchCsdb from '../../sub/SearchCsdb.vue';
 import { addSetLogic } from '../../../../js/util/ObjectProperty';
 import { isNumber, indexFromParent } from '../../../../js/util/helper.js';
+import { style as pdoStyle } from '../child/PropertyDetailObject.vue';
+import { style as pdtStyle } from '../child/PropertyDispatchTo.vue';
 
 function openDetailObjectPropertyWindow(windowEl, filename, path, storage) {
   const event = new Event("new-window");
@@ -24,18 +25,13 @@ function openDetailObjectPropertyWindow(windowEl, filename, path, storage) {
         path: path,
         storage: storage,
       },
-      style: {
-        position: 'absolute',
-        width: '600px',
-        height: 'auto',
-        top: (((top.innerHeight / 2) - 400) + 'px'),
-        left: (((top.innerWidth / 2) - 300) + 'px'),
-        backgroundColor: '#ffffff',
-      }
+      style: pdoStyle()
     }
   }
   top.dispatchEvent(event);
 }
+
+export { openDetailObjectPropertyWindow }
 
 function openDispatchToPropertyWindow(windowEl) {
   const event = new Event("new-window");
@@ -46,13 +42,38 @@ function openDispatchToPropertyWindow(windowEl) {
     },
     property: {
       name: 'PropertyDispatchTo',
+      style: pdtStyle()
+    }
+  }
+  top.dispatchEvent(event);
+}
+
+function openFilename(filename){
+  let name = filename.substring(0,3);
+  switch (name) {
+    case ('DML'||'DDN'): break; // nama component/window sama, yaitu 'DML'||'DDN',
+    default: name = 'XMLEditor'; break; // jika DMC,MC,COM,, dll akan terbuka menggunakan editor XML
+  }
+  const event = new Event("new-window");
+  event.data = {
+    parent: {
+      type: 'window',
+      name: name,
+      props: {
+        filename: filename
+      },
       style: {
         position: 'absolute',
         width: '600px',
-        height: '800px',
+        height: '600px',
         top: (((top.innerHeight / 2) - 400) + 'px'),
         left: (((top.innerWidth / 2) - 300) + 'px'),
-        backgroundColor: '#ffffff',
+        backgroundColor: '#000fff',
+      }
+    },
+    task:{
+      props:{
+        title: name
       }
     }
   }
@@ -130,7 +151,6 @@ export default {
     },
     clickFilename: async function (filename, path, storage) {
       openDetailObjectPropertyWindow(this.$el.parentElement.closest(".app-window"), filename, path, storage);
-      return;
     },
     edit() {
       // get filename
@@ -163,7 +183,9 @@ export default {
     },
     openTr() {
       const cbHome = this.$el.querySelector('.cb-home');
-      if (cbHome.current && cbHome.current.matches(".file-row")) this.clickFilename(cbHome.current.cbWindow.cbValue)
+      if (cbHome.current && cbHome.current.matches(".file-row")) {
+        openFilename(cbHome.current.cbWindow.cbValue)
+      }
       else this.clickFolder(cbHome.current.cbWindow.cbValue);
     },
     sortTable: function sortTable(event) {
@@ -393,7 +415,7 @@ export default {
               class="cb-room folder-row text-base hover:bg-blue-300 cursor-pointer">
               <td class="cb-window"><input type="checkbox" :value="path"></td>
               <td class="leading-3 text-base" colspan="6">
-                <span class="material-symbols-outlined text-base mr-1">folder</span>
+                <i class="material-symbols-outlined icon-shadow-base text-yellow-500 text-base mr-1">folder</i>
                 <span class="text-base">{{ path.split("/").at(-1) }} </span>
               </td>
             </tr>
@@ -401,7 +423,7 @@ export default {
               class="cb-room file-row text-base hover:bg-blue-300 cursor-pointer">
               <td class="cb-window"><input file type="checkbox" :value="obj.filename"></td>
               <td class="leading-3 text-base">
-                <span class="material-symbols-outlined text-base mr-1">description</span>
+                <i class="material-symbols-outlined text-slate-400 text-base mr-1">description</i>
                 <span class="text-base"> {{ obj.filename }} </span>
               </td>
               <td class="leading-3 text-base"> {{ obj.path }} </td>

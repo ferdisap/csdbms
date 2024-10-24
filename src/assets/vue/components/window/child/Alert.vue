@@ -65,13 +65,13 @@ export default {
     <div class="px-3 py-1">
       <div class="min-h-20 text-lg mt-2">
         <div class="flex">
-          <span class="material-symbols-outlined">{{ alertType }}</span>
+          <i class="material-symbols-outlined-unfill text-2xl">{{ alertType }}</i>
           <div class="instruction ml-2" v-html="$props.instruction"></div>
         </div>
       </div>
 
       <div class="text-center mt-2 mb-2">
-        <button @click="this.ok" class="bg-slate-200 shadow-md px-2 py-1 rounded-md font-bold">Ok</button>
+        <button @click="this.ok" class="bg-slate-200 hover:bg-slate-300 shadow-md px-2 py-1 rounded-md font-bold">Ok</button>
       </div>
     </div>
   </div>

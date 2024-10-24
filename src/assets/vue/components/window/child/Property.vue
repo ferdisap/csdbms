@@ -76,8 +76,8 @@ export default {
       </div>
 
       <div v-if="useButton" class="text-center mt-2 mb-2 space-x-2">
-        <button @click="this.yes" class="bg-slate-200 shadow-md px-2 py-1 rounded-md font-bold">Yes</button>
-        <button @click="this.no" class="bg-slate-200 shadow-md px-2 py-1 rounded-md font-bold">No</button>
+        <button @click="this.yes" class="bg-slate-200 hover:bg-slate-300 shadow-md px-2 py-1 rounded-md font-bold">Yes</button>
+        <button @click="this.no" class="bg-slate-200 hover:bg-slate-300 shadow-md px-2 py-1 rounded-md font-bold">No</button>
       </div>
     </div>
   </div>

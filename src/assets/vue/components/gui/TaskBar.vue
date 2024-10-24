@@ -14,6 +14,9 @@ export default {
   },
   components: { StartMenu, Auth, FloatMenu },
   computed:{
+    time(){
+      return top.date.time; // check di WidgetDate.vue
+    },
     isAuthenticated(){
       return (promiseState(auth().isAuth)) === "<fulfilled>: true" ? true : false;
     }
@@ -55,8 +58,9 @@ export default {
 
       <!-- other, eg: login state -->
       <div class="h-full flex items-center justify-end w-full">
+        <div class="mr-2 font-semibold" v-html="time"></div>
         <Auth/>
-        <div class="hover:bg-gray-700 w-3 text-transparent cursor-pointer h-full" @click="hideshow">_</div>
+        <div class="hover:bg-gray-700 w-3 text-transparent cursor-pointer h-full" @click="hideshow"></div>
       </div>
     </nav>
     <FloatMenu :trigger="[{ triggerId: 'app-windowtask', on: 'contextmenu' }]">

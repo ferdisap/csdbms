@@ -10,6 +10,18 @@ import axios from 'axios';
 import { formDataToObject } from '../../../../js/util/helper';
 import { auth } from '../../../../js/Auth';
 
+function style() {
+  return {
+    position: 'absolute',
+    width: '600px',
+    height: 'auto',
+    top: (((top.innerHeight / 2) - 400) + 'px'),
+    left: (((top.innerWidth / 2) - 300) + 'px'),
+    backgroundColor: '#ffffff',
+  }
+}
+export {style}
+
 export default {
   components: { FloatMenu, Property, Remarks },
   data() {
@@ -37,7 +49,7 @@ export default {
         })
     },
     submit(event){
-      axios.post("/api/s1000d/ddn/create", formDataToObject(new FormData(event.target)))
+      axios.put("/api/s1000d/ddn/create", formDataToObject(new FormData(event.target)))
         .finally(() => {
           this.$el.dispatchEvent(new Event('close-window'));
         })

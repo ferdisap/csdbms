@@ -17,6 +17,8 @@ import { installCheckbox, hideAll, select } from '../../../js/gui/Checkbox';
 import { addSetLogic } from '../../../js/util/ObjectProperty';
 import FloatMenu from '../menu/FloatMenu.vue';
 import ContinuousLoadingCircle from '../sub/ContinuousLoadingCircle.vue';
+import { style as pdeStyle } from './child/PropertyDmlEntry.vue';
+import { openDetailObjectPropertyWindow } from './sub/Folder.vue';
 
 function remarks(json, path) {
   path += '..simplePara';
@@ -54,7 +56,7 @@ function defaultTemplateEntry(entry = {}, trId = '', cbValue = '', no = '') {
   const answer = entry.answer ? entry.answer.join("<br/>") : '';
   const rm = entry.remarks ? entry.remarks.join("<br/>") : '';
   let str = `
-      <tr class="dmlEntry cb-room hover:bg-blue-300 cursor-pointer" ${trId ? 'id="' + trId + '"' : ''}>
+      <tr v-on:dblclick="clickFilename" class="dmlEntry cb-room hover:bg-blue-300 cursor-pointer" ${trId ? 'id="' + trId + '"' : ''}>
         <td class="cb-window" style="display:none">
           <input file="true" id="${cbId}" value="${cbValue}" type="checkbox">
         </td>
@@ -166,19 +168,13 @@ function DML(json) {
 function openPropertyWindow(windowEl) {
   const event = new Event("new-window");
   event.data = {
-    window: {
+    parent: {
+      type: 'window',
       app: windowEl,
     },
     property: {
       name: 'PropertyDmlEntry',
-      style: {
-        position: 'absolute',
-        width: '600px',
-        height: 'auto',
-        top: (((top.innerHeight / 2) - 400) + 'px'),
-        left: (((top.innerWidth / 2) - 300) + 'px'),
-        backgroundColor: '#ffffff',
-      }
+      style: pdeStyle(),
     }
   }
   top.dispatchEvent(event);
@@ -266,6 +262,11 @@ export default {
     entries() {
       return {
         template: this.dmlEntryVueTemplate,
+        methods:{
+          clickFilename(event){
+            openDetailObjectPropertyWindow(this.$el.parentElement.closest(".app-window"),event.target.closest(".cb-room").cbWindow.cbValue);
+          }
+        },
         mounted() {
           const cbHome = this.$el.parentElement.closest('.cb-home')
           installCheckbox(cbHome);
@@ -294,7 +295,6 @@ export default {
       this.clp(true);
       axios.post("/api/s1000d/dml/update/" + this.$props.filename, getAllValues.call(this))
         .then(response => {
-          top.rsp = response;
           this._.props.filename = response.data.csdb.filename;
           this.showContent(response.data.csdb.filename)
         })
@@ -304,7 +304,6 @@ export default {
       this.clp(true);
       axios.put("/api/s1000d/dml/merge/" + this.$props.filename, formDataToObject(new FormData(event.target)))
         .then(response => {
-          top.rsp = response;
           this._.props.filename = response.data.csdb.filename;
           this.showContent(response.data.csdb.filename)
         })
@@ -318,8 +317,6 @@ export default {
         params: { form: 'json' }
       })
         .then(response => {
-          top.rsp = response;
-
           this.DMLObject = DML(response.data.json);
           this.DMLType = response.data.csdb.object.dmlType;
 
@@ -347,7 +344,7 @@ export default {
             remarks: data.remarks,
           }, '', data.entryIdent);
           cbRoom.insertAdjacentHTML('afterend', trString);
-          installCheckbox(cbRoom.closest('.cb-home')); k
+          installCheckbox(cbRoom.closest('.cb-home'));
         });
     },
     edit() {
@@ -378,8 +375,8 @@ export default {
     selectCB: select,
   },
   mounted() {
-    top.dml = this;
-    top.jp = jp;
+    // top.dml = this;
+    // top.jp = jp;
     // top.installDropdown = installDropdown;
     // installDropdown(this.$el.querySelector("input[name='brexDmRef']"));
 
@@ -510,7 +507,7 @@ export default {
               <table class="cb-home" :id="dmlContentId">
                 <thead>
                   <tr class="cb-room">
-                    <th class="cb-window-all" style="display:none"><input type="checkbox" /></th>
+                    <th class="cb-window-all" style="display:none"><input type="checkbox"></th>
                     <th>No</th>
                     <th>Ident</th>
                     <th>Type</th>
@@ -520,9 +517,7 @@ export default {
                     <th>Remarks</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <component v-if="dmlEntryVueTemplate" :is="entries" />
-                </tbody>
+                <tbody><component v-if="dmlEntryVueTemplate" :is="entries"/></tbody>
               </table>
             </div>
             <!-- submit button -->

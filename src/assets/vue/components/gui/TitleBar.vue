@@ -71,10 +71,10 @@ export default {
       <span href="/" class="text-lg float-start ml-3 font-bold">{{ $props.title }}</span>
     </div>
     <div class="py-3 mr-3 flex space-x-2">
-      <div v-if="$props.cacheButton" @click="cache" class="h-6 w-6 shadow-sm bg-orange-400 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">save</span></div>
-      <div v-if="$props.hideButton" @click="hide" class="h-6 w-6 shadow-sm bg-green-500 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">minimize</span></div>
-      <div v-if="$props.sizingButton" @click="sizing" class="h-6 w-6 shadow-sm bg-yellow-500 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">{{ isMaximize ? 'close_fullscreen' : 'expand_content' }}</span></div>
-      <div v-if="$props.closeButton" @click="close" class="h-6 w-6 shadow-sm bg-red-600 text-center rounded-full hover:cursor-pointer"><span class="material-symbols-outlined text-base font-bold">close</span></div>
+      <div v-if="$props.cacheButton" @click="cache" class="h-6 w-6 shadow-sm bg-orange-400 text-center hover:bg-orange-600 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">save</i></div>
+      <div v-if="$props.hideButton" @click="hide" class="h-6 w-6 shadow-sm bg-green-500 text-center hover:bg-green-600 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">minimize</i></div>
+      <div v-if="$props.sizingButton" @click="sizing" class="h-6 w-6 shadow-sm bg-yellow-500 text-center hover:bg-yellow-700 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">{{ isMaximize ? 'close_fullscreen' : 'expand_content' }}</i></div>
+      <div v-if="$props.closeButton" @click="close" class="h-6 w-6 shadow-sm bg-red-600 text-center hover:bg-red-700 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">close</i></div>
     </div>
   </nav>
 </template>

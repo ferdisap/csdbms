@@ -20,6 +20,12 @@ const unlogged = function () {
 }
 export { unlogged };
 
+// jika dokumen belum di click sama client (tidak termasuk document.body.click()) maka onbeforeunload tidak dijalankan, tested in 25 oct 2024 di MS Edge
+window.onbeforeunload = (event) => {
+  event.preventDefault();
+  unlogged();
+}
+
 export default {
   data() {
     return {
@@ -60,16 +66,6 @@ export default {
 
     }
   },
-  async mounted() {
-    // window.l = this;
-    // window.auth = auth();
-    // top.jsCookie = jsCookie;
-
-    window.onbeforeunload = (event) => {
-      event.preventDefault();
-      unlogged();
-    }
-  }
 }
 </script>
 <template>

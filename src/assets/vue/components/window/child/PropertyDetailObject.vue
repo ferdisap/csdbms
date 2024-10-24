@@ -4,31 +4,47 @@ import Property from './Property.vue';
 import Comment from '../sub/Comment.vue';
 import axios from 'axios';
 
+function style() {
+  return {
+    position: 'absolute',
+    width: '600px',
+    height: '800px',
+    top: (((top.innerHeight / 2) - 400) + 'px'),
+    left: (((top.innerWidth / 2) - 300) + 'px'),
+    backgroundColor: '#ffffff',
+  }
+}
+export { style }
+
 export default {
   components: { Comment, Property },
-  data(){
+  data() {
     return {
       data: {
         nav: 'ident'
       },
     }
   },
-  props:{
+  props: {
     filename: { type: String },
     path: { type: String },
     storage: { type: String },
   },
   methods: {
-    requestData(navName){
+    requestData(navName) {
       switch (navName) {
         case 'ident':
-          if(!this.data.ident) axios.get("/api/s1000d/ident/" + this.$props.filename).then((response) => this.data.ident = response.data.csdb.ident);          
+          if (!this.data.ident) axios.get("/api/s1000d/ident/" + this.$props.filename).then((response) => {
+            this.data.ident = response.data.csdb.ident;
+            this.data.owner = response.data.csdb.owner;
+            this.data.initiator = response.data.csdb.initiator;
+          });
           break;
-        case 'status': 
-          if(!this.data.status) axios.get("/api/s1000d/status/" + this.$props.filename).then((response) => this.data.status = response.data.csdb.status);          
+        case 'status':
+          if (!this.data.status) axios.get("/api/s1000d/status/" + this.$props.filename).then((response) => this.data.status = response.data.csdb.status);
           break;
-        case 'history': 
-          if(!this.data.history) axios.get("/api/s1000d/histories/" + this.$props.filename).then((response) => this.data.history = response.data.csdb.histories);          
+        case 'history':
+          if (!this.data.history) axios.get("/api/s1000d/histories/" + this.$props.filename).then((response) => this.data.history = response.data.csdb.histories);
           break;
         // case 'comment': 
         //   if(!this.data.comment) axios.get("/api/s1000d/comments/" + this.$props.filename).then((response) => this.data.comment = response.data.csdb.comments);
@@ -36,9 +52,9 @@ export default {
       }
     },
   },
-  mounted(){
+  mounted() {
     // top.pdo = this;
-    addSetLogic(this.data,'nav', (ctx,v) => {
+    addSetLogic(this.data, 'nav', (ctx, v) => {
       this.requestData(v);
       return v;
     });
@@ -58,24 +74,36 @@ export default {
             <div class="text-left p-1 w-full">
               <div class="mb-1">
                 <span class="font-bold">filename: </span>
-                <span>DMC...xml</span>
+                <span>{{ $props.filename }}</span>
               </div>
               <div class="mb-1">
                 <span class="font-bold">Path: </span>
-                <span>CSDB</span>
+                <span>{{ $props.path }}</span>
               </div>
-              <div class="mb-1">
+              <div class="mb-1" v-if="this.data.initiator">
                 <span class="font-bold">Initiator: </span>
-                <span>Luffy</span>
+                <span>{{ this.data.initiator.email }}</span>
+              </div>
+              <div class="mb-1" v-if="this.data.owner">
+                <span class="font-bold">Owner: </span>
+                <span>{{ this.data.owner.email }}</span>
               </div>
             </div>
           </div>
           <div class="border-t">
             <nav class="flex w-min border-x">
-              <button @click="data.nav = 'ident'" :class="[(data.nav === 'ident' ? 'bg-gray-100 border-b-none' : 'border-b'), 'font-semibold py-2 px-4 ']" type="button" >Ident</button>
-              <button @click="data.nav = 'status'" :class="[(data.nav === 'status' ? 'bg-gray-100 border-b-none' : 'border-b'),'font-semibold py-2 px-4']" type="button" >Status</button>
-              <button @click="data.nav = 'history'" :class="[(data.nav === 'history' ? 'bg-gray-100 border-b-none' : 'border-b'), 'font-semibold py-2 px-4']" type="button">History</button>
-              <button @click="data.nav = 'comment'" :class="[(data.nav === 'comment' ? 'bg-gray-100 border-b-none' : 'border-b'), 'font-semibold py-2 px-4']" type="button">Comment</button>
+              <button @click="data.nav = 'ident'"
+                :class="[(data.nav === 'ident' ? 'bg-gray-100 border-b-none' : 'border-b'), 'font-semibold py-2 px-4 ']"
+                type="button">Ident</button>
+              <button @click="data.nav = 'status'"
+                :class="[(data.nav === 'status' ? 'bg-gray-100 border-b-none' : 'border-b'), 'font-semibold py-2 px-4']"
+                type="button">Status</button>
+              <button @click="data.nav = 'history'"
+                :class="[(data.nav === 'history' ? 'bg-gray-100 border-b-none' : 'border-b'), 'font-semibold py-2 px-4']"
+                type="button">History</button>
+              <button @click="data.nav = 'comment'"
+                :class="[(data.nav === 'comment' ? 'bg-gray-100 border-b-none' : 'border-b'), 'font-semibold py-2 px-4']"
+                type="button">Comment</button>
             </nav>
             <div class="w-full min-h-28 p-2 text-left">
               <!-- ident -->
@@ -107,7 +135,7 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-for="(history, i) in data.history" :data-id="history[0]">
-                        <td class="border px-2">{{ i+1 }}</td>
+                        <td class="border px-2">{{ i + 1 }}</td>
                         <td class="border px-2 font-bold">{{ history[1] }}</td>
                         <td class="border px-2 ml-2">{{ history[2] }}</td>
                       </tr>
@@ -118,7 +146,7 @@ export default {
               </div>
               <!-- comment -->
               <div v-show="data.nav === 'comment'">
-                <Comment :filename="$props.filename" :path="$props.path" :storage="$props.storage"/>
+                <Comment :filename="$props.filename" :path="$props.path" :storage="$props.storage" />
               </div>
             </div>
           </div>
