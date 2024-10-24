@@ -8,5 +8,10 @@
     "path": "/api/s1000d/dml/create",
     "methods": ["PUT"],
     "#": "baru dipakai di DML.vue"
+  },
+  "api.user_search_model" : {
+    "path": "/api/s1000d/user/search",
+    "methods": ["GET"],
+    "#": "baru dipakai di Dropdown.js"
   }
 }

@@ -139,7 +139,7 @@ export default {
       this.commentPreferencesData.commentContentSimplePara = event.target.querySelector("text-editor[name='commentContentSimplePara']").value,
         top.cpd = JSON.stringify(this.commentPreferencesData);
       // return;
-      axios.post("/api/s1000d/comment/create", this.commentPreferencesData)
+      axios.put("/api/s1000d/comment/create", this.commentPreferencesData)
         .then(this.fetchComment)
         .catch((error) => {
           this.commentPreferencesData.errors = error.response.data.errors;

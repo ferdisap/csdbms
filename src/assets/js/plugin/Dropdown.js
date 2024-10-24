@@ -94,6 +94,8 @@ function select(evtTarget) {
   // evtTarget = evtTarget.closest("div");
   const indexInResults = indexFromParent(evtTarget.closest("div")); // number
   // untuk setiap target, akan di render value of keys nya
+
+  const event = new Event("dd-selected");
   for (let i = 0; i < this.dd.targets.length; i++) {
     let el, append;
     if (this.dd.targets[i].includes('-append')) append = true;
@@ -112,6 +114,8 @@ function select(evtTarget) {
     } else {
       el.value = getObjectValueFromString(this.dd.results[indexInResults], this.dd.keys[i]);
     }
+    
+    el.dispatchEvent(event);    
   }
 
   // close/unshowed container here
@@ -138,6 +142,7 @@ function searching(evtTarget) {
   for (let i = 0; i < this.dd.keys.length; i++) {
     params.sc += this.dd.keys[0] + '::' + searchValue + ","
   }
+  params.sc = params.sc.substring(0,params.sc.length-1);
   params.limit = 5;
   axios({
     url: routes[this.dd.route]['path'],

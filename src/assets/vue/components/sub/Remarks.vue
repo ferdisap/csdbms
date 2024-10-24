@@ -40,6 +40,6 @@ export default {
     <div :class="[$props.class, 'w-full block']">
       <text-editor id="id" :line-type="$props.lineType" :name="$props.nameAttr">{{ $props.para }}</text-editor>
     </div>
-    <div class="error-form" v-html="$ersp.get('remarks')"></div>
+    <div class="error-form" v-html="$ersp.get('$props.nameAttr')"></div>
   </div>
 </template>

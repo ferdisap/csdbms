@@ -37,6 +37,28 @@ function openDetailObjectPropertyWindow(windowEl, filename, path, storage) {
   top.dispatchEvent(event);
 }
 
+function openDispatchToPropertyWindow(windowEl) {
+  const event = new Event("new-window");
+  event.data = {
+    parent: {
+      type: 'window',
+      app: windowEl,
+    },
+    property: {
+      name: 'PropertyDispatchTo',
+      style: {
+        position: 'absolute',
+        width: '600px',
+        height: '800px',
+        top: (((top.innerHeight / 2) - 400) + 'px'),
+        left: (((top.innerWidth / 2) - 300) + 'px'),
+        backgroundColor: '#ffffff',
+      }
+    }
+  }
+  top.dispatchEvent(event);
+}
+
 export default {
   components: { FloatMenu, Sort, ContinuousLoadingCircle, SearchCsdb },
   data() {
@@ -188,13 +210,12 @@ export default {
       this.data.csdbs.splice(index, 1);
       return csdb;
     },
-    dispatch: async function (cond = 0) {
-      alert("dispatch");
-      // const emitName = !cond ? 'dispatchTo' : 'AddDispatchTo';
-      // const csdbs = await this.CB.value();
-      // this.CB.cancel();
-      // if (!csdbs) return;
-      // this.emitter.emit(emitName, csdbs);
+    dispatch: async function () {
+      openDispatchToPropertyWindow(this.$el.closest(".app-window"));
+      const cbHome = this.$el.querySelector(".cb-home");
+      let filenames = cbHome.cbValues;
+      if (!filenames.length) filenames = [cbHome.current.cbWindow.cbValue];
+      this.$el.closest(".app-window").property.data = filenames;
     },
     changePath: function () {
       alert("change path")
@@ -417,6 +438,9 @@ export default {
         </div>
         <div class="list" @click="deleteObject">
           <div>delete</div>
+        </div>
+        <div class="list" @click="dispatch">
+          <div>dispatch</div>
         </div>
       </div>
       <div v-else-if="$props.status === 'dct'">

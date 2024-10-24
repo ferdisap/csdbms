@@ -209,9 +209,12 @@ function installCheckbox(cbHome) {
 
   // add current cbRoom select by pointer
   if (!cbHome.current) {
-    cbHome.current = new WeakRef(cbHome.querySelector(".cb-room"));
-    addSetLogic(cbHome, "current", (ctx, value) => new WeakRef(value));
-    addGetLogic(cbHome, "current", (ctx, value) => value.deref());
+    const cbRoom = cbHome.querySelector(".cb-room");
+    if(cbRoom){
+      cbHome.current = new WeakRef(cbRoom);
+      addSetLogic(cbHome, "current", (ctx, value) => new WeakRef(value));
+      addGetLogic(cbHome, "current", (ctx, value) => value.deref());
+    }
   }
 
   // define property values on cbHome

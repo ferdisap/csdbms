@@ -24,7 +24,7 @@ export default {
   mounted() {
     installDropdown(this.$el.querySelector("input[name='brexDmRef']"));
     installDropdown(this.$el.querySelector("input[name='commentRefs']"));
-    top.pccp = this;
+    // top.pccp = this;
   }
 }
 </script>

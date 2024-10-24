@@ -37,7 +37,7 @@ export default {
     },
   },
   mounted(){
-    top.pdo = this;
+    // top.pdo = this;
     addSetLogic(this.data,'nav', (ctx,v) => {
       this.requestData(v);
       return v;

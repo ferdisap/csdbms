@@ -2,6 +2,7 @@ import Property from '../../../vue/components/window/child/Property.vue';
 import PropertyDmlEntry from '../../../vue/components/window/child/PropertyDmlEntry.vue';
 import PropertyDetailObject from '../../../vue/components/window/child/PropertyDetailObject.vue';
 import PropertyCommentCreatePreverences from '../../../vue/components/window/child/PropertyCommentCreatePreverences.vue';
+import PropertyDispatchTo from '../../../vue/components/window/child/PropertyDispatchTo.vue';
 import { createApp } from 'vue';
 
 export default class WindowProperty{
@@ -18,6 +19,8 @@ export default class WindowProperty{
         return PropertyCommentCreatePreverences;
       case 'PropertyDetailObject':
         return PropertyDetailObject;
+      case 'PropertyDispatchTo':
+        return PropertyDispatchTo;
       case 'PropertyDmlEntry':
         return PropertyDmlEntry;
       default:

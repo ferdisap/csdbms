@@ -39,6 +39,7 @@ export const auth = defineStore('auth', {
        * Promise <fulfilled> true/false
        */
       isAuth: authenticating.result(),
+      user: {},
     }
   },
   actions: {
@@ -164,6 +165,8 @@ export const auth = defineStore('auth', {
               "Authorization": this.getAuthToken()
             }
           });
+          const json = await check.json();
+          this.user = json.user
           break;
       }
       if (check.ok) {

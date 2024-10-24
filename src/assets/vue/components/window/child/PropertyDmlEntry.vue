@@ -5,7 +5,7 @@ import { addSetLogic } from '../../../../js/util/ObjectProperty';
 export default {
   components: {Property, Remarks},
   mounted() {
-    top.pdel = this;
+    // top.pdel = this;
     addSetLogic(top.document.getElementById(this._.appContext.app.windowId).property, 'data', (ctx, value) => {
       if(value instanceof Object){
         Object.keys(value).forEach(key => {
