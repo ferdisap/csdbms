@@ -22,7 +22,7 @@ export default {
 <template>
   <div class="main h-full w-full z-10">
     <Flash/>
-    <div id="app-content-container" class="w-full h-[96.5%] relative bg-yellow-200 z-10">
+    <div id="app-content-container" class="w-full h-[96.5%] relative z-10">
       <Desktop/>
       <Content/>
     </div>

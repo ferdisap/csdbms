@@ -651,7 +651,6 @@ class Window {
    * @param {Object} el contain key task or window
    */
   toggle(el = {}, display = undefined) {
-    console.log(el);
     let taskEl, window, windowEl;
     if (el.taskEl) {
       taskEl = el.taskEl;
@@ -662,14 +661,6 @@ class Window {
       window = windowEl.__vue_app__;
       taskEl = window.task ? window.task._container : undefined; // jika dialog/alert/property tidak ada task nya
     }
-
-    console.log(
-      top.xwindowEl = windowEl,
-      top.xwindow = window,
-      top.xtaskEl = taskEl,
-      windowEl.style.display,
-      display,
-    );
 
     if (windowEl.style.display === display) return;
 
@@ -700,7 +691,6 @@ class Window {
     //   windowEl.style.zIndex = (this.zIndex.length) + 80;
     // }
     // }
-    console.log(top.isTop = isTop);
     if (isTop) {
       windowEl.style.display = (display !== undefined ? display : (windowEl.style.display === 'none' ? '' : 'none'));
       if (windowEl.style.display !== 'none' && window.type === 'window') {

@@ -44,7 +44,7 @@ export default {
     },
     hide(event){
       const evt = new Event('toggle-window');
-      evt.data = {window: event.target.closest(".app-window")};
+      evt.data = {windowEl: event.target.closest(".app-window")};
       this.$el.dispatchEvent(evt);
     },
     close(){
