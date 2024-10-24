@@ -29,7 +29,8 @@ export default {
 
           const e = new Event("new-window");
           e.data = {
-            window: {
+            parent: {
+              type: 'window',
               app: this.$el.closest(".app-window"),
             },
             alert: {

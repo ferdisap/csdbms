@@ -24,6 +24,48 @@ import { addGetLogic } from '../util/ObjectProperty';
 // import { createRouter, createWebHistory } from 'vue-router';
 // import RoutesVue from './../RoutesVue';
 
+// create window
+const _window = function (data) {
+  const window = createWindow(data);
+  // this.mountWindow(window, data.style);
+  window.type = 'window';
+  return window;
+}
+const _task = function (data, parentId) {
+  const task = createApp(Task, data.props);
+  task.appId = "tsk" + Randomstring.generate({ charset: 'alphabetic' })
+  task.windowId = parentId ? parentId : undefined;
+  // this.mountTask(task);
+  task.type = 'task';
+  return task;
+}
+const _dialog = function (data, parentId) {
+  const dialog = new WindowDialog(data, parentId);
+  dialog.appId = "dlg" + Randomstring.generate({ charset: 'alphabetic' })
+  dialog.windowId = parentId ? parentId : undefined;
+  // this.mountDialog(dialog, data.style);
+  dialog.type = 'dialog';
+  return dialog
+}
+const _alert = function (data, parentId) {
+  const alert = createApp(Alert, data.props);
+  alert.appId = "alt" + Randomstring.generate({ charset: 'alphabetic' })
+  alert.windowId = parentId ? parentId : undefined;
+  // this.mountAlert(alert, data.style);
+  alert.type = 'alert';
+  return alert;
+}
+const _property = function (data, parentId) {
+  if (data.app && data.app instanceof HTMLElement) return data.app.__vue_app__;
+  const property = new WindowProperty(data, parentId);
+  property.appId = "prp" + Randomstring.generate({ charset: 'alphabetic' })
+  property.windowId = parentId ? parentId : undefined;
+  // this.mountProperty(property, data.style);
+  property.type = 'property';
+  return property;
+};
+
+
 /**
  * setiap window ada tasknya, kecuali dialog, alert, dan property window
  * alert window tidak bisa di move, tidak bisa di size, tidak ada button close, top-window nya tidak bisa user interactive
@@ -109,47 +151,7 @@ class Window {
    * @returns {void}
    */
   create(config = {}) {
-    let parent, window, task, dialog, alert, property;
-    // create window
-    const _window = (data) => {
-      const window = createWindow.call(this, data);
-      this.mountWindow(window, data.style);
-      window.type = 'window';
-      return window;
-    }
-    const _task = (data, parentId) => {
-      const task = createApp(Task, data.props);
-      task.appId = "tsk" + Randomstring.generate({ charset: 'alphabetic' })
-      task.windowId = parentId ? parentId : undefined;
-      this.mountTask(task);
-      task.type = 'task';
-      return task;
-    }
-    const _dialog = (data, parentId) => {
-      const dialog = new WindowDialog(data, parentId);
-      dialog.appId = "dlg" + Randomstring.generate({ charset: 'alphabetic' })
-      dialog.windowId = parentId ? parentId : undefined;
-      this.mountDialog(dialog, data.style);
-      dialog.type = 'dialog';
-      return dialog
-    }
-    const _alert = (data, parentId) => {
-      const alert = createApp(Alert, data.props);
-      alert.appId = "alt" + Randomstring.generate({ charset: 'alphabetic' })
-      alert.windowId = parentId ? parentId : undefined;
-      this.mountAlert(alert, data.style);
-      alert.type = 'alert';
-      return alert;
-    }
-    const _property = (data, parentId) => {
-      if(data.app && data.app instanceof HTMLElement) return data.app.__vue_app__;
-      const property = new WindowProperty(data, parentId);
-      property.appId = "prp" + Randomstring.generate({ charset: 'alphabetic' })
-      property.windowId = parentId ? parentId : undefined;
-      this.mountProperty(property, data.style);
-      property.type = 'property';
-      return property;
-    };
+    let parent, window;
 
     switch (config.parent.type) {
       case 'window':
@@ -165,26 +167,31 @@ class Window {
         break;
     }
 
-    let windowType;
+    let windowType, windowStyle;
     if (config.window) {
       window = _window(config.window);
       windowType = 'window';
+      windowStyle = config.window.style;
     }
     if (config.task) {
       window = _task(config.task, parent ? parent.appId : null);
       windowType = 'task';
+      windowStyle = config.task.style;
     }
     if (config.dialog) {
       window = _dialog(config.dialog, parent ? parent.appId : null);
       windowType = 'dialog';
+      windowStyle = config.dialog.style;
     }
     if (config.alert) {
       window = _alert(config.alert, parent ? parent.appId : null);
       windowType = 'alert';
+      windowStyle = config.alert.style;
     }
     if (config.property) {
       window = _property(config.property, parent ? parent.appId : null);
       windowType = 'property';
+      windowStyle = config.property.style;
     }
 
     const register = (parent, window, windowType) => {
@@ -196,29 +203,51 @@ class Window {
           window.parent = new WeakRef(parent);
           try {
             addGetLogic(parent, 'task', (ctx, v) => v.deref());
-          } catch (error) {}
+          } catch (error) { }
           try {
             addGetLogic(window, 'parent', (ctx, v) => v.deref());
-          } catch (error){}
+          } catch (error) { }
           this.resetZIndex();
           break;
         default:
           parent.child = new WeakRef(window);
           window.parent = new WeakRef(parent);
-          try {            
+          try {
             addGetLogic(parent, 'child', (ctx, v) => v.deref());
-          } catch (error) {}
-          try {            
+          } catch (error) { }
+          try {
             addGetLogic(window, 'parent', (ctx, v) => v.deref());
-          } catch (error) {}
+          } catch (error) { }
       }
     }
 
-    // top.prt = parent;
-    // top.child = window;
-
     // register
-    register(parent,window,windowType);
+    register(parent, window, windowType);
+
+    top.wn = window;
+    top.pr = parent;
+
+    // mount parent
+    if (!parent.mounted) {
+      switch (config.parent.type) {
+        case 'window': this.mountWindow(parent, config.parent.style); break;
+        case 'alert': this.mountAlert(parent, config.parent.style); break;
+        case 'dialog': this.mountDialog(parent, config.parent.style); break;
+        case 'property': this.mountProperty(parent, config.parent.style); break;
+      }
+    }
+
+    // mount window
+    if (!window.mounted) {
+      switch (windowType) {
+        case 'task': this.mountTask(window, windowStyle); break;
+        case 'window': this.mountWindow(window, windowStyle); break;
+        case 'alert': this.mountAlert(window, windowStyle); break;
+        case 'dialog': this.mountDialog(window, windowStyle); break;
+        case 'property': this.mountProperty(window, windowStyle); break;
+      }
+    }
+
   }
 
   // ##########################################################################################
@@ -309,6 +338,8 @@ class Window {
     el.addEventListener('close-window', this.close.bind(this), true); // ref mountDialog(), jika sama sama tidak capture=true, close-window tidak berjalan
     el.addEventListener('toggle-window', (e) => this.toggle(e.data), true);
     // el.addEventListener('sizing-window', this.sizing.bind(this),true);
+
+    window.mounted = true;
   }
   mountTask(task) {
     const container = document.getElementById('app-windowtask');
@@ -323,7 +354,9 @@ class Window {
     this.setBorderBottomTask(el)
 
     // event click
-    el.addEventListener('click', this.toggle.bind(this, { task: el }, undefined))
+    el.addEventListener('click', this.toggle.bind(this, { taskEl: el }, undefined))
+
+    task.mounted = true;
   }
   mountDialog(dialog, style) {
     const container = document.getElementById(this.rootAppWindowContainerId);
@@ -351,11 +384,11 @@ class Window {
 
     if (dialog.windowId) {
       // push z Index
-      if (this.zIndex[this.zIndex.length - 1] !== dialog.windowId) {
-        this.zIndex[this.zIndex.indexOf(dialog.windowId)] = undefined;
-        this.zIndex.push(dialog.windowId)
-      }
-      this.zIndex.push(el.id);
+      // if (this.zIndex[this.zIndex.length - 1] !== dialog.windowId) {
+      //   this.zIndex[this.zIndex.indexOf(dialog.windowId)] = undefined;
+      //   this.zIndex.push(dialog.windowId)
+      // }
+      // this.zIndex.push(el.id);
       // prevent from user interactive in top-window
       const windowEl = document.getElementById(dialog.windowId);
       dialog.blockerId = this.addTopWindowBlocker(windowEl, el.id);
@@ -373,7 +406,8 @@ class Window {
     }
 
     // set zIndex
-    el.style.zIndex = this.zIndex.length + 80 + 1;
+    // el.style.zIndex = this.zIndex.length + 80 + 1;
+    el.style.zIndex = dialog.parent._container.style.zIndex;
 
     // add event
     el.addEventListener('click', this.setToTop.bind(this, el), true); // di buat true agar ini dijalankan lebih dulu daripada close() saat ada event, misal tombol close di TitleBar.vue
@@ -382,6 +416,8 @@ class Window {
     // append and mount dialog to document
     container.appendChild(el);
     dialog.mount('#' + el.id);
+
+    dialog.mounted = true;
   }
   mountAlert(alert, style) {
     const container = document.getElementById(this.rootAppWindowContainerId);
@@ -410,12 +446,12 @@ class Window {
 
     if (alert.windowId) {
       // prevent from user interactive in top-window
-      const windowEl = document.getElementById(alert.windowId);
-      alert.blockerId = this.addTopWindowBlocker(windowEl);
+      // const windowEl = document.getElementById(alert.windowId);
+      alert.blockerId = this.addTopWindowBlocker(alert.parent._container, el.id);
 
       // add alert result
-      if (windowEl.alert) throw Error("Cannot open alert window.");
-      windowEl.alert = runAlert();
+      if (alert.parent._container.alert) throw Error("Cannot open alert window.");
+      alert.parent._container.alert = runAlert();
     } else {
       if (!document.alertResult) document.alertResult = [];
       document.alertResult[alert.id] = runAlert();
@@ -429,6 +465,8 @@ class Window {
     // append and mount alert to document
     container.appendChild(el);
     alert.mount('#' + el.id);
+
+    alert.mounted = true;
   }
   mountProperty(property, style) {
     const container = document.getElementById(this.rootAppWindowContainerId);
@@ -455,27 +493,30 @@ class Window {
 
     property.id = el.id
 
-    top.pp = property;
+    // console.log(top.pp = property);
     if (property.windowId) {
-      if (this.zIndex[this.zIndex.length - 1] !== property.windowId) {
-        this.zIndex[this.zIndex.indexOf(property.windowId)] = undefined;
-        this.zIndex.push(property.windowId)
-      }
-      this.zIndex.push(el.id);
+      // if (this.zIndex[this.zIndex.length - 1] !== property.windowId) {
+      //   this.zIndex[this.zIndex.indexOf(property.windowId)] = undefined;
+      //   this.zIndex.push(property.windowId)
+      // }
+      // this.zIndex.push(el.id);
       // prevent from user interactive in top-window
-      const windowEl = document.getElementById(property.windowId);
-      property.blockerId = this.addTopWindowBlocker(windowEl, el.id);
+      // const windowEl = document.getElementById(property.windowId);
+      // property.blockerId = this.addTopWindowBlocker(windowEl, el.id);
+      property.blockerId = this.addTopWindowBlocker(property.parent._container, el.id);
 
       // add property result
-      if (windowEl.property) throw Error("Cannot open property window.");
-      windowEl.property = runProperty();
+      // console.log(top.wel = windowEl, windowEl.property);
+      if (property.parent._container.property) throw Error("Cannot open property window.");
+      property.parent._container.property = runProperty();
     } else {
       if (!document.propertyResult) document.propertyResult = [];
       document.propertyResult[property.id] = runProperty();
     }
 
     // set zIndex
-    el.style.zIndex = this.zIndex.length + 80 + 1;
+    // el.style.zIndex = this.zIndex.length + 80 + 1;
+    el.style.zIndex = property.parent._container.style.zIndex;
 
     // add event
     el.addEventListener('click', this.setToTop.bind(this, el), true); // di buat true agar ini dijalankan lebih dulu daripada close() saat ada event, misal tombol close di TitleBar.vue
@@ -487,6 +528,8 @@ class Window {
 
     // configure to enable moving window
     this.enableMoving(el);
+
+    property.mounted = true;
   }
 
   // ##########################################################################################
@@ -561,11 +604,11 @@ class Window {
     this.zIndex[this.zIndex.indexOf(window.appId)] = undefined;
 
     // selanjutnya close child window (dialog, alert, property)
-    if(window.child){
+    if (window.child) {
       switch (window.child.type) {
-        case 'dialog': this.stopDialog(window.child);break;      
-        case 'alert': this.stopAlert(window.child);break;
-        case 'property': this.stopProperty(window.child);break;
+        case 'dialog': this.stopDialog(window.child); break;
+        case 'alert': this.stopAlert(window.child); break;
+        case 'property': this.stopProperty(window.child); break;
       }
     }
     this.unmountWindow(window);
@@ -573,7 +616,7 @@ class Window {
   }
   stopTask(task) {
     delete task.parent;
-    if(task.parent) this.stopTopWindow(task.parent);
+    if (task.parent) this.stopTopWindow(task.parent);
     this.unmountTask(task);
   }
   // matikan child window dan top window;
@@ -587,12 +630,14 @@ class Window {
   stopAlert(alert) {
     delete document.getElementById(alert.windowId).alert;
     if (document.alertResult) delete document.alertResult[alert.id];
+    this.zIndex[this.zIndex.indexOf(alert.appId)] = undefined;
     this.removeTopWindowBlocker(alert.blockerId);
     this.unmountAlert(alert);
   }
   stopProperty(property) {
     delete document.getElementById(property.windowId).property;
     if (document.propertyResult) delete document.propertyResult[property.id];
+    this.zIndex[this.zIndex.indexOf(property.appId)] = undefined;
     this.removeTopWindowBlocker(property.blockerId);
     this.unmountProperty(property);
   }
@@ -606,52 +651,100 @@ class Window {
    * @param {Object} el contain key task or window
    */
   toggle(el = {}, display = undefined) {
-    const taskEl = el.task;
-    const windowEl = el.window ?? document.getElementById(el.task.windowId);
-    const window = windowEl.__vue_app__;
+    console.log(el);
+    let taskEl, window, windowEl;
+    if (el.taskEl) {
+      taskEl = el.taskEl;
+      window = taskEl.__vue_app__.parent;
+      windowEl = window._container;
+    } else {
+      windowEl = el.windowEl;
+      window = windowEl.__vue_app__;
+      taskEl = window.task ? window.task._container : undefined; // jika dialog/alert/property tidak ada task nya
+    }
+
+    console.log(
+      top.xwindowEl = windowEl,
+      top.xwindow = window,
+      top.xtaskEl = taskEl,
+      windowEl.style.display,
+      display,
+    );
+
+    if (windowEl.style.display === display) return;
+
     if (!window) return; // jika ada alert/dialog/property maka tidak bisa toggle
     const isTop = (this.zIndex.indexOf(window.appId) + 1) === this.zIndex.length;
-    if (isTop) {
-      // show/hide window (threatment undefined == null kalau pakai syntax seperti dibawah)
-      const styleDisplay = display !== undefined ? display : (windowEl.style.display === 'none' ? '' : 'none');
-      windowEl.style.display = styleDisplay;
-    } else {
-      windowEl.style.display = display !== undefined ? display : '';
-      // set z-index; sama dengan @setToTop
-      this.zIndex[this.zIndex.indexOf(window.appId)] = undefined;
-      this.zIndex.push(window.appId);
-      windowEl.style.zIndex = (this.zIndex.length) + 80;
-    }
-    this.setBorderBottomTask(taskEl ?? document.getElementById(window.task.appId), windowEl.style.display);
+    // if (isTop) {
+    // show/hide window (threatment undefined == null kalau pakai syntax seperti dibawah)
+    // windowEl.style.display = display !== undefined ? display : (windowEl.style.display === 'none' ? '' : 'none');     
 
-    // set previous index window to top
-    if (windowEl.style.display === 'none') {
-      if (isTop) {
-        let k = this.zIndex.length - 2;
-        let id = this.zIndex[k];
-        let backEl = document.getElementById(id);
-        while ((k >= 0 && id && backEl.style.display === 'none') || (!(id) && k >= 0)) {
-          k--;
-          id = this.zIndex[k];
-          backEl = document.getElementById(id);
-        }
-        if (backEl) this.setToTop(backEl);
+    // set previous index window to top, tapi kayaknya ga perlu karna jika user mengklik window tertentu maka otomatis menjadi top
+    // if (windowEl.style.display === 'none'){
+    //   let k = this.zIndex.length - 2;
+    //   let id = this.zIndex[k];
+    //   let backEl = document.getElementById(id);
+    //   while ((k >= 0 && id && backEl.style.display === 'none') || (!(id) && k >= 0)) {
+    //     k--;
+    //     id = this.zIndex[k];
+    //     backEl = document.getElementById(id);
+    //   }
+    //   if (backEl) this.setToTop(backEl);
+    // }
+    // } else {
+    // windowEl.style.display = display !== undefined ? display : '';
+    // set z-index; sama dengan @setToTop
+    // if(windowEl.style.display !== 'none'){
+    //   this.zIndex[this.zIndex.indexOf(window.appId)] = undefined;
+    //   this.zIndex.push(window.appId);
+    //   windowEl.style.zIndex = (this.zIndex.length) + 80;
+    // }
+    // }
+    console.log(top.isTop = isTop);
+    if (isTop) {
+      windowEl.style.display = (display !== undefined ? display : (windowEl.style.display === 'none' ? '' : 'none'));
+      if (windowEl.style.display !== 'none' && window.type === 'window') {
+        this.zIndex[this.zIndex.indexOf(window.appId)] = undefined;
+        this.zIndex.push(window.appId);
+        windowEl.style.zIndex = (this.zIndex.length) + 80;
       }
+      this.toggleChild(windowEl)
+    }
+
+    // console.log('###')
+    // console.log(windowEl.style.display);
+    if (taskEl) this.setBorderBottomTask(taskEl ?? document.getElementById(window.task.appId), windowEl.style.display);
+
+  }
+
+  toggleChild(windowEl) {
+    const child = windowEl.__vue_app__.child;
+    if (child && child.type !== 'window') {
+      child._container.style.display = windowEl.style.display;
+      child._container.style.zIndex = windowEl.__vue_app__._container.style.zIndex;
+      this.toggleChild(child._container);
     }
   }
 
   setToTop(windowEl) {
-    this.zIndex[this.zIndex.indexOf(windowEl.id)] = undefined;
-    this.zIndex.push(windowEl.id);
-    windowEl.style.zIndex = (this.zIndex.length) + 80;
+    if (this.zIndex.indexOf(windowEl.id) === (this.zIndex.length - 1)) return;
 
-    // push history
-    const window = windowEl.__vue_app__;
-    if(window.config.globalProperties.$history) window.config.globalProperties.$history.pushState();
+    if (windowEl.__vue_app__.type === 'window') {
+      this.zIndex[this.zIndex.indexOf(windowEl.id)] = undefined;
+      this.zIndex.push(windowEl.id);
+      windowEl.style.zIndex = (this.zIndex.length) + 80;
+
+      // push history
+      const window = windowEl.__vue_app__;
+      if (window.config.globalProperties.$history) window.config.globalProperties.$history.pushState();
+    }
+    else if (windowEl.__vue_app__.type === 'dialog' || windowEl.__vue_app__.type === 'property') {
+      windowEl.style.zIndex = windowEl.__vue_app__.parent._container.style.zIndex;
+    }
 
     // set to top all child window such as dialog, alert property
-    if(window.child){
-      this.setToTop(document.getElementById(window.child.appId));
+    if (window.child) {
+      this.setToTop(window.child._container);
     }
   }
 
@@ -726,18 +819,21 @@ class Window {
   hideshow(event) {
     this.zIndex.filter(v => v).reverse().forEach(appId => {
       const windowEl = document.getElementById(appId);
+      const taskEl = windowEl.__vue_app__.task ? windowEl.__vue_app__.task._container : undefined; // jika dialog/alert/property tidak ada task nya
       // hide All
       // if (!event.data.state && windowEl.style.display !== 'none') {
       if (!event.data.state) {
-        this.toggle({ window: windowEl }, 'none');
-        // windowEl.style.display = 'none';
+        // this.toggle({ windowEl: windowEl }, 'none');
+        windowEl.style.display = 'none';
+        if (taskEl) this.setBorderBottomTask(taskEl, 'none');
         this.showAll = false;
       }
       // show all
       // else if (event.data.state && windowEl.style.display === 'none') {
       else {
-        this.toggle({ window: windowEl }, '');
-        // windowEl.style.display = '';
+        // this.toggle({ windowEl: windowEl }, '');
+        windowEl.style.display = '';
+        if (taskEl) this.setBorderBottomTask(taskEl, '');
         this.showAll = true;
       }
     })
@@ -749,6 +845,7 @@ class Window {
 const window = {
   install: (app) => {
     app.config.globalProperties.$window = new Window();
+    top.$window = app.config.globalProperties.$window;
   }
 }
 export default window

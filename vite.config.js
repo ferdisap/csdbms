@@ -3,15 +3,17 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue({
-    template: {
-      compilerOptions: {
-        isCustomElement: (tag) => ['text-editor'].includes(tag)
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => ['text-editor'].includes(tag)
+        }
       }
-    }
-  })],
+    }),
+  ],
   build: {
-    rollupOptions:{
+    rollupOptions: {
       input: [
         "index.html",
         "login.html",
@@ -27,10 +29,10 @@ export default defineConfig({
   },
   optimizeDeps: {
     esbuildOptions: {
-        // Node.js global to browser globalThis
-        define: {
-            global: 'globalThis',
-        },
+      // Node.js global to browser globalThis
+      define: {
+        global: 'globalThis',
+      },
     },
-},
+  },
 })

@@ -10,13 +10,13 @@ export default {
     }
   },
   methods:{
-    toggle(event){
-      top.mainApp.config.globalProperties.$window.toggle({task: event.target.closest(".window-task")});
-    }
+    // toggle(event){
+      // top.mainApp.config.globalProperties.$window.toggle({taskEl: event.target.closest(".window-task")});
+    // }
   }
 }
 </script>
 <template>
   <!-- <div class="task min-w-24 h-full flex items-center text-base shadow-md px-2 hover:bg-gray-700 text-nowrap" @click.stop="toggle">{{ $props.title }}</div>   -->
-  <div class="task min-w-24 h-full flex items-center text-base shadow-md px-2 hover:bg-gray-700 text-nowrap">{{ $props.title }}</div>  
+  <button type="button" class="task min-w-24 h-full flex items-center text-base shadow-md px-2 hover:bg-gray-700 text-nowrap">{{ $props.title }}</button>  
 </template>
