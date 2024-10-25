@@ -67,7 +67,7 @@ export default {
   <Property :use-button="false" title="Detail Csdb">
     <template #content>
       <div class="border p-2">
-        <h1 class="text-center font-bold mb-2 text-lg">Details {{ $props.filename }}</h1>
+        <h1 class="text-center font-bold mb-2 text-lg">{{ $props.filename }}</h1>
         <div class="w-full text-center mb-2 relative">
           <div class="flex mb-2">
             <div class="material-symbols-outlined text-8xl">description</div>

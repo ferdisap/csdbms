@@ -534,23 +534,32 @@ class Window {
     const blocker = document.createElement('div');
     const id = Randomstring.generate({ charset: 'alphabetic' });
     const rect = topWindowEl.getBoundingClientRect();
+    let h,w;
+    if(topWindowEl.isMaximize){
+      h = topWindowEl.style.height;
+      w = topWindowEl.style.width;
+    } else {
+      h = rect.height + 'px'
+      w = rect.width + 'px';
+    }
     blocker.classList.add(this.windowClassBlocker);
     blocker.setAttribute('id', id);
     blocker.style.position = 'fixed';
-    blocker.style.height = rect.height + 'px';
-    blocker.style.width = rect.width + 'px';
+    blocker.style.height = h;
+    blocker.style.width = w;
     blocker.style.top = rect.top + 'px';
     blocker.style.left = rect.left + 'px';
     blocker.style.backgroundColor = '#9090908a';
-    blocker.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    }, true);
+    // blocker.addEventListener('pointerdown', (e) => {
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    // }, true);
     topWindowEl.appendChild(blocker);
     topWindowEl.pez = topWindowEl.enableSizing;
     topWindowEl.enableSizing = false;
     topWindowEl.pem = topWindowEl.enableMoving;
     topWindowEl.enableMoving = false;
+    topWindowEl.blocker = blocker;
     return id;
   }
 
@@ -558,6 +567,7 @@ class Window {
     topWindowEl.querySelector("."+this.windowClassBlocker).remove();
     topWindowEl.enableSizing = topWindowEl.pez;
     topWindowEl.enableMoving = topWindowEl.pem;
+    delete topWindowEl.blocker;
   }
 
   // ##########################################################################################
@@ -826,6 +836,7 @@ class Window {
         if (taskEl) this.setBorderBottomTask(taskEl, '');
         this.showAll = true;
       }
+      this.toggleChild(windowEl);
     })
   }
 

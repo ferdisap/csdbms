@@ -13,6 +13,8 @@ import { style as pdtStyle } from '../child/PropertyDispatchTo.vue';
 
 function openDetailObjectPropertyWindow(windowEl, filename, path, storage) {
   const event = new Event("new-window");
+  const style = pdoStyle();
+  style.height = 'auto';
   event.data = {
     parent: {
       type: 'window',
@@ -25,7 +27,7 @@ function openDetailObjectPropertyWindow(windowEl, filename, path, storage) {
         path: path,
         storage: storage,
       },
-      style: pdoStyle()
+      style: style
     }
   }
   top.dispatchEvent(event);
