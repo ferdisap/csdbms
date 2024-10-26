@@ -3,7 +3,7 @@ import axios from 'axios';
 
 function getCsdbData(fullPath){
   //const fulPath = `mbb38/CSDB/DML/DML-MALE-0001Z-P-2024-00004_000-01.xml`;
-  const m = /(\w+)\/([\w\/]+)\/(?<=\/)([\w\-.]+)|(\w+)\/([\w\/]+)/.exec(fullPath).filter(v => v);
+  const m = /(\w+|#)\/([\w\/]+)\/(?<=\/)([\w\-.]+)|(\w+|#)\/([\w\/]+)/.exec(fullPath).filter(v => v);
   if(m[3] && !m[3].includes(".")) {
     m[2] += "/" + m[3];
     m[3] = undefined;

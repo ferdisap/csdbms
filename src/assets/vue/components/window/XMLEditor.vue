@@ -84,6 +84,9 @@ export default {
     filename: {
       type: String
     },
+    path: {
+      type: String
+    },
   },
   methods:{
     // jika PUT method, maka masih belum tau caranya membaca data di laravel kalau request pakai formdata, 
@@ -125,7 +128,7 @@ export default {
         <div class="h-[calc(100%-2.5rem)]">
           <div class="mb-1 h-8 px-2 py-1">
             <label for="object-path" class="text-sm font-bold mr-2">Path:</label>
-            <input id="object-path" name="path" ref="inputPath" placeholder="type the fullpath eg. CSDB/N219/AMM"
+            <input id="object-path" name="path" :value="$props.path" placeholder="type the fullpath eg. CSDB/N219/AMM"
               type="text"
               class="py-0 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
           </div>

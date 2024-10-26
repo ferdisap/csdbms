@@ -29,6 +29,7 @@ const _window = function (data) {
   const window = createWindow(data);
   // this.mountWindow(window, data.style);
   window.type = 'window';
+  window.loadFromCache = data.loadFromCache;
   return window;
 }
 const _task = function (data, parentId) {

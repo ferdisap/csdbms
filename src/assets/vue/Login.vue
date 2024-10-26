@@ -39,7 +39,7 @@ export default {
   components: { ContinuousLoadingCircle, Flash },
   methods: {
     registerURL() {
-      return config.CSDB_HOST_PROD + '/login';
+      return config.CSDB_HOST + '/register';
     },
     login() {
       this.$emit('clp', true);

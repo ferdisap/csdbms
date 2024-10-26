@@ -46,14 +46,14 @@ function ListTree() {
           levels[i].push(p.join("/"));
         }
         levels[l].indexOf(path) < 0 ? levels[l].push(path) : '';
+        // levels[l].push(path)
 
         obj[path] = obj[path] || [];
         obj[path].push({
           filename: v[2],
-          path: v[1],
+          // path: v[1],
           storage: v[0],
         });
-
       }
       
       Object.keys(levels).forEach(l => levels[l] = array_unique(levels[l]));
@@ -65,23 +65,15 @@ function ListTree() {
         style ? (style = `style="${style}"`) : '';
         let listobj = '';
         if (models) { // ada kemungkinan models undefined karena path "csdb/n219/amm", csdb/n219 nya tidak ada csdbobject nya
-          for (const model of models) {
+          Object.keys(models).forEach(path => {
+            const href = '#';
+            const model = models[path];
             const isICN = model.filename.substr(0, 3) === 'ICN';
             const logo = isICN ? `<i class="material-symbols-outlined item">mms</i>&#160;` : `<i class="material-symbols-outlined item">description</i>&#160;`;
-            let href = isICN ? this.hrefForOther : this.hrefForPdf;
-            // const cb = `<span class="cb-window"><input type="checkbox" value="${model.filename}"/></span>`;
-            const cb = `<span class="cb-window"><input type="checkbox" value="${model.storage}/${model.path}/${model.filename}"/></span>`;
-            href = href.replace(':filename', model.filename);
-            const viewType = isICN ? 'other' : 'pdf';
-            // listobj = listobj + `
-            //      <div class="cb-room" ${style}>
-            //        ${cb}${logo}<a href="${href}" @click.prevent="$parent.clickFilename({path:'${model.path}',filename: '${model.filename}', viewType:'${viewType}'})">${model.filename}</a>
-            //      </div>`
+            const cb = `<span class="cb-window"><input type="checkbox" value="${model.storage}/${path}/${model.filename}"/></span>`;
             listobj = listobj + `
-                 <div class="cb-room" ${style}>
-                   ${cb}${logo}<a href="${href}" class="filename">${model.filename}</a>
-                 </div>`
-          }
+                 <div class="cb-room" ${style}> ${cb}${logo}<a href="${href}" class="filename">${model.filename}</a></div>`
+          })
         }
         return listobj
       };
@@ -96,7 +88,6 @@ function ListTree() {
             let currFolder = pathSplit[start_l - 1];
             pathSplit.splice(pathSplit.indexOf(currFolder), 1);
             let parentP = pathSplit.join("/");
-            const storage = dataobj[path][0]['storage']; // sengaja ambil index ke 0 karena semua csdb storagenya sama
 
             if (path_yang_sudah.indexOf(path) >= 0
               || path_yang_sudah.indexOf(parentP) >= 0
@@ -104,9 +95,9 @@ function ListTree() {
             ) {
               continue;
             }
-            let isOpen = this.open ? this.open[path] : false;
+            const storage = dataobj[path] ? dataobj[path][0]['storage'] : '#'; // sengaja ambil index ke 0 karena semua csdb storagenya sama
+            let isOpen = this.open ? this.open[storage + "/" + path] : false;
             isOpen = isOpen ? 'open' : '';
-            // isOpen = isOpen ? 'true' : 'false';
             const cbAll = `<span class="cb-window-all"><input type="checkbox" value=""/></span>`;
 
             // CSS
@@ -129,7 +120,7 @@ function ListTree() {
             details = details + `
             <details ${isOpen} class="cb-room" path="${storage}/${path}">
               <summary class="list-none flex">
-              <i expand-collapse-btn="${path}" class="material-symbols-outlined chevron">chevron_right</i> 
+              <i expand-collapse-btn="${storage}/${path}" class="material-symbols-outlined chevron">chevron_right</i> 
                ${cbAll}
                <a href="#" class="folder">${currFolder}</a>
              </summary>`;
@@ -140,7 +131,9 @@ function ListTree() {
 
             // generating obj list
             // details = details + (gen_objlist.bind(this, dataobj[path], `margin-left:${start_l * 3 + defaultMarginLeft + 2}px;`))();
-            details = details + (gen_objlist.bind(this, dataobj[path]))();
+            if(dataobj[path]){
+              details = details + (gen_objlist.bind(this, dataobj[path]))();
+            }
 
             details = details + "</details>"
 
@@ -160,7 +153,33 @@ onmessage = async function (e) {
   switch (e.data.mode) {
     case 'fetchData':
       ret = new ListTree();
-      const data = await ret.request(e.data.data);
+      let data = {"0":{},"1":{}};
+      if(e.data.data instanceof Array){
+        for (let i = 0; i < e.data.data.length; i++) {
+          // const result = await ret.request(e.data.data[i]);
+          let result;
+          result = await ret.request(e.data.data[i]);
+          // console.log((result = await ret.request(e.data.data[i]))[0]);
+          // console.log(result);
+          data[0] = Object.assign(data[0], result[0]);
+          // data[1] = Object.assign(data[1], result[1]);          
+          Object.keys(result[1]).forEach(k => {
+            data[1][k] = data[1][k] ? data[1][k].concat(result[1][k]) : result[1][k]
+          })
+          // console.log(data[1][1])
+          // data = Object.assign(result, data); 
+          // data = Object.assign(data, result); 
+          // console.log(data[0], result[0], Object.assign(data[0], result[0]))
+          // console.log(e.data.data[i].route.url);
+          // console.log(Object.keys(result[0]));
+        }
+      }
+      else {
+        data = await ret.request(e.data.data);
+      }
+      // console.log(top.data = data);
+      // console.log(data, data[0], data[1]);
+      // console.log(JSON.stringify(data))
       this.postMessage(data);
       break;
     case 'createHTMLString':

@@ -8,7 +8,7 @@ import { installCheckbox, cancel, select } from '../../../../js/gui/Checkbox';
 import FloatMenu from '../../menu/FloatMenu.vue';
 import Randomstring from 'randomstring';
 import { isArray } from '../../../../js/util/helper';
-import {getCsdbData} from '../../../../js/util/S1000DHelper.js'
+import { getCsdbData } from '../../../../js/util/S1000DHelper.js'
 
 async function fetchList() {
   if (promiseState(auth().isAuth) !== "<fulfilled>: true") {
@@ -18,23 +18,33 @@ async function fetchList() {
   worker.onmessage = (e) => {
     this.data.level = e.data[1];
     this.data.list = e.data[0];
-    
+
     worker.terminate();
   }
   this.clp(true);
+  const headers = {
+    "Content-Type": "application/json",
+    "X-Requested-With": "XMLHttpRequest",
+    "Authorization": auth().getAuthToken(),
+  };
   worker.postMessage({
     mode: 'fetchData',
-    data: {
-      route: {
-        method: 'GET',
-        url: config.CSDB_HOST + '/api/s1000d/all',
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-          "Authorization": auth().getAuthToken(),
+    data: [
+      {
+        route: {
+          method: 'GET',
+          url: config.CSDB_HOST + '/api/s1000d/csdb/all',
+          headers: headers
         }
-      }
-    }
+      },
+      {
+        route: {
+          method: 'GET',
+          url: config.CSDB_HOST + '/api/s1000d/csdb/dispatched',
+          headers: headers
+        }
+      },
+    ]
   })
 }
 
@@ -47,8 +57,8 @@ function render(stringhtml) {
   // open/close details
   container.querySelectorAll("*[expand-collapse-btn]").forEach(el => {
     el.component = new WeakRef(this);
-    if(!el.expandCollapseListener){
-      el.addEventListener('click', function(event){
+    if (!el.expandCollapseListener) {
+      el.addEventListener('click', function (event) {
         event.preventDefault();
         const path = this.getAttribute('expand-collapse-btn');
         const details = this.closest('details');
@@ -56,7 +66,7 @@ function render(stringhtml) {
         // set icon
         details.firstElementChild.firstElementChild.innerHTML = details.open ? 'keyboard_arrow_down' : 'chevron_right'
         if (!this.component.deref().$data.open) {
-          const expandCollapseListTreeFromLocalStorage = top.sessionStorage.getItem(window.location.origin + window.location.pathname + window.location.search);
+          const expandCollapseListTreeFromLocalStorage = top.sessionStorage.getItem("listtree://"+window.location.origin + window.location.pathname + window.location.search);
           if (expandCollapseListTreeFromLocalStorage) {
             this.component.deref().$data.open = JSON.parse(expandCollapseListTreeFromLocalStorage)
           } else {
@@ -64,7 +74,7 @@ function render(stringhtml) {
           }
         }
         this.component.deref().$data.open[path] = details.open;
-        top.sessionStorage.setItem(window.location.origin + window.location.pathname + window.location.search, JSON.stringify(this.component.deref().$data.open))
+        top.sessionStorage.setItem("listtree://"+window.location.origin + window.location.pathname + window.location.search, JSON.stringify(this.component.deref().$data.open))
       }.bind(el))
       el.expandCollapseListener = true;
     }
@@ -72,18 +82,18 @@ function render(stringhtml) {
 
   // onclick folder
   container.querySelectorAll("summary > .folder").forEach(el => {
-    if(!el.clickFolder){
+    if (!el.clickFolder) {
       // add here listener
-      el.addEventListener('click',() => console.log('click Folder', getCsdbData(el.closest(".cb-room").getAttribute('path'))))
+      el.addEventListener('click', () => console.log('click Folder', getCsdbData(el.closest(".cb-room").getAttribute('path'))))
       el.clickFolder = true
     }
   })
   // onclick filename
   container.querySelectorAll("details .filename").forEach(el => {
-    if(!el.clickFilename){
+    if (!el.clickFilename) {
       // add here listener
       // el.addEventListener('click',() => console.log('click Filename: ', el.closest(".cb-room").cbWindow.cbValue), getCsdbData(el.closest(".cb-room").cbWindow.cbValue))
-      el.addEventListener('click',() => console.log('click Filename: ', getCsdbData(el.closest(".cb-room").cbWindow.cbValue)))
+      el.addEventListener('click', () => console.log('click Filename: ', getCsdbData(el.closest(".cb-room").cbWindow.cbValue)))
       el.clickFilename = true
     }
   })
@@ -123,7 +133,7 @@ async function start() {
       return true;
     }
   });
-  this._.props.open = JSON.parse(top.sessionStorage.getItem(window.location.origin + window.location.pathname + window.location.search));
+  this._.props.open = JSON.parse(top.sessionStorage.getItem("listtree://"+window.location.origin + window.location.pathname + window.location.search));
   fetchList.apply(this);
 }
 

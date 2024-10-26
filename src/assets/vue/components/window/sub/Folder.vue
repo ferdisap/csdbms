@@ -10,6 +10,7 @@ import { addSetLogic } from '../../../../js/util/ObjectProperty';
 import { isNumber, indexFromParent } from '../../../../js/util/helper.js';
 import { style as pdoStyle } from '../child/PropertyDetailObject.vue';
 import { style as pdtStyle } from '../child/PropertyDispatchTo.vue';
+import { useCache } from '../../../../js/plugin/sub/WindowCache';
 
 function openDetailObjectPropertyWindow(windowEl, filename, path, storage) {
   const event = new Event("new-window");
@@ -149,6 +150,7 @@ export default {
       this.getObjs(path);
     },
     clickFolder: function (path) {
+      this._.path = path;
       this.back(path);
     },
     clickFilename: async function (filename, path, storage) {
@@ -168,10 +170,12 @@ export default {
       filename.forEach(f => {
         const event = new Event("new-window");
         event.data = {
-          window: {
+          parent: {
+            type: 'window',
             name: 'XMLEditor',
             props: {
               filename: f,
+              path: this.$props.path
             }
           },
           task: {
@@ -263,7 +267,8 @@ export default {
       }, f);
       const windowEl = this.$el.closest(".app-window");
       e.data = {
-        window: {
+        parent: {
+          type:'window',
           app: windowEl
         },
         dialog: {
@@ -371,6 +376,9 @@ export default {
       installCheckbox(this.$el.querySelector(".cb-home"));
       this.clp(false);
     }
+  },
+  beforeCreate(){
+    useCache.apply(this);
   },
   mounted() {
     addSetLogic(this.$el.querySelector(".cb-home"), 'sm', (ctx, value) => {

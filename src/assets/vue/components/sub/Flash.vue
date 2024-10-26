@@ -52,7 +52,9 @@ export default {
       <div v-if="info.errors" class="mt-3">
         <div class="mb-2 flex space-x-2" v-for="(messages, key) in info.errors">
           <div class="pr-2 border-r-2">{{ key }}</div>
-          <p style="line-break: anywhere" v-for="text in messages" v-html="text.toString()" />
+          <div>
+            <p style="line-break: anywhere" v-for="text in messages" v-html="text.toString()" />
+          </div>
         </div>
       </div>      
       <div v-else v-html="replaceFilenameWithURL(info.message)" class="mb-1"></div>
