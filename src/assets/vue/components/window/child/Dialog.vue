@@ -58,6 +58,16 @@ export default {
     footer: {
       type: String,
       default: '',
+    },
+    infotype:{
+      type: String
+    }
+  },
+  computed:{
+    color(){
+      return this.$props.infotype === 'warning' ? 'bg-red-600' : (
+        this.$props.infotype === 'caution' ? 'bg-yellow-400' : "bg-blue-500"
+      )
     }
   },
   methods: {
@@ -79,7 +89,7 @@ export default {
 </script>
 <template>
   <div class="h-full w-full border shadow-md">
-    <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" :cache-button="false"/>
+    <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" :cache-button="false" :bg-color="color"/>
     <div class="px-3 py-1">
       <div class="text-lg mt-2 max-h-20 overflow-auto" v-html="$props.instruction"></div>
       <div class="mt-2 h-20 overflow-auto" v-if="$slots.content">
@@ -90,7 +100,7 @@ export default {
         <button class="material-symbols-outlined text-base">keyboard_arrow_down</button>
         <button class="italic">More options</button>
       </div>
-      <div v-if="showOptions" v-html="$props.options"></div>
+      <div v-if="showOptions" v-html="$props.options" class="border p-1 overflow-auto"></div>
 
       <div class="border-t-2 border-black mt-1 text-sm" v-html="$props.footer"></div>
 

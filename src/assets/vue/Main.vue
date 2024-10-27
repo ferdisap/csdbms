@@ -29,9 +29,9 @@ export default {
     <div id="app-task-container" class="w-full h-[3%] relative z-20">
       <TaskBar/>
     </div>
-    <FloatMenu :trigger="[{triggerId: 'app-content-container', on: 'contextmenu'}]" :use-copy-btn="false">
+    <FloatMenu :trigger="[{triggerId: 'app-content-container', on: 'contextmenu'}]">
       <div class="list" @click="showDesktop">
-        <div>Show desktop</div>
+        <div>show desktop</div>
       </div>
     </FloatMenu>
   </div>

@@ -51,11 +51,12 @@ function openDispatchToPropertyWindow(windowEl) {
   top.dispatchEvent(event);
 }
 
-function openFilename(filename){
+function openFile(filename){
   let name = filename.substring(0,3);
-  switch (name) {
-    case ('DML'||'DDN'): break; // nama component/window sama, yaitu 'DML'||'DDN',
-    default: name = 'XMLEditor'; break; // jika DMC,MC,COM,, dll akan terbuka menggunakan editor XML
+  if(!(name === ('DML') || name === 'DDN')) {
+    // nama component/window sama, yaitu 'DML'||'DDN',
+    // jika DMC,MC,COM,, dll akan terbuka menggunakan editor XML
+    name = 'XMLEditor';
   }
   const event = new Event("new-window");
   event.data = {
@@ -71,7 +72,7 @@ function openFilename(filename){
         height: '600px',
         top: (((top.innerHeight / 2) - 400) + 'px'),
         left: (((top.innerWidth / 2) - 300) + 'px'),
-        backgroundColor: '#000fff',
+        backgroundColor: '#ffffff',
       }
     },
     task:{
@@ -82,6 +83,8 @@ function openFilename(filename){
   }
   top.dispatchEvent(event);
 }
+
+export {openFile}
 
 export default {
   components: { FloatMenu, Sort, ContinuousLoadingCircle, SearchCsdb },
@@ -188,7 +191,7 @@ export default {
     openTr() {
       const cbHome = this.$el.querySelector('.cb-home');
       if (cbHome.current && cbHome.current.matches(".file-row")) {
-        openFilename(cbHome.current.cbWindow.cbValue)
+        openFile(cbHome.current.cbWindow.cbValue)
       }
       else this.clickFolder(cbHome.current.cbWindow.cbValue);
     },
@@ -382,7 +385,7 @@ export default {
     addSetLogic(this.$el.querySelector(".cb-home"), 'sm', (ctx, value) => {
       this.selectionMode = value;
       return value;
-    })    
+    });
     addSetLogic(this._.props,'path', (ctx, v) => {
       if(v) this.getObjs(v);
       return v;

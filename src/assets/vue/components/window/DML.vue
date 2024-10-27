@@ -6,12 +6,7 @@ import Remarks from '../sub/Remarks.vue';
 import axios from 'axios';
 import { formDataToObject } from '../../../js/util/helper';
 import Randomstring from 'randomstring';
-import {
-  fetchJsonFile,
-  resolve_dmIdent, resolve_dmlIdent, resolve_pmIdent, resolve_commentIdent, resolve_infoEntityIdent,
-  resolve_pmCode, resolve_dmCode, resolve_dmlCode, resolve_commentCode,
-  resolve_issueInfo, resolve_issueDate, resolve_language
-} from '../../../js/util/S1000DHelper';
+import { resolve_dmIdent, resolve_dmlIdent, resolve_pmIdent, resolve_commentIdent, resolve_infoEntityIdent, resolve_dmlCode, resolve_issueDate } from '../../../js/util/S1000DHelper';
 import jp from 'jsonpath';
 import { installCheckbox, hideAll, select } from '../../../js/gui/Checkbox';
 import { addSetLogic } from '../../../js/util/ObjectProperty';

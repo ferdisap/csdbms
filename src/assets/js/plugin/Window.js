@@ -3,6 +3,7 @@ import Task from '../../vue/components/gui/sub/Task.vue'
 import HelloWorld from '../../vue/components/window/HelloWorld.vue';
 import Explorer from '../../vue/components/window/Explorer.vue';
 import DML from '../../vue/components/window/DML.vue';
+import DDN from '../../vue/components/window/DDN.vue';
 import XMLEditor from '../../vue/components/window/XMLEditor.vue';
 import Trash from '../../vue/components/window/Trash.vue';
 import Alert from '../../vue/components/window/child/Alert.vue';
@@ -595,7 +596,7 @@ class Window {
     const task = window.task;
     delete window.task;
     delete task.parent;
-    this.stopTask(task);
+    this.unmountTask(task);
     this.zIndex[this.zIndex.indexOf(window.appId)] = undefined;
 
     // selanjutnya close child window (dialog, alert, property)
@@ -610,9 +611,7 @@ class Window {
     clearUrl()
   }
   stopTask(task) {
-    delete task.parent;
     if (task.parent) this.stopTopWindow(task.parent);
-    this.unmountTask(task);
   }
   // matikan child window dan top window;
   stopDialog(dialog) {
@@ -859,6 +858,9 @@ function createWindow(config) {
       break;
     case 'DML':
       component = DML;
+      break;
+    case 'DDN':
+      component = DDN;
       break;
     case 'Trash':
       component = Trash;
