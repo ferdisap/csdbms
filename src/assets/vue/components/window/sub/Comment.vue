@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { installCheckbox } from '../../../../js/gui/Checkbox';
 import FloatMenu from '../../menu/FloatMenu.vue';
+import { style } from '../child/PropertyCommentCreatePreverences.vue';
 
 function openPreferences(windowEl, props) {
   const event = new Event("new-window");
@@ -13,14 +14,7 @@ function openPreferences(windowEl, props) {
     property: {
       name: 'PropertyCommentCreatePreverences',
       props: props,
-      style: {
-        position: 'absolute',
-        width: '600px',
-        height: 'auto',
-        top: (((top.innerHeight / 2) - 400) + 'px'),
-        left: (((top.innerWidth / 2) - 300) + 'px'),
-        backgroundColor: '#ffffff',
-      }
+      style: style
     }
   }
   top.dispatchEvent(event);

@@ -5,12 +5,14 @@ import Comment from '../sub/Comment.vue';
 import axios from 'axios';
 
 function style() {
+  const t = ((top.innerHeight / 2) - 400); 
+  const l = ((top.innerWidth / 2) - 300);
   return {
     position: 'absolute',
     width: '600px',
     height: '800px',
-    top: (((top.innerHeight / 2) - 400) + 'px'),
-    left: (((top.innerWidth / 2) - 300) + 'px'),
+    top: ((t > 0 ? t : 0) + 'px'),
+    left: ((l > 0 ? l : 0) + 'px'),
     backgroundColor: '#ffffff',
   }
 }

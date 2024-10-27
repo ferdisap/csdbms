@@ -17,6 +17,20 @@ const dialog = () => {
 }
 export {dialog}
 
+function style() {
+  const t = ((top.innerHeight / 2) - 100); 
+  const l = ((top.innerWidth / 2) - 200);
+  return {
+    position: 'absolute',
+    width: '400px',
+    height: '',
+    top: ((t > 0 ? t : 0) + 'px'),
+    left: ((l > 0 ? l : 0) + 'px'),
+    backgroundColor: '#ffffff',
+  }
+}
+export {style}
+
 export default {
   data(){
     return {

@@ -56,7 +56,8 @@ export default {
       const response = await axios({
         url: "/api/s1000d/path/" + this.$props.path,
         method: 'GET',
-        params: { sc: this.sc, stt: this.$props.status }
+        // params: { sc: this.sc, stt: this.$props.status }
+        params: { sc: this.sc }
       });
       this.$emit('success', response)
     },

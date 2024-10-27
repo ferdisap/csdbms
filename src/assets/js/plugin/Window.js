@@ -23,6 +23,9 @@ import ErrorResponseMessage from './ErrorResponseMessage';
 import { addGetLogic } from '../util/ObjectProperty';
 // import { createRouter, createWebHistory } from 'vue-router';
 // import RoutesVue from './../RoutesVue';
+import {style as styleProperty} from '../../vue/components/window/child/Property.vue'
+import {style as styleDialog} from '../../vue/components/window/child/Dialog.vue'
+import {style as styleAlert} from '../../vue/components/window/child/Alert.vue'
 
 // create window
 const _window = function (data) {
@@ -364,18 +367,10 @@ class Window {
     el.isMaximize = false;
     el.enableSizing = false;
 
-    if (style) {
-      Object.keys(style).forEach(key => {
-        el.style[key] = style[key]
-      })
-    } else {
-      el.style.position = 'absolute';
-      el.style.width = '400px';
-      el.style.height = '';
-      el.style.top = (((top.innerHeight / 2) - 100) + 'px');
-      el.style.left = (((top.innerWidth / 2) - 200) + 'px');
-      el.style.backgroundColor = '#ffffff';
-    }
+    if (!style) style = styleDialog();
+    Object.keys(style).forEach(key => {
+      el.style[key] = style[key]
+    })
 
     dialog.id = el.id;
 
@@ -425,17 +420,10 @@ class Window {
     el.isMaximize = false;
     el.enableSizing = false;
 
-    if (style) {
-      Object.keys(style).forEach(key => {
-        el.style[key] = style[key]
-      })
-    } else {
-      el.style.position = 'absolute';
-      el.style.width = '400px';
-      el.style.top = (((top.innerHeight / 2) - 100) + 'px');
-      el.style.left = (((top.innerWidth / 2) - 200) + 'px');
-      el.style.backgroundColor = '#ffffff';
-    }
+    if (!style) style = styleAlert();
+    Object.keys(style).forEach(key => {
+      el.style[key] = style[key]
+    })
 
     alert.id = el.id
 
@@ -475,18 +463,10 @@ class Window {
     el.enableSizing = false;
     el.enableMoving = true;
 
-    if (style) {
-      Object.keys(style).forEach(key => {
-        el.style[key] = style[key]
-      })
-    } else {
-      el.style.position = 'absolute';
-      el.style.width = '600px';
-      el.style.height = '800px';
-      el.style.top = (((top.innerHeight / 2) - 400) + 'px');
-      el.style.left = (((top.innerWidth / 2) - 300) + 'px');
-      el.style.backgroundColor = '#ffffff';
-    }
+    if (!style) style = styleProperty();
+    Object.keys(style).forEach(key => {
+      el.style[key] = style[key]
+    })
 
     property.id = el.id
 

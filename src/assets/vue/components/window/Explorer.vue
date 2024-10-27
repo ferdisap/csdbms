@@ -9,9 +9,16 @@ export default {
   data(){
     return{
       // auth: auth()
+      path: '',
     }
   },
+  emits:['tes'],
   components: { TitleBar, ListTree, Folder, Tes },
+  methods:{
+    clickFolderFromListtree({storage,path}){
+      this.path = path;
+    }
+  },
   mounted(){
     top.exp = this;
     // top.auth = this.auth;
@@ -23,10 +30,10 @@ export default {
     <TitleBar title="Explorer"/>
     <div class="flex h-[calc(100%-3rem)] space-x-2 w-full">
       <div class="h-full w-72">
-        <ListTree/>
+        <ListTree @clickFilename="" @clickFolder="clickFolderFromListtree"/>
       </div>
       <div class="w-[calc(100%-18rem)] h-full">
-        <Folder status="act"/>
+        <Folder status="act" :path="path"/>
       </div>
     </div>
   </div>

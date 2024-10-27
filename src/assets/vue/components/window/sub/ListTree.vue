@@ -82,19 +82,21 @@ function render(stringhtml) {
 
   // onclick folder
   container.querySelectorAll("summary > .folder").forEach(el => {
-    if (!el.clickFolder) {
+    if (!el.clickFolderListener) {
       // add here listener
-      el.addEventListener('click', () => console.log('click Folder', getCsdbData(el.closest(".cb-room").getAttribute('path'))))
-      el.clickFolder = true
+      el.addEventListener('click',function(){
+        this.closest(".listtree").__vnode.ctx.emit('clickFolder', getCsdbData(el.closest(".cb-room").getAttribute('path')))
+      })
+      el.clickFolderListener = true
     }
   })
   // onclick filename
   container.querySelectorAll("details .filename").forEach(el => {
-    if (!el.clickFilename) {
+    if (!el.clickFilenameListener) {
       // add here listener
       // el.addEventListener('click',() => console.log('click Filename: ', el.closest(".cb-room").cbWindow.cbValue), getCsdbData(el.closest(".cb-room").cbWindow.cbValue))
       el.addEventListener('click', () => console.log('click Filename: ', getCsdbData(el.closest(".cb-room").cbWindow.cbValue)))
-      el.clickFilename = true
+      el.clickFilenameListener = true
     }
   })
 }
@@ -137,15 +139,6 @@ async function start() {
   fetchList.apply(this);
 }
 
-
-
-
-
-
-
-
-
-
 // ############
 
 export default {
@@ -163,6 +156,7 @@ export default {
       default: {},
     },
   },
+  emits:['clickFilename', 'clickFolder'],
   methods: {
     /*
     * akan mendelete jika newModel tidak ada
@@ -180,44 +174,16 @@ export default {
       }); // ini akan mereturn Array: index#0 path, index#1 Array berisi csdb object
       return csdb;
     },
-    pushList(model) {
-      let path = model.path;
-      this.data.list[path] = this.data.list[path] ?? [];
-      this.data.list[path].push(model);
-
-      let split = model.path.split("/");
-      let level = split.length;
-      let p = [];
-      for (let i = 1; i <= level; i++) {
-        p.push(split[i - 1]);
-        this.data.level[i] = this.data.level[i] ?? [];
-        this.data.level[i].push(p.join("/"));
-      }
-      let foundLevel = Object.entries(this.data.level).find(arr => arr[0] == level); // output ['level', Array containing path];;
-      if (foundLevel && !(this.data.level[foundLevel[0]].find(v => v === model.path))) { // agar tidak terduplikasi path nya
-        this.data.level[foundLevel[0]].push(model.path)
-      }
-    },
     /**
      * digunakan untuk emit.on('ListTree-refresh')
      */
-    refresh(data) {
-      //data adalah model SQL Csdb Object atau array contain csdb object (bukan meta objek nya)
-      if (isArray(data)) {
-        data.forEach((obj) => {
-          this.deleteList(obj.filename)
-          this.pushList(obj);
-        });
-      } else if (data) {
-        this.deleteList(data.filename)
-        this.pushList(data);
-      } else {
-        fetchList.apply(this);
-      }
+    refresh() {
+      fetchList.apply(this);
       createListTreeHTML.apply(this);
     },
     clickFolder(data) {
       console.log('click folder', data);
+      this.$emit('clickFolder', )
     },
     clickFilename(data) {
       console.log('click filename', data);

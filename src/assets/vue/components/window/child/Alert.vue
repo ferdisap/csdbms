@@ -11,20 +11,32 @@ const alert = () => {
   const result = () => promise;
   return { ok, result };
 }
+export { alert }
 
-export {alert}
+function style() {
+  const t = ((top.innerHeight / 2) - 100);
+  const l = ((top.innerWidth / 2) - 200);
+  return {
+    position: 'absolute',
+    width: '400px',
+    top: ((t > 0 ? t : 0) + 'px'),
+    left: ((l > 0 ? l : 0) + 'px'),
+    backgroundColor: '#ffffff',
+  }
+}
+export { style }
 
 export default {
   components: { TitleBar },
-  computed:{
-    alertType(){
+  computed: {
+    alertType() {
       switch (this.$props.type) {
         case 'warning': return 'warning';
         case 'caution': return 'error';
         default: return 'help';
       }
     },
-    titleBgColor(){
+    titleBgColor() {
       switch (this.$props.type) {
         case 'warning': return 'bg-red-500';
         case 'caution': return 'bg-yellow-400';
@@ -48,12 +60,12 @@ export default {
   },
   methods: {
     ok() {
-      if(this._.appContext.app.windowId) top.document.getElementById(this._.appContext.app.windowId).alert.ok();
+      if (this._.appContext.app.windowId) top.document.getElementById(this._.appContext.app.windowId).alert.ok();
       else top.document.alertResult[this.$el.parentElement.id].ok();
       this.$el.dispatchEvent(new Event('close-window'));
     },
   },
-  mounted(){
+  mounted() {
     top.al = this;
   }
 }
@@ -61,7 +73,8 @@ export default {
 
 <template>
   <div class="alert h-full w-full border shadow-md">
-    <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" :cache-button="false" :close-button="false" :bg-color="titleBgColor"/>
+    <TitleBar :sizing-button="false" :hide-button="false" :title="$props.title" :cache-button="false"
+      :close-button="false" :bg-color="titleBgColor" />
     <div class="px-3 py-1">
       <div class="min-h-20 text-lg mt-2">
         <div class="flex">
@@ -71,7 +84,8 @@ export default {
       </div>
 
       <div class="text-center mt-2 mb-2">
-        <button @click="this.ok" class="bg-slate-200 hover:bg-slate-300 shadow-md px-2 py-1 rounded-md font-bold">Ok</button>
+        <button @click="this.ok"
+          class="bg-slate-200 hover:bg-slate-300 shadow-md px-2 py-1 rounded-md font-bold">Ok</button>
       </div>
     </div>
   </div>

@@ -100,7 +100,8 @@ export default {
     },
     status: {
       type: String,
-    }
+      default: 'act'
+    },
   },
   computed: {
     pagination() {
@@ -116,7 +117,7 @@ export default {
   methods: {
     getObjs: function (path, data = {}) {
       this.clp(true);
-      data.stt = this.$props.status;
+      // data.stt = this.$props.status; // sepertinya tidak perlu agar folder akan request semua file sesuai pathnya
       axios({
         url: "/api/s1000d/path/" + path,
         method: 'GET',
@@ -131,7 +132,6 @@ export default {
       if (response.statusText === 'OK' || ((response.status >= 200) && (response.status < 300))) {
         this.data.csdbs = response.data.pagination.data; // array contain object csdb
         this.data.folders = response.data.paths; // array contain string path
-        this._.props.path = response.data.path;
         this.data.paginationInfo = response.data.pagination;
       }
       this.clp(false);
@@ -145,13 +145,11 @@ export default {
         this.storingResponse(await axios.get(url));
       }
     },
-    back: async function (path = undefined) {
-      if (!path) path = this.$props.path.replace(/\/\w+\/?$/, "");
-      this.getObjs(path);
+    back: async function () {
+      this._.props.path = this.$props.path.replace(/\/\w+\/?$/, "");
     },
     clickFolder: function (path) {
-      this._.path = path;
-      this.back(path);
+      this._.props.path = path
     },
     clickFilename: async function (filename, path, storage) {
       openDetailObjectPropertyWindow(this.$el.parentElement.closest(".app-window"), filename, path, storage);
@@ -375,7 +373,7 @@ export default {
       this.storingResponse(response);
       installCheckbox(this.$el.querySelector(".cb-home"));
       this.clp(false);
-    }
+    },
   },
   beforeCreate(){
     useCache.apply(this);
@@ -384,9 +382,14 @@ export default {
     addSetLogic(this.$el.querySelector(".cb-home"), 'sm', (ctx, value) => {
       this.selectionMode = value;
       return value;
+    })    
+    addSetLogic(this._.props,'path', (ctx, v) => {
+      if(v) this.getObjs(v);
+      return v;
     })
+    if(!this.$props.path) this._.props.path = this.$props.status === 'act' ? 'CSDB' : 'DELETED';
     this.getObjs(this.$props.path);
-    top.folder = this;
+    top.folder = this;    
   },
 }
 </script>
@@ -397,14 +400,14 @@ export default {
 }
 </style>
 <template>
-  <div :id="componentId" class="folder h-full w-full shadow-md border p-2">
+  <div :id="componentId" class="folder h-full w-full shadow-md p-2">
     <div class="h-[100%] w-full relative overflow-x-auto">
 
       <div class="h-[50px] mb-3 flex items-center space-x-4">
-        <button @click="back()" class="material-symbols-outlined has-tooltip-right hover:bg-gray-100 block"
+        <button @click="back" class="material-symbols-outlined has-tooltip-right hover:bg-gray-100 block"
           data-tooltip="back">keyboard_backspace</button>
         <h1 class="text-2xl inline w-full"><span>#/</span>{{ this.$props.path.toUpperCase() }}</h1>
-        <SearchCsdb :path="$props.path" @start="() => clp(true)" @success="onSearchSuccess" :status="$props.status" />
+        <SearchCsdb :path="$props.path" @start="() => clp(true)" @success="onSearchSuccess" />
       </div>
 
       <div class="h-[calc(100%-90px)] overflow-y-auto">

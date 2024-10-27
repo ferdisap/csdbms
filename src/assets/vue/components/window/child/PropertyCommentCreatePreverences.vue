@@ -2,6 +2,20 @@
 import Property from './Property.vue';
 import { installDropdown } from '../../../../js/plugin/Dropdown.js';
 
+function style() {
+  const t = ((top.innerHeight / 2) - 400);
+  const l = ((top.innerWidth / 2) - 300);
+  return {
+    position: 'absolute',
+    width: '600px',
+    height: 'auto',
+    top: ((t > 0 ? t : 0) + 'px'),
+    left: ((l > 0 ? l : 0) + 'px'),
+    backgroundColor: '#ffffff',
+  }
+}
+export { style }
+
 export default {
   components: { Property },
   props: {
@@ -11,7 +25,7 @@ export default {
     countryIsoCode: { type: String },
     languageIsoCode: { type: String },
     securityClassification: { type: String },
-    
+
     brexDmRef: { type: String },
 
     parentCommentFilename: { type: String },
@@ -48,11 +62,13 @@ export default {
             <div class="flex items-center mt-1 text-left mb-2">
               <div class="w-1/2 mr-1">
                 <label for="languageIsoCode" class="mr-2 font-semibold italic">Lang:</label>
-                <input name="languageIsoCode" id="languageIsoCode" class="mr-2 p-2 rounded-md w-full" :value="$props.languageIsoCode" />
+                <input name="languageIsoCode" id="languageIsoCode" class="mr-2 p-2 rounded-md w-full"
+                  :value="$props.languageIsoCode" />
               </div>
               <div class="w-1/2 ml-1">
                 <label for="countryIsoCode" class="mr-2 font-semibold italic">Country:</label>
-                <input name="countryIsoCode" id="countryIsoCode" class="p-2 rounded-md w-full" :value="$props.countryIsoCode" />
+                <input name="countryIsoCode" id="countryIsoCode" class="p-2 rounded-md w-full"
+                  :value="$props.countryIsoCode" />
               </div>
             </div>
             <div class="error-form" v-html="$props.errors['languageIsoCode']"></div>
@@ -68,8 +84,8 @@ export default {
             <!-- comment security class  -->
             <div class="flex items-center mb-2">
               <label for="securityClassification" class="italic font-semibold ml-1 mr-2">Security Classification:</label>
-              <input name="securityClassification" id="securityClassification" placeholder="eg:. 05" :value="$props.securityClassification"
-                class="w-[50px] p-2" type="number" min="1" max="5" step="1"
+              <input name="securityClassification" id="securityClassification" placeholder="eg:. 05"
+                :value="$props.securityClassification" class="w-[50px] p-2" type="number" min="1" max="5" step="1"
                 onchange="if(parseInt(this.value,10)<10)this.value='0'+this.value;" />
             </div>
             <div class="error-form" v-html="$props.errors['securityClassification']"></div>

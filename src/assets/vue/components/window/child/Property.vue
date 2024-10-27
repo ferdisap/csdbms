@@ -2,6 +2,20 @@
 import { formDataToObject } from '../../../../js/util/helper';
 import TitleBar from '../../gui/TitleBar.vue';
 
+function style() {
+  const t = ((top.innerHeight / 2) - 400); 
+  const l = ((top.innerWidth / 2) - 300);
+  return {
+    position: 'absolute',
+    width: '600px',
+    height: '800px',
+    top: ((t > 0 ? t : 0) + 'px'),
+    left: ((l > 0 ? l : 0) + 'px'),
+    backgroundColor: '#ffffff',
+  }
+}
+export {style}
+
 /**
  * Tidak seperti Alert dan Dialog, Property bisa reject karena 
  * misal jika user ingin buat commment pakai property window, jika cancel maka logic creating comment di vueComponent akan dihentikan
