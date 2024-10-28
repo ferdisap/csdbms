@@ -1,4 +1,16 @@
 const array_unique = (arr) => arr.filter((value, index, a) => a.indexOf(value) === index);
+function getCsdbData(fullPath){
+  //const fulPath = `CSDB/DML/DML-MALE-0001Z-P-2024-00004_000-01.xml`;
+  const m = /([\w\/]+)\/(?<=\/)([\w\-.]+)|([\w\/]+)/.exec(fullPath).filter(v => v);
+  if(m[2] && !m[2].includes(".")) {
+    m[1] += "/" + m[2];
+    m[2] = undefined;
+  }
+  return {
+      path: m[1],
+      filename: m[2]
+  }
+}
 
 function ListTree() {
   return {
@@ -14,6 +26,8 @@ function ListTree() {
       return new Promise(async (resolve, reject) => {
         if (response.ok) {
           let json = await response.json();
+          // console.log(json);
+          // console.log(window.json = json);
           // resolve(setListTreeData(json.csdbs)); // jika ingin pakai modul
           // resolve(this.setListTreeData(json.csdbs));
           resolve(this.setListTreeData(json.csdbs)); //[storage,path,filename]
@@ -28,14 +42,17 @@ function ListTree() {
      */
     setListTreeData: function (responseData) {
       // sortir berdasarkan path
-      responseData = responseData.sort((a, b) => {
-        return a[1] > b[1] ? 1 : (a[1] < b[1] ? -1 : 0); // 1 adalah path
-      });
+      // responseData = responseData.sort((a, b) => {
+      //   return a[1] > b[1] ? 1 : (a[1] < b[1] ? -1 : 0); // 1 adalah path
+      // });
+      responseData = responseData.sort();
       // sortir object dan level path nya eg: "/csdb/n219/amm" berarti level 3
       let obj = {};
       let levels = {};
       for (const v of responseData) {
-        let path = v[1]
+        // let path = v[1];
+        const url = new URL('s1000d:'+ v);
+        const {path,filename} = getCsdbData(url.pathname);
         let split = path.split("/");
         let l = split.length;
 
@@ -50,9 +67,10 @@ function ListTree() {
 
         obj[path] = obj[path] || [];
         obj[path].push({
-          filename: v[2],
-          // path: v[1],
-          storage: v[0],
+          filename: filename,
+          path: path,
+          storage: '#',
+          access_key: url.searchParams.get('access_key'),
         });
       }
       
@@ -65,14 +83,12 @@ function ListTree() {
         style ? (style = `style="${style}"`) : '';
         let listobj = '';
         if (models) { // ada kemungkinan models undefined karena path "csdb/n219/amm", csdb/n219 nya tidak ada csdbobject nya
-          Object.keys(models).forEach(path => {
+          Object.values(models).forEach(model => {
             const href = '#';
-            const model = models[path];
             const isICN = model.filename.substr(0, 3) === 'ICN';
             const logo = isICN ? `<i class="material-symbols-outlined item">mms</i>&#160;` : `<i class="material-symbols-outlined item">description</i>&#160;`;
-            const cb = `<span class="cb-window"><input type="checkbox" value="${model.storage}/${path}/${model.filename}"/></span>`;
-            listobj = listobj + `
-                 <div class="cb-room" ${style}> ${cb}${logo}<a href="${href}" class="filename">${model.filename}</a></div>`
+            const cb = `<span class="cb-window"><input type="checkbox" value="${model.path}/${model.filename}?access_key=${model.access_key}"/></span>`;
+            listobj = listobj + `<div class="cb-room" ${style}> ${cb}${logo}<a href="${href}" class="filename">${model.filename}</a></div>`
           })
         }
         return listobj
@@ -95,8 +111,9 @@ function ListTree() {
             ) {
               continue;
             }
-            const storage = dataobj[path] ? dataobj[path][0]['storage'] : '#'; // sengaja ambil index ke 0 karena semua csdb storagenya sama
-            let isOpen = this.open ? this.open[storage + "/" + path] : false;
+            // const storage = dataobj[path] ? dataobj[path][0]['storage'] : '#'; // sengaja ambil index ke 0 karena semua csdb storagenya sama
+            // let isOpen = this.open ? this.open[storage + "/" + path] : false;
+            let isOpen = this.open ? this.open[path] : false;
             isOpen = isOpen ? 'open' : '';
             const cbAll = `<span class="cb-window-all"><input type="checkbox" value=""/></span>`;
 
@@ -118,9 +135,9 @@ function ListTree() {
             //    <a href="#" @click.prevent="$parent.clickFolder({path: '${path}'})">${currFolder}</a>
             //  </summary>`;
             details = details + `
-            <details ${isOpen} class="cb-room" path="${storage}/${path}">
+            <details ${isOpen} class="cb-room" path="${path}">
               <summary class="list-none flex">
-              <i expand-collapse-btn="${storage}/${path}" class="material-symbols-outlined chevron">chevron_right</i> 
+              <i expand-collapse-btn="${path}" class="material-symbols-outlined chevron">chevron_right</i> 
                ${cbAll}
                <a href="#" class="folder">${currFolder}</a>
              </summary>`;

@@ -7,10 +7,15 @@
     @apply text-lg
   }
   .comment .type-q {
-    @apply ml-1 mt-1 p-1
+    @apply ml-1 mt-1 flex
   }
+
   .comment .type-i, .comment .type-r {
-    @apply ml-2 mt-1
+    @apply ml-2 flex
+  }
+
+  .comment .cb-window {
+    @apply pt-3
   }
 
   .comment .date {
@@ -18,7 +23,7 @@
   }
 
   .comment .para-container {
-    @apply hover:bg-blue-300 min-h-10 border
+    @apply hover:bg-blue-300 min-h-10
   }
 
   .comment .list .simple-para {
@@ -50,6 +55,6 @@
   }
 
   .comment .com-filename {
-    @apply text-xs italic text-gray-700
+    @apply text-xs italic text-pink-500 bg-gray-100 p-1 rounded-md
   }
 }

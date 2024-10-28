@@ -2,18 +2,31 @@ import jp from 'jsonpath';
 import axios from 'axios';
 
 function getCsdbData(fullPath){
-  //const fulPath = `mbb38/CSDB/DML/DML-MALE-0001Z-P-2024-00004_000-01.xml`;
-  const m = /(\w+|#)\/([\w\/]+)\/(?<=\/)([\w\-.]+)|(\w+|#)\/([\w\/]+)/.exec(fullPath).filter(v => v);
-  if(m[3] && !m[3].includes(".")) {
-    m[2] += "/" + m[3];
-    m[3] = undefined;
+  //const fulPath = `CSDB/DML/DML-MALE-0001Z-P-2024-00004_000-01.xml`;
+  const m = /([\w\/]+)\/(?<=\/)([\w\-.]+)|([\w\/]+)/.exec(fullPath).filter(v => v);
+  if(m[2] && !m[2].includes(".")) {
+    m[1] += "/" + m[2];
+    m[2] = undefined;
   }
   return {
-      storage: m[1],
-      path: m[2],
-      filename: m[3]
+      path: m[1],
+      filename: m[2]
   }
 }
+
+// function getCsdbData(fullPath){
+//   //const fulPath = `mbb38/CSDB/DML/DML-MALE-0001Z-P-2024-00004_000-01.xml`;
+//   const m = /(\w+|#)\/([\w\/]+)\/(?<=\/)([\w\-.]+)|(\w+|#)\/([\w\/]+)/.exec(fullPath).filter(v => v);
+//   if(m[3] && !m[3].includes(".")) {
+//     m[2] += "/" + m[3];
+//     m[3] = undefined;
+//   }
+//   return {
+//       storage: m[1],
+//       path: m[2],
+//       filename: m[3]
+//   }
+// }
 
 export {getCsdbData}
 

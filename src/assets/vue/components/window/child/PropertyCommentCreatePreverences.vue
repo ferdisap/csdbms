@@ -45,7 +45,7 @@ export default {
 <template>
   <Property title="Preferences Comment">
     <template #content>
-      <form @submit.prevent class="border p-2">
+      <form @submit.prevent class="propertycommentcreatepreferences border p-2">
         <h1 class="text-center font-bold mb-2 text-lg">Preferences</h1>
         <div class="w-full text-center mb-2 relative">
           <input class="hidden" name="parentCommentFilename" :value="$props.parentCommentFilename" />

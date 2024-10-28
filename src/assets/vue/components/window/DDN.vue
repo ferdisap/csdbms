@@ -3,16 +3,16 @@ import TitleBar from '../gui/TitleBar.vue';
 import ContinuousLoadingCircle from '../sub/ContinuousLoadingCircle.vue';
 import FloatMenu from '../menu/FloatMenu.vue';
 import jp from 'jsonpath';
-import { jsonFileGetRemarks, resolve_dmIdent, resolve_ddnCode , resolve_issueDate } from '../../../js/util/S1000DHelper';
+import { jsonFileGetRemarks, resolve_dmIdent, resolve_ddnCode, resolve_issueDate } from '../../../js/util/S1000DHelper';
 import axios from 'axios';
 import Remarks from '../sub/Remarks.vue';
 import { installCheckbox, select, cancel } from '../../../js/gui/Checkbox';
 import Randomstring from 'randomstring';
 import { addSetLogic } from '../../../js/util/ObjectProperty';
-import { openFile } from './sub/Folder.vue';
+import { openFile, openDetailObjectPropertyWindow } from './sub/Folder.vue';
 
 function openDialogOverWriteImport(windowEl, filenames) {
-  filenames = filenames.map(v => v = "<code class='filename'>"+v+"</code>");
+  filenames = filenames.map(v => v = "<code class='filename'>" + v + "</code>");
   const event = new Event("new-window");
   event.data = {
     parent: {
@@ -54,9 +54,10 @@ export default {
   },
   data() {
     return {
-      componentId: Randomstring.generate({charset:'alphabetic'}),
+      componentId: Randomstring.generate({ charset: 'alphabetic' }),
       DDNObject: {},
       selectionMode: undefined,
+      owner: {},
     }
   },
   methods: {
@@ -71,49 +72,61 @@ export default {
       })
         .then(response => {
           this.DDNObject = DDN(response.data.json);
-          setTimeout(installCheckbox,0,this.$el.querySelector(".cb-home"))
+          this.owner = response.data.csdb.owner
+          setTimeout(installCheckbox, 0, this.$el.querySelector(".cb-home"))
         })
         .finally(() => this.clp(false))
     },
-    importCsdb(){
+    importCsdb() {
       const cbHome = this.$el.querySelector(".cb-home");
       let filenames = cbHome.cbValues;
-      if(!filenames.length) filenames = [cbHome.current.cbWindow.cbValue];
+      if (!filenames.length) filenames = [cbHome.current.cbWindow.cbValue];
       const put = (data) => {
         axios.put("/api/s1000d/csdb/import/" + this.$props.filename, data)
-        .then(response => {
-          // console.log(top.rsp = response);
-        })
-        .catch(async(error) => {
-          // console.log(top.err = error);
-          if(error.status == 499){
-            const windowEl = this.$el.closest(".app-window");
-            openDialogOverWriteImport(windowEl, error.response.data.errors.failure)
-            if(await windowEl.dialog.result()){
-              put({
-                filenames: filenames,
-                overwrite: 1
-              })
+          .then(response => {
+            // console.log(top.rsp = response);
+          })
+          .catch(async (error) => {
+            // console.log(top.err = error);
+            if (error.status == 499) {
+              const windowEl = this.$el.closest(".app-window");
+              openDialogOverWriteImport(windowEl, error.response.data.errors.failure)
+              if (await windowEl.dialog.result()) {
+                put({
+                  filenames: filenames,
+                  overwrite: 1
+                })
+              }
             }
-          }
-        })
+          })
       }
-      put({filenames: filenames})
+      put({ filenames: filenames })
     },
-    open(filename){
-      if(filename){
+    openDetail(filename){
+      openDetailObjectPropertyWindow(this.$el.closest(".app-window"), filename, this.owner.storage, undefined, {params: {csdbRef: this.$props.filename}});
+    },
+    open(filename) {
+      if (filename) {
+        console.log(filename)
         openFile({
-          filename: filename, 
+          filename: filename,
           route: {
             params: {
               csdbRef: this.$props.filename
             }
-        }});
+          }
+        });
         return;
-        
       }
       const cbHome = this.$el.querySelector(".cb-home");
-      openFile(cbHome.current.cbWindow.cbValue);
+      openFile({
+        filename: cbHome.current.cbWindow.cbValue,
+        route: {
+          params: {
+            csdbRef: this.$props.filename
+          }
+        }
+      });
     }
   },
   mounted() {
@@ -167,17 +180,17 @@ export default {
               <table class="cb-home">
                 <thead>
                   <tr class="cb-room">
-                    <th class="cb-window-all"><input type="checkbox"/></th>
+                    <th class="cb-window-all"><input type="checkbox" /></th>
                     <th class="text-left px-2">No</th>
                     <th class="text-left px-2">Filename</th>
                   </tr>
                 </thead>
                 <tbody v-if="DDNObject.dispatchFileNames && DDNObject.dispatchFileNames.length">
-                  <tr v-for="(filename, i) in DDNObject.dispatchFileNames" class="cb-room" @dblclick="open(filename)">
+                  <tr v-for="(filename, i) in DDNObject.dispatchFileNames" class="cb-room" @dblclick="openDetail(filename)">
                     <td class="cb-window">
                       <input type="checkbox" :value="filename">
                     </td>
-                    <td class="text-left px-2">{{ i+1 }}</td>
+                    <td class="text-left px-2">{{ i + 1 }}</td>
                     <td class="text-left px-2">{{ filename }}</td>
                   </tr>
                 </tbody>
@@ -201,7 +214,7 @@ export default {
         </div>
       </div>
       <div v-else>
-        <div class="list" @click="open">
+        <div class="list" @click="open()">
           <div>open</div>
         </div>
       </div>

@@ -31,25 +31,34 @@ export default {
     filename: { type: String },
     path: { type: String },
     storage: { type: String },
+    route: { type: Object, default: {} },
   },
   methods: {
     requestData(navName) {
       switch (navName) {
         case 'ident':
-          if (!this.data.ident) axios.get("/api/s1000d/ident/" + this.$props.filename).then((response) => {
+          if (!this.data.ident) axios({
+            url: "/api/s1000d/ident/" + this.$props.filename, method: 'GET', params: this.$props.route.params
+          }).then((response) => {
             this.data.ident = response.data.csdb.ident;
             this.data.owner = response.data.csdb.owner;
             this.data.initiator = response.data.csdb.initiator;
           });
           break;
         case 'status':
-          if (!this.data.status) axios.get("/api/s1000d/status/" + this.$props.filename).then((response) => this.data.status = response.data.csdb.status);
+          if (!this.data.status) axios({
+            url: "/api/s1000d/status/" + this.$props.filename, method: 'GET', params: this.$props.route.params
+          }).then((response) => this.data.status = response.data.csdb.status);
           break;
         case 'history':
-          if (!this.data.history) axios.get("/api/s1000d/histories/" + this.$props.filename).then((response) => this.data.history = response.data.csdb.histories);
+          if (!this.data.history) axios({
+            url: "/api/s1000d/histories/" + this.$props.filename, method: 'GET', params: this.$props.route.params
+          }).then((response) => this.data.history = response.data.csdb.histories);
           break;
         // case 'comment': 
-        //   if(!this.data.comment) axios.get("/api/s1000d/comments/" + this.$props.filename).then((response) => this.data.comment = response.data.csdb.comments);
+        //   if(!this.data.comment) axios({
+        //     url: "/api/s1000d/comments/" + this.$props.filename, method: 'GET', params: this.$props.route.params
+        //}).then((response) => this.data.comment = response.data.csdb.comments);
         //   break;
       }
     },

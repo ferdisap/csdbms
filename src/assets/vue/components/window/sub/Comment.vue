@@ -1,8 +1,9 @@
 <script>
 import axios from 'axios';
-import { installCheckbox } from '../../../../js/gui/Checkbox';
+import { installCheckbox, select, cancel } from '../../../../js/gui/Checkbox';
 import FloatMenu from '../../menu/FloatMenu.vue';
 import { style } from '../child/PropertyCommentCreatePreverences.vue';
+import { addSetLogic } from '../../../../js/util/ObjectProperty';
 
 function openPreferences(windowEl, props) {
   const event = new Event("new-window");
@@ -14,7 +15,7 @@ function openPreferences(windowEl, props) {
     property: {
       name: 'PropertyCommentCreatePreverences',
       props: props,
-      style: style
+      style: style()
     }
   }
   top.dispatchEvent(event);
@@ -61,11 +62,11 @@ function htmlString(coms) {
   const makeTemplate = (comment) => {
     let str = `<div class="cb-room list type-${comment.commentType}">`;
     str += `<div class="cb-window"><input type="checkbox" value="${comment.csdb.filename}"></input></div>`;
+    str += `<div class="p-1">`;
     str += `<div>`;
-    str += `<div comment-type="${comment.commentType}">`;
     // add comment sender last name
     str += `<h6>${comment.csdb.initiator.email}<span class="date"> ${comment.csdb.last_history.created_at}</span></h6>`
-    str += `<div class="com-filename">${comment.csdb.filename}</div>`
+    str += `<div><code class="com-filename">${comment.csdb.filename}</code></div>`
     // add comment para
     str += `<div class="para-container">`;
     comment.commentContent.forEach(content => {
@@ -99,14 +100,16 @@ function htmlString(coms) {
   return template;
 }
 
-function createEditor() {
+function createEditor(parentCommentFilename) {
   let div = document.getElementById("comment-editor-container");
   if (!div) {
     div = document.createElement('div');
-    div.setAttribute('class', 'editor-container');
     div.id = "comment-editor-container";
-    div.innerHTML = `<text-editor name="commentContentSimplePara"></text-editor>
-      <button id="sendBtn" type="submit" class="material-icons send">send</button>`;
+    div.innerHTML = `<div>replying comment <code class="com-filename">${parentCommentFilename}</code></div>
+      <div class="editor-container">
+      <text-editor name="commentContentSimplePara"></text-editor>
+      <button id="sendBtn" type="submit" class="material-symbols-outlined send">send</button>
+      </div>`;
   }
   return div;
 }
@@ -116,6 +119,8 @@ export default {
   data() {
     return {
       commentPreferencesData: {},
+      selectionMode: false,
+      commentEditor: undefined
     };
   },
   props: {
@@ -149,7 +154,7 @@ export default {
             form.innerHTML = `<div class="text-center w-full">No comments available.</div>`;
           } else {
             form.innerHTML = template;
-            installCheckbox(form);
+            installCheckbox(form, {disableMark:true});
           }
         });
     },
@@ -162,11 +167,7 @@ export default {
         });
     },
     makeEditor(isReply) {
-      // harusnya position dan parentCommentFilename ditaruh sesua dengan Checkbox current
       const form = this.$el.querySelector("form#comment-form");
-      form.appendChild(createEditor());
-      top.form = form;
-
       if(isReply){
         const cbRoom = form.current;
         this.commentPreferencesData.parentCommentFilename = cbRoom.cbWindow.cbValue
@@ -178,13 +179,29 @@ export default {
         this.commentPreferencesData.commentType = 'q';
         this.commentPreferencesData.position = [...form.querySelectorAll(".cb-room.type-q")].length;
       }
+      this.commentEditor = createEditor(this.commentPreferencesData.parentCommentFilename);
+      form.appendChild(this.commentEditor);
     },
     cancel() {
-      document.getElementById('comment-editor-container').remove();
+      cancel();
+      if(this.commentEditor){
+        this.commentEditor.remove();
+        this.commentEditor = undefined;
+      }
+    },
+    select(){
+      select();
     }
+
   },
   mounted() {
     top.cmt = this;
+
+    addSetLogic(this.$el.querySelector(".cb-home"), 'sm', (ctx, value) => {
+      this.selectionMode = value;
+      return value;
+    });
+
     this.commentPreferencesData = {
       brexDmRef: '',
       commentPriorityCode: 'cp01',
@@ -212,6 +229,12 @@ export default {
       </div>
       <div class="list" @click="makeEditor(false)">
         <div>new</div>
+      </div>
+      <div class="list" @click="select">
+        <div>select</div>
+      </div>
+      <div class="list" @click="cancel">
+        <div>cancel</div>
       </div>
     </FloatMenu>
   </div>

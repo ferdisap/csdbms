@@ -4,19 +4,26 @@ import ListTree from './sub/ListTree.vue';
 import Tes from './sub/Tes.vue';
 import Folder from './sub/Folder.vue';
 import { auth } from '../../../js/Auth';
+import { getCsdbData } from '../../../js/util/S1000DHelper';
 
 export default {
   data(){
     return{
       // auth: auth()
-      path: '',
+      // path: '',
+      csdb: {},
     }
   },
   emits:['tes'],
   components: { TitleBar, ListTree, Folder, Tes },
   methods:{
-    clickFolderFromListtree({storage,path}){
-      this.path = path;
+    // clickFolderFromListtree({storage,path}){
+    //   this.path = path;
+    // }
+    clickFolderFromListtree(url){
+      url = new URL("s1000d:"+url)
+      this.csdb = getCsdbData(url.pathname);
+      this.csdb.access_key = url.searchParams.get('access_key');
     }
   },
   mounted(){
@@ -30,10 +37,11 @@ export default {
     <TitleBar title="Explorer"/>
     <div class="flex h-[calc(100%-3rem)] space-x-2 w-full">
       <div class="h-full w-72">
-        <ListTree @clickFilename="" @clickFolder="clickFolderFromListtree"/>
+        <ListTree @clickFilename="clickFolderFromListtree" @clickFolder="clickFolderFromListtree"/>
       </div>
       <div class="w-[calc(100%-18rem)] h-full">
-        <Folder status="act" :path="path"/>
+        <!-- <Folder status="act" :path="path"/> -->
+        <Folder status="act" :path="csdb.path" :access_key="csdb.access_key"/>
       </div>
     </div>
   </div>

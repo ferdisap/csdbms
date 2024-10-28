@@ -200,10 +200,11 @@ function setEventListnener(cbHome) {
  * 2. use installCheckbox(cbHomeTarget)
  * 3. use hideAll(), showALl(), push() to manipulating display
  * 
+ * config.disableMark digunakan di Comment.vue
  * cb-window attribute must be a parent of a checkbox;
  * @param {HTMLElement} cbHome 
  */
-function installCheckbox(cbHome) {
+function installCheckbox(cbHome, config = {}) {
   // set attribute
   cbHome.classList.add("cb-home")
 
@@ -233,11 +234,13 @@ function installCheckbox(cbHome) {
   }
 
   // add mark border on cbRoom, saat di coba, event terdispatch 2x padahal script ini dijalankan sekali hanya untuk listtree
-  const cbRooms = cbHome.querySelectorAll(".cb-room");
-  for (let i = 0; i < cbRooms.length; i++) {
-    if (!cbRooms[i].addedListenerForMark) {
-      cbRooms[i].addEventListener('pointerup', mark.bind(cbRooms[i]))
-      cbRooms[i].addedListenerForMark = true;
+  if(!config.disableMark){
+    const cbRooms = cbHome.querySelectorAll(".cb-room");
+    for (let i = 0; i < cbRooms.length; i++) {
+      if (!cbRooms[i].addedListenerForMark) {
+        cbRooms[i].addEventListener('pointerup', mark.bind(cbRooms[i]))
+        cbRooms[i].addedListenerForMark = true;
+      }
     }
   }
 }

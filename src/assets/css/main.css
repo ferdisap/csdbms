@@ -20,7 +20,7 @@ body{
 
 @layer components{
   .floatmenu{
-    @apply border shadow-md
+    @apply shadow-md
   }
   .floatmenu .container{
     @apply bg-white w-60 flex flex-col text-base py-1 px-1 text-gray-500 shadow-md rounded-md

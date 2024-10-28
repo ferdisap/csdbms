@@ -16,8 +16,9 @@ async function fetchList() {
   }
   const worker = new WorkerListTree;
   worker.onmessage = (e) => {
-    this.data.level = e.data[1];
-    this.data.list = e.data[0];
+    // this.data.level = e.data[1];
+    // this.data.list = e.data[0];
+    createListTreeHTML.call(this, e.data[0],e.data[1],this.$props.open)
 
     worker.terminate();
   }
@@ -51,7 +52,6 @@ async function fetchList() {
 function render(stringhtml) {
   const container = this.$el.querySelector(".listtree-tree");
   container.innerHTML = stringhtml;
-  top.ihtml = stringhtml;
   installCheckbox(container);
 
   // open/close details
@@ -66,7 +66,7 @@ function render(stringhtml) {
         // set icon
         details.firstElementChild.firstElementChild.innerHTML = details.open ? 'keyboard_arrow_down' : 'chevron_right'
         if (!this.component.deref().$data.open) {
-          const expandCollapseListTreeFromLocalStorage = top.sessionStorage.getItem("listtree://"+window.location.origin + window.location.pathname + window.location.search);
+          const expandCollapseListTreeFromLocalStorage = top.sessionStorage.getItem("listtree:"+ window.location.pathname + window.location.search);
           if (expandCollapseListTreeFromLocalStorage) {
             this.component.deref().$data.open = JSON.parse(expandCollapseListTreeFromLocalStorage)
           } else {
@@ -74,7 +74,7 @@ function render(stringhtml) {
           }
         }
         this.component.deref().$data.open[path] = details.open;
-        top.sessionStorage.setItem("listtree://"+window.location.origin + window.location.pathname + window.location.search, JSON.stringify(this.component.deref().$data.open))
+        top.sessionStorage.setItem("listtree:" + window.location.pathname + window.location.search, JSON.stringify(this.component.deref().$data.open))
       }.bind(el))
       el.expandCollapseListener = true;
     }
@@ -85,7 +85,7 @@ function render(stringhtml) {
     if (!el.clickFolderListener) {
       // add here listener
       el.addEventListener('click',function(){
-        this.closest(".listtree").__vnode.ctx.emit('clickFolder', getCsdbData(el.closest(".cb-room").getAttribute('path')))
+        this.closest(".listtree").__vnode.ctx.emit('clickFolder', el.closest(".cb-room").getAttribute('path'));
       })
       el.clickFolderListener = true
     }
@@ -95,13 +95,15 @@ function render(stringhtml) {
     if (!el.clickFilenameListener) {
       // add here listener
       // el.addEventListener('click',() => console.log('click Filename: ', el.closest(".cb-room").cbWindow.cbValue), getCsdbData(el.closest(".cb-room").cbWindow.cbValue))
-      el.addEventListener('click', () => console.log('click Filename: ', getCsdbData(el.closest(".cb-room").cbWindow.cbValue)))
+      el.addEventListener('click', function(){
+        this.closest(".listtree").__vnode.ctx.emit('clickFilename', el.closest(".cb-room").cbWindow.cbValue);
+      });
       el.clickFilenameListener = true
     }
   })
 }
 
-function createListTreeHTML() {
+function createListTreeHTML(list, level,open) {
   const hrefForPdf = '#';
   const hrefForHtml = '#';
   const hrefForOther = '#';
@@ -115,9 +117,9 @@ function createListTreeHTML() {
     mode: 'createHTMLString',
     data: {
       start_l: 1,
-      list_level: isProxy(this.data.level) ? toRaw(this.data.level) : this.data.level,
-      list: isProxy(this.data.list) ? toRaw(this.data.list) : this.data.list,
-      open: this._.props.open,
+      list_level: level,
+      list: list,
+      open: open,
       hrefForPdf: hrefForPdf,
       hrefForHtml: hrefForHtml,
       hrefForOther: hrefForOther,
@@ -126,16 +128,18 @@ function createListTreeHTML() {
 }
 
 async function start() {
-  this.data = new Proxy({}, {
-    set: (t, k, v) => {
-      t[k] = v;
-      if (k === 'list') {
-        setTimeout(createListTreeHTML.apply(this));
-      };
-      return true;
-    }
-  });
-  this._.props.open = JSON.parse(top.sessionStorage.getItem("listtree://"+window.location.origin + window.location.pathname + window.location.search));
+  // this.data = new Proxy({}, {
+  //   set: (t, k, v) => {
+  //     // t[k] = v;
+  //     // if (k === 'list') {
+  //       // setTimeout(createListTreeHTML.apply(this));
+  //     // };
+  //     console.log(v);
+  //     setTimeout(createListTreeHTML.apply(this, v, this._.props.open));
+  //     return true;
+  //   }
+  // });
+  this._.props.open = JSON.parse(top.sessionStorage.getItem("listtree:" + window.location.pathname + window.location.search));
   fetchList.apply(this);
 }
 
@@ -179,7 +183,6 @@ export default {
      */
     refresh() {
       fetchList.apply(this);
-      createListTreeHTML.apply(this);
     },
     clickFolder(data) {
       console.log('click folder', data);

@@ -12,7 +12,7 @@ import { style as pdoStyle } from '../child/PropertyDetailObject.vue';
 import { style as pdtStyle } from '../child/PropertyDispatchTo.vue';
 import { useCache } from '../../../../js/plugin/sub/WindowCache';
 
-function openDetailObjectPropertyWindow(windowEl, filename, path, storage) {
+function openDetailObjectPropertyWindow(windowEl, filename, path, storage, route = {}) {
   const event = new Event("new-window");
   const style = pdoStyle();
   style.height = 'auto';
@@ -27,6 +27,7 @@ function openDetailObjectPropertyWindow(windowEl, filename, path, storage) {
         filename: filename,
         path: path,
         storage: storage,
+        route,
       },
       style: style
     }
@@ -103,6 +104,9 @@ export default {
     path: {
       type: String,
       default: 'csdb'
+    },
+    access_key:{
+      type: String,
     },
     status: {
       type: String,
