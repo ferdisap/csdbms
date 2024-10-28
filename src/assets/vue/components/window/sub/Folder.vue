@@ -51,8 +51,13 @@ function openDispatchToPropertyWindow(windowEl) {
   top.dispatchEvent(event);
 }
 
-function openFile(filename){
-  let name = filename.substring(0,3);
+// digunakan di Folder.vue dan DDN.vue
+// function openFile(filename){
+/**
+ * minimal ada filename
+ */
+function openFile(props = {}){
+  let name = props.filename.substring(0,3);
   if(!(name === ('DML') || name === 'DDN')) {
     // nama component/window sama, yaitu 'DML'||'DDN',
     // jika DMC,MC,COM,, dll akan terbuka menggunakan editor XML
@@ -63,9 +68,7 @@ function openFile(filename){
     parent: {
       type: 'window',
       name: name,
-      props: {
-        filename: filename
-      },
+      props,
       style: {
         position: 'absolute',
         width: '600px',
@@ -191,7 +194,7 @@ export default {
     openTr() {
       const cbHome = this.$el.querySelector('.cb-home');
       if (cbHome.current && cbHome.current.matches(".file-row")) {
-        openFile(cbHome.current.cbWindow.cbValue)
+        openFile({filename: cbHome.current.cbWindow.cbValue})
       }
       else this.clickFolder(cbHome.current.cbWindow.cbValue);
     },

@@ -102,7 +102,13 @@ export default {
     },
     open(filename){
       if(filename){
-        openFile(filename);
+        openFile({
+          filename: filename, 
+          route: {
+            params: {
+              csdbRef: this.$props.filename
+            }
+        }});
         return;
         
       }

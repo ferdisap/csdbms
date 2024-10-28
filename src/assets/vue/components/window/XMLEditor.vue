@@ -36,12 +36,13 @@ class XMLEditor {
     });
   }
 
-  fetchRaw = (filename) => {
+  fetchRaw = (filename, params) => {
     this.changeText(' ON LOADING...');
 
     axios({
       url: "/api/s1000d/csdb/read/" + filename,
       method: 'GET',
+      params: params
     })
       .then(response => {
         if ((response.statusText === 'OK' || ((response.status >= 200) && (response.status < 300))) && !this.stop) this.changeText(response.data);
@@ -87,6 +88,10 @@ export default {
     path: {
       type: String
     },
+    route: {
+      type:Object,
+      default: {}
+    }
   },
   methods:{
     // jika PUT method, maka masih belum tau caranya membaca data di laravel kalau request pakai formdata, 
@@ -109,7 +114,7 @@ export default {
   },
   mounted() {
     this.editor.attachEditor();
-    if(this.$props.filename) this.editor.fetchRaw(this.$props.filename);
+    if(this.$props.filename) this.editor.fetchRaw(this.$props.filename, this.$props.route.params);
   },
 }
 </script>
