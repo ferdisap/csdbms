@@ -3,7 +3,7 @@ import TitleBar from '../gui/TitleBar.vue';
 import ContinuousLoadingCircle from '../sub/ContinuousLoadingCircle.vue';
 import FloatMenu from '../menu/FloatMenu.vue';
 import jp from 'jsonpath';
-import { jsonFileGetRemarks, resolve_dmIdent, resolve_ddnCode, resolve_issueDate } from '../../../js/util/S1000DHelper';
+import { getCsdbData, jsonFileGetRemarks, resolve_dmIdent, resolve_ddnCode, resolve_issueDate } from '../../../js/util/S1000DHelper';
 import axios from 'axios';
 import Remarks from '../sub/Remarks.vue';
 import { installCheckbox, select, cancel } from '../../../js/gui/Checkbox';
@@ -55,7 +55,8 @@ export default {
   data() {
     return {
       componentId: Randomstring.generate({ charset: 'alphabetic' }),
-      DDNObject: {},
+      DDNObject: [],
+      DDNObjectContent: {}, // diambil dari csdb, karena ada access key nya
       selectionMode: undefined,
       owner: {},
     }
@@ -73,6 +74,15 @@ export default {
         .then(response => {
           this.DDNObject = DDN(response.data.json);
           this.owner = response.data.csdb.owner
+          this.DDNObjectContent = response.data.csdb.object.ddnContent.map((url) => {
+            url = new URL(url);
+            const {filename, path} = getCsdbData(url.pathname);
+            return {
+              filename: filename,
+              path: path,
+              access_key: encodeURIComponent(url.searchParams.get('access_key'))
+            }
+          })
           setTimeout(installCheckbox, 0, this.$el.querySelector(".cb-home"))
         })
         .finally(() => this.clp(false))
@@ -102,28 +112,32 @@ export default {
       }
       put({ filenames: filenames })
     },
-    openDetail(filename){
-      openDetailObjectPropertyWindow(this.$el.closest(".app-window"), filename, this.owner.storage, undefined, {params: {csdbRef: this.$props.filename}});
+    openDetail(filename, path, access_key){
+      openDetailObjectPropertyWindow(this.$el.closest(".app-window"), filename, path, access_key);
     },
-    open(filename) {
+    open(filename, access_key) {
       if (filename) {
-        console.log(filename)
         openFile({
           filename: filename,
           route: {
             params: {
-              csdbRef: this.$props.filename
+              // csdbRef: this.$props.filename
+              access_key: access_key
             }
           }
         });
         return;
       }
       const cbHome = this.$el.querySelector(".cb-home");
+      const url = new URL(cbHome.current.cbWindow.cbValue);
+      var {filename, path} = getCsdbData(url.pathname);
       openFile({
-        filename: cbHome.current.cbWindow.cbValue,
+        filename: filename,
+        path: path,
         route: {
           params: {
-            csdbRef: this.$props.filename
+            // csdbRef: this.$props.filename
+            access_key: url.searchParams.get('access_key')
           }
         }
       });
@@ -135,6 +149,7 @@ export default {
       return value;
     });
     this.showContent(this.$props.filename)
+    top.ddn = this;
   }
 }
 </script>
@@ -185,7 +200,16 @@ export default {
                     <th class="text-left px-2">Filename</th>
                   </tr>
                 </thead>
-                <tbody v-if="DDNObject.dispatchFileNames && DDNObject.dispatchFileNames.length">
+                <tbody>
+                  <tr v-for="(csdb, i) in DDNObjectContent" class="cb-room" @dblclick="openDetail(csdb.filename, csdb.path, csdb.access_key)">
+                    <td class="cb-window">
+                      <input type="checkbox" :value="'s1000d:'+csdb.path+'/'+csdb.filename+'?access_key='+csdb.access_key">
+                    </td>
+                    <td class="text-left px-2">{{ i + 1 }}</td>
+                    <td class="text-left px-2">{{ csdb.filename }}</td>
+                  </tr>
+                </tbody>
+                <!-- <tbody v-if="DDNObject.dispatchFileNames && DDNObject.dispatchFileNames.length">
                   <tr v-for="(filename, i) in DDNObject.dispatchFileNames" class="cb-room" @dblclick="openDetail(filename)">
                     <td class="cb-window">
                       <input type="checkbox" :value="filename">
@@ -193,7 +217,7 @@ export default {
                     <td class="text-left px-2">{{ i + 1 }}</td>
                     <td class="text-left px-2">{{ filename }}</td>
                   </tr>
-                </tbody>
+                </tbody> -->
               </table>
             </div>
           </form>

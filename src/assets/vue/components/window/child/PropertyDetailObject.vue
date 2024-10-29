@@ -30,7 +30,7 @@ export default {
   props: {
     filename: { type: String },
     path: { type: String },
-    storage: { type: String },
+    access_key: { type: String },
     route: { type: Object, default: {} },
   },
   methods: {
@@ -38,7 +38,7 @@ export default {
       switch (navName) {
         case 'ident':
           if (!this.data.ident) axios({
-            url: "/api/s1000d/ident/" + this.$props.filename, method: 'GET', params: this.$props.route.params
+            url: "/api/s1000d/ident/" + this.$props.filename + '?access_key=' + this.$props.access_key, method: 'GET', params: this.$props.route.params
           }).then((response) => {
             this.data.ident = response.data.csdb.ident;
             this.data.owner = response.data.csdb.owner;
@@ -47,12 +47,12 @@ export default {
           break;
         case 'status':
           if (!this.data.status) axios({
-            url: "/api/s1000d/status/" + this.$props.filename, method: 'GET', params: this.$props.route.params
+            url: "/api/s1000d/status/" + this.$props.filename + '?access_key=' + this.$props.access_key, method: 'GET', params: this.$props.route.params
           }).then((response) => this.data.status = response.data.csdb.status);
           break;
         case 'history':
           if (!this.data.history) axios({
-            url: "/api/s1000d/histories/" + this.$props.filename, method: 'GET', params: this.$props.route.params
+            url: "/api/s1000d/histories/" + this.$props.filename + '?access_key=' + this.$props.access_key, method: 'GET', params: this.$props.route.params
           }).then((response) => this.data.history = response.data.csdb.histories);
           break;
         // case 'comment': 
@@ -157,7 +157,7 @@ export default {
               </div>
               <!-- comment -->
               <div v-show="data.nav === 'comment'">
-                <Comment :filename="$props.filename" :path="$props.path" :storage="$props.storage" />
+                <Comment :filename="$props.filename" :path="$props.path" :access_key="$props.access_key" />
               </div>
             </div>
           </div>

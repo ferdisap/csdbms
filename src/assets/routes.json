@@ -1,6 +1,6 @@
 {
   "api.get_csdbs" : {
-    "path": "/api/s1000d/all",
+    "path": "/api/s1000d/csdb/all",
     "methods": ["GET"],
     "#": "baru dipakai di Dropdown.js"
   },

@@ -17,13 +17,14 @@ export default {
   emits:['tes'],
   components: { TitleBar, ListTree, Folder, Tes },
   methods:{
-    // clickFolderFromListtree({storage,path}){
-    //   this.path = path;
-    // }
-    clickFolderFromListtree(url){
-      url = new URL("s1000d:"+url)
+    clickFilenameFromListtree(url){
+      url = new URL(url)
       this.csdb = getCsdbData(url.pathname);
       this.csdb.access_key = url.searchParams.get('access_key');
+    },
+    clickFolderFromListtree(path){
+      this.csdb = getCsdbData(path);
+      this.csdb.access_key = undefined
     }
   },
   mounted(){
@@ -31,13 +32,13 @@ export default {
     // top.auth = this.auth;
   }
 }
-</script>
+</script> 
 <template>
   <div class="explorer h-full w-full border shadow-md">
     <TitleBar title="Explorer"/>
     <div class="flex h-[calc(100%-3rem)] space-x-2 w-full">
       <div class="h-full w-72">
-        <ListTree @clickFilename="clickFolderFromListtree" @clickFolder="clickFolderFromListtree"/>
+        <ListTree @clickFilename="clickFilenameFromListtree" @clickFolder="clickFolderFromListtree"/>
       </div>
       <div class="w-[calc(100%-18rem)] h-full">
         <!-- <Folder status="act" :path="path"/> -->

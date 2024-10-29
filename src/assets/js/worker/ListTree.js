@@ -51,7 +51,7 @@ function ListTree() {
       let levels = {};
       for (const v of responseData) {
         // let path = v[1];
-        const url = new URL('s1000d:'+ v);
+        const url = new URL(v);
         const {path,filename} = getCsdbData(url.pathname);
         let split = path.split("/");
         let l = split.length;
@@ -87,7 +87,7 @@ function ListTree() {
             const href = '#';
             const isICN = model.filename.substr(0, 3) === 'ICN';
             const logo = isICN ? `<i class="material-symbols-outlined item">mms</i>&#160;` : `<i class="material-symbols-outlined item">description</i>&#160;`;
-            const cb = `<span class="cb-window"><input type="checkbox" value="${model.path}/${model.filename}?access_key=${model.access_key}"/></span>`;
+            const cb = `<span class="cb-window"><input type="checkbox" value="s1000d:${model.path}/${model.filename}?access_key=${model.access_key}"/></span>`;
             listobj = listobj + `<div class="cb-room" ${style}> ${cb}${logo}<a href="${href}" class="filename">${model.filename}</a></div>`
           })
         }

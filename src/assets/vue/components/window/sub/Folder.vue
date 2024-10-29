@@ -12,7 +12,7 @@ import { style as pdoStyle } from '../child/PropertyDetailObject.vue';
 import { style as pdtStyle } from '../child/PropertyDispatchTo.vue';
 import { useCache } from '../../../../js/plugin/sub/WindowCache';
 
-function openDetailObjectPropertyWindow(windowEl, filename, path, storage, route = {}) {
+function openDetailObjectPropertyWindow(windowEl, filename, path, access_key, route = {}) {
   const event = new Event("new-window");
   const style = pdoStyle();
   style.height = 'auto';
@@ -26,7 +26,7 @@ function openDetailObjectPropertyWindow(windowEl, filename, path, storage, route
       props: {
         filename: filename,
         path: path,
-        storage: storage,
+        access_key: access_key,
         route,
       },
       style: style
@@ -161,8 +161,8 @@ export default {
     clickFolder: function (path) {
       this._.props.path = path
     },
-    clickFilename: async function (filename, path, storage) {
-      openDetailObjectPropertyWindow(this.$el.parentElement.closest(".app-window"), filename, path, storage);
+    clickFilename: async function (filename, path, access_key) {
+      openDetailObjectPropertyWindow(this.$el.parentElement.closest(".app-window"), filename, path, access_key);
     },
     edit() {
       // get filename
@@ -442,7 +442,7 @@ export default {
                 <span class="text-base">{{ path.split("/").at(-1) }} </span>
               </td>
             </tr>
-            <tr v-for="obj in data.csdbs" @dblclick.prevent="clickFilename(obj.filename, obj.path, obj.owner.storage)"
+            <tr v-for="obj in data.csdbs" @dblclick.prevent="clickFilename(obj.filename, obj.path, obj.access_key.key)"
               class="cb-room file-row text-base hover:bg-blue-300 cursor-pointer">
               <td class="cb-window"><input file type="checkbox" :value="obj.filename"></td>
               <td class="leading-3 text-base">

@@ -115,6 +115,7 @@ export default {
   mounted() {
     this.editor.attachEditor();
     if(this.$props.filename) this.editor.fetchRaw(this.$props.filename, this.$props.route.params);
+    top.xmled = this;
   },
 }
 </script>

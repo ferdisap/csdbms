@@ -11,6 +11,7 @@ function getCsdbData(fullPath){
   return {
       path: m[1],
       filename: m[2]
+      
   }
 }
 

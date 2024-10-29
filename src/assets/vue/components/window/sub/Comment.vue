@@ -126,15 +126,15 @@ export default {
   props: {
     filename: { type: String },
     path: { type: String },
-    storage: { type: String },
+    access_key: { type: String },
   },
   methods: {
     submitComment(event) {
       this.commentPreferencesData.csdb = {
         filename: this.$props.filename,
         path: this.$props.path,
-        storage: this.$props.storage,
       };
+      this.commentPreferencesData.access_key = this.$props.access_key;
       this.commentPreferencesData.commentContentSimplePara = event.target.querySelector("text-editor[name='commentContentSimplePara']").value,
         top.cpd = JSON.stringify(this.commentPreferencesData);
       // return;
@@ -146,7 +146,7 @@ export default {
         });
     },
     fetchComment() {
-      axios.get("/api/s1000d/comments/" + this.$props.filename)
+      axios.get("/api/s1000d/comments/" + this.$props.filename + "?access_key=" + this.$props.access_key)
         .then((response) => {
           const template = htmlString(arrangeComments(response.data.csdb.comments));
           const form = this.$el.querySelector("form#comment-form");
