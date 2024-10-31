@@ -95,10 +95,8 @@ function useCache() {
     const rootCurrUid = this._.root.uid;
     const selisihUid = rootPrevUid - rootCurrUid;
     const curUid = this._.uid;
-    const cachedProps = cached.child[curUid + selisihUid];
-    Object.keys(this._.props).forEach(keys => {
-      this._.props[keys] = cachedProps[keys];
-    })
+    const cachedProps = (curUid + selisihUid) === rootPrevUid ? cached.props : cached.child[curUid + selisihUid];
+    Object.keys(this._.props).forEach(keys => this._.props[keys] = cachedProps[keys]);
   }
 }
 

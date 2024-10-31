@@ -40,7 +40,7 @@ class XMLEditor {
     this.changeText(' ON LOADING...');
 
     axios({
-      url: "/api/s1000d/csdb/read/" + filename,
+      url: "/api/s1000d/csdb/read/" + filename + '?form=xml',
       method: 'GET',
       params: params
     })

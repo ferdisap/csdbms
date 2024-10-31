@@ -51,6 +51,15 @@ export default {
         }}
       })
     },
+    newICN(event){
+      event.preventDefault();
+      this.$window.create({
+        parent: {type: 'window', name: 'ICN'},
+        task: {
+          props: {title: 'ICN'
+        }}
+      })
+    },
   },
   mounted(){
     document.addEventListener('start-menu',()=>{
@@ -99,6 +108,11 @@ export default {
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
       <i class="material-symbols-outlined">lan</i>
       <span class="font-semibold">Data Management List</span>
+    </a>
+    <a href="#" @click="newICN"
+      class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">
+      <i class="material-symbols-outlined">movie</i>
+      <span class="font-semibold">Information Control Number</span>
     </a>
     <!-- <RouterLink @click="newHelloWorld()" :to="$router.resolve({name: 'HelloWorld'})['fullPath']"
       class="flex items-center text-base space-x-1 hover:bg-neutral-100 py-1 px-1">

@@ -25,6 +25,7 @@ export default {
       data: {
         nav: 'ident'
       },
+      fetching: 'fetching...'
     }
   },
   props: {
@@ -40,6 +41,10 @@ export default {
           if (!this.data.ident) axios({
             url: "/api/s1000d/ident/" + this.$props.filename + '?access_key=' + this.$props.access_key, method: 'GET', params: this.$props.route.params
           }).then((response) => {
+            if(response.status === 204) {
+              this.fetching = 'Not available.'
+              return;
+            };
             this.data.ident = response.data.csdb.ident;
             this.data.owner = response.data.csdb.owner;
             this.data.initiator = response.data.csdb.initiator;
@@ -48,12 +53,24 @@ export default {
         case 'status':
           if (!this.data.status) axios({
             url: "/api/s1000d/status/" + this.$props.filename + '?access_key=' + this.$props.access_key, method: 'GET', params: this.$props.route.params
-          }).then((response) => this.data.status = response.data.csdb.status);
+          }).then((response) => {
+            if(response.status === 204) {
+              this.fetching = 'Not available.'
+              return;
+            };
+            this.data.status = response.data.csdb.status
+          });
           break;
         case 'history':
           if (!this.data.history) axios({
             url: "/api/s1000d/histories/" + this.$props.filename + '?access_key=' + this.$props.access_key, method: 'GET', params: this.$props.route.params
-          }).then((response) => this.data.history = response.data.csdb.histories);
+          }).then((response) => {
+            if(response.status === 204) {
+              this.fetching = 'Not available.'
+              return;
+            };
+            this.data.history = response.data.csdb.histories;
+          });
           break;
         // case 'comment': 
         //   if(!this.data.comment) axios({
@@ -64,7 +81,7 @@ export default {
     },
   },
   mounted() {
-    // top.pdo = this;
+    top.pdo = this;
     addSetLogic(this.data, 'nav', (ctx, v) => {
       this.requestData(v);
       return v;
@@ -123,7 +140,7 @@ export default {
                   <span class="font-bold">{{ key }}: </span>
                   <span class="ml-2">{{ value }}</span>
                 </div>
-                <div v-else class="p-4 text-center text-gray-300">fetching...</div>
+                <div v-else class="p-4 text-center text-gray-300">{{ fetching }}</div>
               </div>
               <!-- status -->
               <div v-show="data.nav === 'status'">
@@ -131,7 +148,7 @@ export default {
                   <span class="font-bold">{{ key }}: </span>
                   <span class="ml-2">{{ value }}</span>
                 </div>
-                <div v-else class="p-4 text-center text-gray-300">fetching...</div>
+                <div v-else class="p-4 text-center text-gray-300">{{ fetching }}</div>
               </div>
               <!-- history -->
               <div v-show="data.nav === 'history'">
@@ -153,7 +170,7 @@ export default {
                     </tbody>
                   </table>
                 </div>
-                <div v-else class="p-4 text-center text-gray-300">fetching...</div>
+                <div v-else class="p-4 text-center text-gray-300">{{ fetching }}</div>
               </div>
               <!-- comment -->
               <div v-show="data.nav === 'comment'">

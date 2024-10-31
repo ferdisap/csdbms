@@ -4,6 +4,7 @@ import HelloWorld from '../../vue/components/window/HelloWorld.vue';
 import Explorer from '../../vue/components/window/Explorer.vue';
 import DML from '../../vue/components/window/DML.vue';
 import DDN from '../../vue/components/window/DDN.vue';
+import ICN from '../../vue/components/window/ICN.vue';
 import XMLEditor from '../../vue/components/window/XMLEditor.vue';
 import Trash from '../../vue/components/window/Trash.vue';
 import Alert from '../../vue/components/window/child/Alert.vue';
@@ -861,6 +862,9 @@ function createWindow(config) {
       break;
     case 'DDN':
       component = DDN;
+      break;
+    case 'ICN':
+      component = ICN;
       break;
     case 'Trash':
       component = Trash;
