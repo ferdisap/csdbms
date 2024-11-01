@@ -304,10 +304,11 @@ export default {
         })
         .finally(() => this.clp(false))
     },
-    showContent(filename) {
+    showContent(filename, csl = false) {
       this.clp(true);
+      const url = (csl ? "/api/s1000d/csl/" : "/api/s1000d/dml/") + filename;
       axios({
-        url: "/api/s1000d/csdb/read/" + filename,
+        url: url,
         method: 'GET',
         params: { form: 'json' }
       })
@@ -338,7 +339,11 @@ export default {
             answer: data.answer,
             remarks: data.remarks,
           }, '', data.entryIdent);
-          cbRoom.insertAdjacentHTML('afterend', trString);
+          if(cbRoom.parentElement.tagName === 'TBODY'){
+            cbRoom.insertAdjacentHTML('afterend', trString);
+          } else {
+            this.$el.querySelector("table tbody").innerHTML = trString;
+          }
           installCheckbox(cbRoom.closest('.cb-home'));
         });
     },
@@ -521,7 +526,7 @@ export default {
             </div>
           </form>
 
-          <form @submit.prevent="mergeDML" class="border p-2 text-center max-w-[250px] h-[calc(100%-10px)] overflow-auto">
+          <form v-if="DMLType !== 's'" @submit.prevent="mergeDML" class="border p-2 text-center max-w-[250px] h-[calc(100%-10px)] overflow-auto">
             <div class="text-center">
               <label class="font-semibold mb-2 block">Merge DML</label>
               <input placeholder="search filename" type="text" class="p-2 w-full ml-1text-sm rounded-lg border"
@@ -554,8 +559,21 @@ export default {
       <div class="list" @click="remove">
         <div>remove</div>
       </div>
+      <div v-if="DMLType !== 's'" class="list" @click="showContent($props.filename, true)">
+        <div>see csl</div>
+      </div>
+      <div v-else class="list" @click="showContent($props.filename, false)">
+        <div>see dml</div>
+      </div>
     </FloatMenu>
-    <FloatMenu v-if="isDML" :trigger="[{ triggerId: dmlIdentStatusId, on: 'contextmenu' }]" />
+    <FloatMenu v-if="isDML" :trigger="[{ triggerId: dmlIdentStatusId, on: 'contextmenu' }]">
+      <div v-if="DMLType !== 's'" class="list" @click="showContent($props.filename, true)">
+        <div>see csl</div>
+      </div>
+      <div v-else class="list" @click="showContent($props.filename, false)">
+        <div>see dml</div>
+      </div>
+    </FloatMenu>
     <ContinuousLoadingCircle />
   </div>
 </template>
