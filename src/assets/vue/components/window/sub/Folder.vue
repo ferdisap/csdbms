@@ -57,12 +57,14 @@ function openDispatchToPropertyWindow(windowEl) {
 /**
  * minimal ada filename
  */
-function openFile(props = {}){
-  let name = props.filename.substring(0,3);
-  if(!(name === ('DML') || name === 'DDN' || name === 'ICN')) {
-    // nama component/window sama, yaitu 'DML'||'DDN',
-    // jika DMC,MC,COM,, dll akan terbuka menggunakan editor XML
-    name = 'XMLEditor';
+function openFile(props = {},name){
+  if(!name){
+    let name = props.filename.substring(0,3);
+    if(!(name === ('DML') || name === 'DDN' || name === 'ICN')) {
+      // nama component/window sama, yaitu 'DML'||'DDN',
+      // jika DMC,MC,COM,, dll akan terbuka menggunakan editor XML
+      name = 'XMLEditor';
+    }
   }
   const event = new Event("new-window");
   event.data = {

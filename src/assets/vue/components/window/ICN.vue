@@ -120,7 +120,7 @@ export default {
         </form>
       </div>
       <div v-if="file" class="p-4 w-full h-full">
-        <h1 class="w-full text-center mb-3 mt-2 font-bold text-2xl h-12">{{ file.name }}</h1>
+        <h1 class="w-full mb-3 mt-2 font-bold text-lg h-12">{{ file.name }}</h1>
         <div class="flex justify-center h-[calc(100%-3.5rem)] w-full">
           <!-- <embed class="w-auto max-w-[100%] h-auto max-h-[100%] border-2 p-4" :src="file.src" :type="file.mime" /> -->
           <embed class="max-w-[100%] h-fit max-h-[100%] border-2 p-4" :src="file.src" :type="file.mime" />

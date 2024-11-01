@@ -6,6 +6,7 @@ import DML from '../../vue/components/window/DML.vue';
 import DDN from '../../vue/components/window/DDN.vue';
 import ICN from '../../vue/components/window/ICN.vue';
 import XMLEditor from '../../vue/components/window/XMLEditor.vue';
+import PDFViewer from '../../vue/components/window/PDFViewer.vue';
 import Trash from '../../vue/components/window/Trash.vue';
 import Alert from '../../vue/components/window/child/Alert.vue';
 import WindowDialog from './sub/WindowDialog';
@@ -101,20 +102,20 @@ const _property = function (data, parentId) {
 class Window {
   zIndex = []; // appId (windowId)
 
-  em = new WeakMap(); // k = windowEl, v = window // deprecated
+  // em = new WeakMap(); // k = windowEl, v = window // deprecated
 
-  // wm = new WeakMap(); // k = task, v = window // nanti dihapus
-  tm = new WeakMap(); // k = window, v = task // deprecated
-  te = new WeakMap(); // k = taskEl, v = task // deprecated
+  // // wm = new WeakMap(); // k = task, v = window // nanti dihapus
+  // tm = new WeakMap(); // k = window, v = task // deprecated
+  // te = new WeakMap(); // k = taskEl, v = task // deprecated
 
-  dm = new WeakMap(); // k = window, v = dialog // deprecated
-  ed = new WeakMap(); // k = dialogEl, v = dialog; // deprecated
+  // dm = new WeakMap(); // k = window, v = dialog // deprecated
+  // ed = new WeakMap(); // k = dialogEl, v = dialog; // deprecated
 
-  am = new WeakMap(); // k = window, v = alert // deprecated
-  ea = new WeakMap(); // k = alertEl, v = alert; // // deprecated
+  // am = new WeakMap(); // k = window, v = alert // deprecated
+  // ea = new WeakMap(); // k = alertEl, v = alert; // // deprecated
 
-  pm = new WeakMap(); // k = window, v = property
-  ep = new WeakMap(); // k = propertyEl, v = property;
+  // pm = new WeakMap(); // k = window, v = property
+  // ep = new WeakMap(); // k = propertyEl, v = property;
 
   // id
   rootAppId = "app"; // dimana mainApp.mount("#app");
@@ -732,8 +733,13 @@ class Window {
   resetZIndex() {
     this.zIndex = this.zIndex.filter(v => v);
     for (let i = 0; i < this.zIndex.length; i++) {
-      const element = document.getElementById(this.zIndex[i]);
-      if (element) element.style.zIndex = i + 80;
+      const windowEl = document.getElementById(this.zIndex[i]);
+      if (windowEl) {
+        windowEl.style.zIndex = i + 80;
+        if (windowEl.__vue_app__ && windowEl.__vue_app__.child) {
+          this.setToTop(windowEl.__vue_app__.child._container);
+        }
+      }
       else this.zIndex[i] = undefined;
     }
   }
@@ -865,6 +871,9 @@ function createWindow(config) {
       break;
     case 'ICN':
       component = ICN;
+      break;
+    case 'PDFViewer':
+      component = PDFViewer;
       break;
     case 'Trash':
       component = Trash;
