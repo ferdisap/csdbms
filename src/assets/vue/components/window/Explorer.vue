@@ -28,7 +28,7 @@ export default {
     }
   },
   mounted(){
-    top.exp = this;
+    // top.exp = this;
     // top.auth = this.auth;
   }
 }

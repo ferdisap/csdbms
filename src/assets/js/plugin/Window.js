@@ -5,6 +5,7 @@ import Explorer from '../../vue/components/window/Explorer.vue';
 import DML from '../../vue/components/window/DML.vue';
 import DDN from '../../vue/components/window/DDN.vue';
 import ICN from '../../vue/components/window/ICN.vue';
+import ImageMapper from '../../vue/components/window/ImageMapper.vue';
 import XMLEditor from '../../vue/components/window/XMLEditor.vue';
 import PDFViewer from '../../vue/components/window/PDFViewer.vue';
 import Trash from '../../vue/components/window/Trash.vue';
@@ -871,6 +872,9 @@ function createWindow(config) {
       break;
     case 'ICN':
       component = ICN;
+      break;
+    case 'ImageMapper':
+      component = ImageMapper;
       break;
     case 'PDFViewer':
       component = PDFViewer;

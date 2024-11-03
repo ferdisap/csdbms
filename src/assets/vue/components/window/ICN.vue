@@ -28,6 +28,7 @@ export default {
     },
     readEntity(event) {
       const file = event.target.files[0];
+      top.file = file;
       if (file) {
         if (file.type === 'text/xml') {
           event.target.value = '';

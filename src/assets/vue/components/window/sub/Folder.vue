@@ -111,8 +111,7 @@ export default {
       type: String,
     },
     status: {
-      type: String,
-      default: 'act'
+      type: String
     },
   },
   computed: {
@@ -129,7 +128,7 @@ export default {
   methods: {
     getObjs: function (path, data = {}) {
       this.clp(true);
-      // data.stt = this.$props.status; // sepertinya tidak perlu agar folder akan request semua file sesuai pathnya
+      if(this.$props.status) data.stt = this.$props.status; // sepertinya tidak perlu agar folder akan request semua file sesuai pathnya
       axios({
         url: "/api/s1000d/path/" + path,
         method: 'GET',
