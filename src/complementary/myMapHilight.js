@@ -147,7 +147,11 @@ if (has_canvas) {
 
     if (options.fade) {
       canvas.style.opacity = 0;
+<<<<<<< HEAD
       canvas.animate({opacity: [1,1]},{duration: 1, iterations: Infinity});
+=======
+      canvas.animate({opacity: [1,1]},{duration: 1000});
+>>>>>>> be583a167eb8bd18d17d2771842ec6c4ff499dc5
     }
   };
 
@@ -348,11 +352,14 @@ function _onMouseOut(canvas){
  * saat ini options belum di coba
  * check developmentnya di D:\application\Image-map\tes_highlight\myMapHilight.js
  * untuk resolve dimensi <img> dan coordinate, tambahkan attribute width dan height di <map> dengan value sesuai image size saat pembuatan coordinate (size original sebelum <img> di resize)
+<<<<<<< HEAD
  * 
  * jika ada child atau coordinate inside coordinate, maka child pertama adalah inner coordinate
  * eg:
  *  <area shape=rect coords="50,50,100,100"> <!-- the hole in the red box -->
  *  <area shape=rect coords="25,25,125,125" href="red.html" alt="Red box.">
+=======
+>>>>>>> be583a167eb8bd18d17d2771842ec6c4ff499dc5
  * @param {HTMLElement} img 
  * @param {Object} opts 
  * @returns 
@@ -371,7 +378,10 @@ function maphilight(img, opts) {
   if (!usemap) return;
 
   const map = document.querySelector('map[name="' + usemap.substring(1) + '"]');
+<<<<<<< HEAD
   console.log(map);
+=======
+>>>>>>> be583a167eb8bd18d17d2771842ec6c4ff499dc5
   if (!(img.matches('img,input[type="image"]') && usemap && map)) return;
 
   const canvas = create_canvas_for(img);
@@ -382,8 +392,11 @@ function maphilight(img, opts) {
   canvas.height = img.height;
   canvas.width = img.width;
 
+<<<<<<< HEAD
   console.log('aa');
 
+=======
+>>>>>>> be583a167eb8bd18d17d2771842ec6c4ff499dc5
   // Store the current width/height of the image here in case it's being sized by CSS that'll
   // be affected by it being wrapped by the div below. (e.g. width:50%)
   // For now, we'll trust that something else is handling scaling the <area>'s coords to account
