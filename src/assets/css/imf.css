@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .imfContent{
+    @apply p-4 w-full h-full
+  }
+  .imfContent .icnVariation {
+    @apply flex justify-center h-[calc(100%-3.5rem)] w-full
+  }
+}

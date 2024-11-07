@@ -59,8 +59,8 @@ function openDispatchToPropertyWindow(windowEl) {
  */
 function openFile(props = {},name){
   if(!name){
-    let name = props.filename.substring(0,3);
-    if(!(name === ('DML') || name === 'DDN' || name === 'ICN')) {
+    name = props.filename.substring(0,3);
+    if(!(name === ('DML') || name === 'DDN' || name === 'ICN' || name === 'IMF')) {
       // nama component/window sama, yaitu 'DML'||'DDN',
       // jika DMC,MC,COM,, dll akan terbuka menggunakan editor XML
       name = 'XMLEditor';
