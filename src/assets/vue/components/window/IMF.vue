@@ -4,7 +4,7 @@ import ContinuousLoadingCircle from '../sub/ContinuousLoadingCircle.vue';
 import axios from 'axios';
 import config from '../../../config.json';
 import { auth } from '../../../js/Auth';
-import { maphilight } from '../../../../complementary/myMapHilight';
+import { maphilight, uninstall } from '../../../../complementary/myMapHilight';
 
 export default {
   components:{TitleBar, ContinuousLoadingCircle},
@@ -18,7 +18,6 @@ export default {
         (this.$props.access_key ? ('&access_key=' + this.$props.access_key) : '') + 
         (auth().user.accessKey ? ('&user_access_key=' + auth().user.accessKey.key) : ''))
       .then(rsp => {
-        top.rsp = rsp;
         const html = Document.parseHTMLUnsafe(rsp.data)
         const imfContent = html.querySelector(".imfContent")
         imfContent.querySelectorAll("[src]").forEach(el => {
@@ -32,12 +31,20 @@ export default {
   },
   mounted(){
     this.request();
+    top.imf = this;
+    top.maphilight = maphilight;
+    this.$el.closest('.app-window').addEventListener('window-resized',(e) => {
+      const imfImage = this.$el.querySelector('.imfContent img');
+      const imfMap = document.querySelector('map[name="' + imfImage.getAttribute('usemap').substring(1) + '"]');
+      uninstall(imfMap, imfImage);
+      maphilight(imfImage);
+    })
   }
 }
 </script>
 <template>
   <div class="icn h-full w-full border shadow-md bg-slate-50">
-    <TitleBar title="Information Control Number"/>
+    <TitleBar title="ICN Metadata File"/>
     <div class="h-[calc(100%-3rem)] w-full imf-content-container">
 
     </div>

@@ -276,6 +276,8 @@ export default class WindowSize {
       frame.remove();
       setDotsPosition(window);
       setLinesPosition(window);
+      const windowResizedEvent = new Event('window-resized');
+      window.dispatchEvent(windowResizedEvent);      
     },{once:true});
   }
 }

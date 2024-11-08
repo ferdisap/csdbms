@@ -4,6 +4,8 @@ import configApp from '../config.json';
 import { auth, promiseState } from "./Auth";
 import { dialog } from "../vue/components/window/child/Dialog.vue";
 
+top.axios = axios;
+
 function openLoginPage() {
   top.newWindow = top.open("/login.html", "login", "popup,height=800,width=800,left=100");
   top.newWindow.dialog = dialog();

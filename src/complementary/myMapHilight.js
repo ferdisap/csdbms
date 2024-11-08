@@ -8,7 +8,7 @@ function defaultsOpts() {
     strokeColor: 'ff0000',
     strokeOpacity: 1,
     strokeWidth: 1,
-    fade: true,
+    fade: false,
     alwaysOn: false,
     neverOn: false,
     groupBy: false,
@@ -40,7 +40,11 @@ if (has_canvas) {
   hex_to_decimal = (hex) => Math.max(0, Math.min(parseInt(hex, 16), 255));
   css3color = (color, opacity) => 'rgba(' + hex_to_decimal(color.substr(0, 2)) + ',' + hex_to_decimal(color.substr(2, 2)) + ',' + hex_to_decimal(color.substr(4, 2)) + ',' + opacity + ')';
   create_canvas_for = function (img) {
-    const c = document.createElement('canvas');
+    let c = img.parentElement.querySelector('[from="' + img.id + '"]');
+    if (!c) {
+      c = document.createElement('canvas')
+      c.setAttribute('from', img.id);
+    };
     c.setAttribute('style', 'width:' + img.width + 'px;height:' + img.height + 'px;');
     c.getContext("2d").clearRect(0, 0, img.width, img.height);
     return c;
@@ -68,14 +72,13 @@ if (has_canvas) {
 
   add_shape_to = function (canvas, shape, coords, options, name) {
     const context = canvas.getContext('2d');
-
     // Because I don't want to worry about setting things back to a base state
 
     // Shadow has to happen first, since it's on the bottom, and it does some clip /
     // fill operations which would interfere with what comes next.
     if (options.shadow) {
       context.save();
-      if (options.shadowPosition == "inside") {
+      if (options.shadowPosition === "inside") {
         // Cause the following stroke to only apply to the inside of the path
         draw_shape(context, shape, coords);
         context.clip();
@@ -98,23 +101,24 @@ if (has_canvas) {
       // shadow. Allow the user to override this if they need to.
       let shadowFrom = options.shadowFrom;
       if (!shadowFrom) {
-        if (options.shadowPosition == 'outside') {
+        if (options.shadowPosition === 'outside') {
           shadowFrom = 'fill';
         } else {
           shadowFrom = 'stroke';
         }
       }
-      if (shadowFrom == 'stroke') {
+      if (shadowFrom === 'stroke') {
         context.strokeStyle = "rgba(0,0,0,1)";
         context.stroke();
-      } else if (shadowFrom == 'fill') {
+      } else if (shadowFrom === 'fill') {
         context.fillStyle = "rgba(0,0,0,1)";
         context.fill();
       }
       context.restore();
 
       // and now we clean up
-      if (options.shadowPosition == "outside") {
+
+      if (options.shadowPosition === "outside") {
         context.save();
         // Clear out the center
         draw_shape(context, shape, coords);
@@ -126,7 +130,6 @@ if (has_canvas) {
     }
 
     context.save();
-
     draw_shape(context, shape, coords);
 
     // fill has to come after shadow, otherwise the shadow will be drawn over the fill,
@@ -147,11 +150,7 @@ if (has_canvas) {
 
     if (options.fade) {
       canvas.style.opacity = 0;
-<<<<<<< HEAD
-      canvas.animate({opacity: [1,1]},{duration: 1, iterations: Infinity});
-=======
-      canvas.animate({opacity: [1,1]},{duration: 1000});
->>>>>>> be583a167eb8bd18d17d2771842ec6c4ff499dc5
+      canvas.animate({ opacity: [1, 1] }, { duration: 1, iterations: Infinity });
     }
   };
 
@@ -159,7 +158,7 @@ if (has_canvas) {
     canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
   }
 } else {
-  create_canvas_for = function(img){
+  create_canvas_for = function (img) {
     // return $('<var style="zoom:1;overflow:hidden;display:block;width:' + img.width + 'px;height:' + img.height + 'px;"></var>').get(0);
     var c = document.createElement('var');
     c.setAttribute('style', 'zoom:1;overflow:hidden;display:block;width:' + img.width + 'px;height:' + img.height + 'px;');
@@ -172,22 +171,22 @@ if (has_canvas) {
     stroke = (options.stroke ? 'strokeweight="' + options.strokeWidth + '" stroked="t" strokecolor="#' + options.strokeColor + '"' : 'stroked="f"');
     opacity = '<v:stroke opacity="' + options.strokeOpacity + '"/>';
     if (shape === 'rect') {
-      e = document.createElementNS('urn:schemas-microsoft-com:vml','v:rect');
+      e = document.createElementNS('urn:schemas-microsoft-com:vml', 'v:rect');
       e.setAttribute('name', name);
-      e.setAttribute('filled', 't '+ stroke);
+      e.setAttribute('filled', 't ' + stroke);
       e.setAttribute('style', 'zoom:1;margin:0;padding:0;display:block;position:absolute;left:' + coords[0] + 'px;top:' + coords[1] + 'px;width:' + (coords[2] - coords[0]) + 'px;height:' + (coords[3] - coords[1]) + 'px;');
       // e = $('<v:rect name="' + name + '" filled="t" ' + stroke + ' style="zoom:1;margin:0;padding:0;display:block;position:absolute;left:' + coords[0] + 'px;top:' + coords[1] + 'px;width:' + (coords[2] - coords[0]) + 'px;height:' + (coords[3] - coords[1]) + 'px;"></v:rect>');
     } else if (shape === 'poly') {
-      e = document.createElementNS('urn:schemas-microsoft-com:vml','v:shape');
-      e.setAttribute('filled', 't '+ stroke);
+      e = document.createElementNS('urn:schemas-microsoft-com:vml', 'v:shape');
+      e.setAttribute('filled', 't ' + stroke);
       e.setAttribute('coordorigin', canvas.width + ',' + canvas.height);
       e.setAttribute('path', 'm ' + coords[0] + ',' + coords[1] + ' l ' + coords.join(',') + ' x e');
       e.setAttribute('style', 'zoom:1;margin:0;padding:0;display:block;position:absolute;top:0px;left:0px;width:' + canvas.width + 'px;height:' + canvas.height + 'px;')
       // e = $('<v:shape name="' + name + '" filled="t" ' + stroke + ' coordorigin="0,0" coordsize="' + canvas.width + ',' + canvas.height + '" path="m ' + coords[0] + ',' + coords[1] + ' l ' + coords.join(',') + ' x e" style="zoom:1;margin:0;padding:0;display:block;position:absolute;top:0px;left:0px;width:' + canvas.width + 'px;height:' + canvas.height + 'px;"></v:shape>');
     } else if (shape === 'circ') {
-      e = document.createElementNS('urn:schemas-microsoft-com:vml','v:oval');
+      e = document.createElementNS('urn:schemas-microsoft-com:vml', 'v:oval');
       e.setAttribute('name', name);
-      e.setAttribute('filled', 't '+ stroke);
+      e.setAttribute('filled', 't ' + stroke);
       e.setAttribute('coordorigin', canvas.width + ',' + canvas.height);
       e.setAttribute('style', 'zoom:1;margin:0;padding:0;display:block;position:absolute;left:' + (coords[0] - coords[2]) + 'px;top:' + (coords[1] - coords[2]) + 'px;width:' + (coords[2] * 2) + 'px;height:' + (coords[2] * 2) + 'px;');
       // e = $('<v:oval name="' + name + '" filled="t" ' + stroke + ' style="zoom:1;margin:0;padding:0;display:block;position:absolute;left:' + (coords[0] - coords[2]) + 'px;top:' + (coords[1] - coords[2]) + 'px;width:' + (coords[2] * 2) + 'px;height:' + (coords[2] * 2) + 'px;"></v:oval>');
@@ -221,7 +220,7 @@ function shape_from_area(area) {
 }
 // top.jq = $;
 function options_from_area(area, options) {
-  return Object.assign({},options, area.dataset['maphilight']);
+  return Object.assign({}, options, area.dataset['maphilight']);
   // var $area = $(area);
   // return $.extend({}, options, $.metadata ? $area.metadata() : false, $area.data('maphilight'));
 }
@@ -240,7 +239,7 @@ if (!has_canvas && !ie_hax_done) {
     document.namespaces.add("v", "urn:schemas-microsoft-com:vml");
     var style = document.createStyleSheet();
     var shapes = ['shape', 'rect', 'oval', 'circ', 'fill', 'stroke', 'imagedata', 'group', 'textbox'];
-    shapes.forEach(function(v){
+    shapes.forEach(function (v) {
       style.addRule('v\\:' + v, "behavior: url(#default#VML); antialias:true");
     })
   });
@@ -262,26 +261,14 @@ function _onAlwaysOn(canvas_always, options, img) {
   }
   if (!has_canvas) {
     // $(canvas).empty();
-    while (canvas.firstChild){ canvas.removeChild(canvas.firstChild); }
+    while (canvas.firstChild) { canvas.removeChild(canvas.firstChild); }
   }
-  const defaultWidth = parseInt(this.getAttribute('width')) || img.naturalWidth;
-  const defaultHeight = parseInt(this.getAttribute('height')) || img.naturalHeight;
   this.querySelectorAll('area[coords]').forEach(function (area) {
-    // resize coords as per image width
-    const shape = (area.dataset['shape'] || area.getAttribute('shape'));
-    const coordsString = (area.dataset['coords'] || area.getAttribute('coords'));
-    const coordsArrayOld = coordsString.split(",");
-    const coordsArrayNew = coordsArrayOld.map((v, i) => {
-      // Scale the coordinate from the original width/height to the actual rendered width/height (i.e. offset)
-      return i % 2 === 0 ? (Number(v) * (img.width / defaultWidth)) : (Number(v) * (img.height / defaultHeight));
-    });
-    area.setAttribute('coords', coordsArrayNew.toString());
-
     const area_options = options_from_area(area, options)
     if (area_options.alwaysOn) {
       if (!canvas_always && has_canvas) {
         canvas_always = create_canvas_for(img);
-        for(const k in canvas_style){ 
+        for (const k in canvas_style) {
           canvas_always.style[k] = canvas_style[k];
         }
         canvas_always.width = img.width;
@@ -289,7 +276,7 @@ function _onAlwaysOn(canvas_always, options, img) {
         img.parentElement.insertBefore(canvas_always, img);
       }
       area_options.fade = area_options.alwaysOnFade; // alwaysOn shouldn't fade in initially
-      shape = shape_from_area(area);
+      let shape = shape_from_area(area);
       if (!shape) {
         return;
       }
@@ -302,7 +289,7 @@ function _onAlwaysOn(canvas_always, options, img) {
   });
 }
 
-function _onMouseOver(canvas, options, e){
+function _onMouseOver(canvas, options, e) {
   const area = e.target;
   const area_options = options_from_area(area, options);
   let shape;
@@ -313,7 +300,7 @@ function _onMouseOver(canvas, options, e){
     }
     add_shape_to(canvas, shape[0], shape[1], area_options, "highlighted");
     if (area_options.groupBy) {
-      if (typeof area_options.groupBy == 'string') {
+      if (typeof area_options.groupBy === 'string') {
         area_options.groupBy = [area_options.groupBy];
       }
       area_options.groupBy.forEach((groupitem) => { // this adalah map
@@ -337,12 +324,12 @@ function _onMouseOver(canvas, options, e){
     }
     // workaround for IE7, IE8 not rendering the final rectangle in a group
     if (!has_canvas) {
-      var vrect = document.createElementNS('urn:schemas-microsoft-com:vml','v:rect');
+      var vrect = document.createElementNS('urn:schemas-microsoft-com:vml', 'v:rect');
       canvas.appendChild(vrect);
     }
   }
 }
-function _onMouseOut(canvas){
+function _onMouseOut(canvas) {
   clear_canvas(canvas);
 }
 
@@ -352,24 +339,22 @@ function _onMouseOut(canvas){
  * saat ini options belum di coba
  * check developmentnya di D:\application\Image-map\tes_highlight\myMapHilight.js
  * untuk resolve dimensi <img> dan coordinate, tambahkan attribute width dan height di <map> dengan value sesuai image size saat pembuatan coordinate (size original sebelum <img> di resize)
-<<<<<<< HEAD
  * 
  * jika ada child atau coordinate inside coordinate, maka child pertama adalah inner coordinate
  * eg:
  *  <area shape=rect coords="50,50,100,100"> <!-- the hole in the red box -->
  *  <area shape=rect coords="25,25,125,125" href="red.html" alt="Red box.">
-=======
->>>>>>> be583a167eb8bd18d17d2771842ec6c4ff499dc5
  * @param {HTMLElement} img 
  * @param {Object} opts 
  * @returns 
  */
 function maphilight(img, opts) {
+  if (!img.id) img.id = makeid(5);
   let canvas_always;
   const options = Object.assign(defaultsOpts(), opts)
 
   if (!is_image_loaded(img)) {
-    return window.setTimeout(() => {
+    return window.setTimeout(function () {
       maphilight(img, options);
     }, 200);
   }
@@ -378,44 +363,38 @@ function maphilight(img, opts) {
   if (!usemap) return;
 
   const map = document.querySelector('map[name="' + usemap.substring(1) + '"]');
-<<<<<<< HEAD
-  console.log(map);
-=======
->>>>>>> be583a167eb8bd18d17d2771842ec6c4ff499dc5
   if (!(img.matches('img,input[type="image"]') && usemap && map)) return;
 
   const canvas = create_canvas_for(img);
-  for(const k in canvas_style){ 
+  for (const k in canvas_style) {
     canvas.style[k] = canvas_style[k];
-    img.style[k] = canvas_style[k];
+    // img.style[k] = canvas_style[k];
   }
   canvas.height = img.height;
   canvas.width = img.width;
 
-<<<<<<< HEAD
-  console.log('aa');
-
-=======
->>>>>>> be583a167eb8bd18d17d2771842ec6c4ff499dc5
   // Store the current width/height of the image here in case it's being sized by CSS that'll
   // be affected by it being wrapped by the div below. (e.g. width:50%)
   // For now, we'll trust that something else is handling scaling the <area>'s coords to account
   // for this non-static sizing...
-  if(!map.onAlwaysOn) map.onAlwaysOn = _onAlwaysOn.bind(map, canvas_always, options, img);
-  if(!map.onMouseOver) map.onMouseOver = _onMouseOver.bind(map, canvas, options);
-  if(!map.onMouseOut) map.onMouseOut = _onMouseOut.bind(undefined, canvas);
+  if (!map.onAlwaysOn) map.onAlwaysOn = _onAlwaysOn.bind(map, canvas_always, options, img);
+  if (!map.onMouseOver) map.onMouseOver = _onMouseOver.bind(map, canvas, options);
+  if (!map.onMouseOut) map.onMouseOut = _onMouseOut.bind(undefined, canvas);
 
-  if (img.classList.contains('maphilighted')) {
-    // We're redrawing an old map, probably to pick up changes to the options.
-    // Just clear out all the old stuff.
-    const wrapper = img.parentElement;
-    wrapper.parentElement.insertBefore(img, wrapper);
-    wrapper.remove();
-    map.removeEventListener('alwaysOn', map.onAlwaysOn);
-    map.removeEventListener('mouseover', map.onMouseOver);
-    map.removeEventListener('mouseout', map.onMouseOut);
-  }
+  // uninstall(map, img);
+  // if (img.classList.contains('maphilighted')) {
+  //   // We're redrawing an old map, probably to pick up changes to the options.
+  //   // Just clear out all the old stuff.
+  //   const wrapper = img.parentElement;
+  //   img.classList.remove('maphilighted');
+  //   wrapper.parentElement.insertBefore(img, wrapper);
+  //   wrapper.remove();
+  //   map.removeEventListener('alwaysOn', map.onAlwaysOn);
+  //   map.removeEventListener('mouseover', map.onMouseOver);
+  //   map.removeEventListener('mouseout', map.onMouseOut);
+  // }
 
+  // reinstall
   //Formating the image source. IE > 9 has issue with new line characters
   // const imgSrc = img.src.replace(/[\n\r]/g, '');
   const wrap = document.createElement('div');
@@ -426,7 +405,9 @@ function maphilight(img, opts) {
   wrap.style.position = 'relative';
   wrap.style.padding = '0px';
   wrap.style.width = img.width + 'px';
+  // wrap.style.maxWidth = '100%';
   wrap.style.height = img.height + 'px';
+  // wrap.style.height = 'auto';
   if (options.wrapClass) {
     if (options.wrapClass === true) {
       wrap.setAttribute('class', img.getAttribute('class'));
@@ -439,9 +420,13 @@ function maphilight(img, opts) {
   // we set opacity of the image to 0, but very nearly 0 works!
   img.parentElement.insertBefore(wrap, img);
   img.style.opacity = '0.0000000001';
+  // img.style.height = '-webkit-fill-available';
   img.remove();
   if (has_VML) img.classList.add('filter', 'Alpha(opacity=0)');
   wrap.appendChild(img);
+
+  // resize coords as per image width
+  resizeCoords(map, img);
 
   map.addEventListener('alwaysOn', map.onAlwaysOn);
   map.dispatchEvent(new Event('alwaysOn'));
@@ -451,3 +436,56 @@ function maphilight(img, opts) {
   img.classList.add('maphilighted');
 };
 export { maphilight }
+
+
+function resizeCoords(map, img) {
+  const defaultWidth = parseInt(map.getAttribute('width')) || img.naturalWidth;
+  const defaultHeight = parseInt(map.getAttribute('height')) || img.naturalHeight;
+  map.querySelectorAll('area[coords]').forEach((area) => {
+    // jika shape === circle (x,y,r) maka r/radius di scale sama dengan x
+    // let shape = (area.dataset['shape'] || area.getAttribute('shape'));
+    area.dataset['prevCoords'] = area.dataset['prevCoords'] ? area.dataset['prevCoords'] : (area.dataset['coords'] || area.getAttribute('coords'));
+    const coordsArrayOld = area.dataset['prevCoords'].split(",");
+    const coordsArrayNew = coordsArrayOld.map((v, i) => {
+      // Scale the coordinate from the original width/height to the actual rendered width/height (i.e. offset)
+      return i % 2 === 0 ? (Number(v) * (img.width / defaultWidth)) : (Number(v) * (img.height / defaultHeight));
+    });
+    area.setAttribute('coords', coordsArrayNew.toString());
+  })
+}
+
+export { resizeCoords };
+
+function makeid(length) {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+}
+
+function uninstall(map, img) {
+  if (img.classList.contains('maphilighted')) {
+    img.style.opacity = 1;
+    img.classList.remove('maphilighted');
+    // We're redrawing an old map, probably to pick up changes to the options.
+    // Just clear out all the old stuff.
+    const wrapper = img.parentElement;
+    // img.classList.remove('maphilighted');
+    wrapper.parentElement.insertBefore(img, wrapper);
+    wrapper.remove();
+    map.removeEventListener('alwaysOn', map.onAlwaysOn);
+    map.removeEventListener('mouseover', map.onMouseOver);
+    map.removeEventListener('mouseout', map.onMouseOut);
+
+    delete(map.onAlwaysOn);
+    delete(map.onMouseOver);
+    delete(map.onMouseOut);
+  }
+}
+
+export { uninstall }
