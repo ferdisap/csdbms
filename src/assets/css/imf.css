@@ -3,10 +3,16 @@
 @tailwind utilities;
 
 @layer components {
-  .imfContent{
-    @apply p-4 w-full h-full
+  .imf-content{
+    @apply p-4 w-full h-full flex
   }
-  .imfContent .icnVariation {
+  .imf-variation-container {
+    @apply w-[80%]
+  }
+  .imf-areas-container{
+    @apply w-[20%] cursor-pointer
+  }
+  .imf-content .icnVariation {
     @apply flex justify-center h-[calc(100%-3.5rem)] w-full
   }
 }

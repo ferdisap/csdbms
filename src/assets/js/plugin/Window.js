@@ -15,7 +15,7 @@ import WindowDialog from './sub/WindowDialog';
 import Property from '../../vue/components/window/child/Property.vue';
 import Randomstring from 'randomstring';
 import WindowMove from './sub/WindowMove';
-import WindowSize from './sub/WindowSize';
+import WindowSize, { resizedEvent } from './sub/WindowSize';
 import { setDotsPosition, setLinesPosition } from './sub/WindowSize';
 import { randomInt } from '../util/helper';
 import { dialog as runDialog } from '../../vue/components/window/child/Dialog.vue';
@@ -278,6 +278,7 @@ class Window {
           () => {
             setDotsPosition(windowEl);
             setLinesPosition(windowEl);
+            resizedEvent(windowEl);
           });
       }
       else if (windowEl.matches(`.${this.windowClassDialog}`)) {
@@ -773,6 +774,7 @@ class Window {
       setDotsPosition(windowEl);
       setLinesPosition(windowEl);
       this.setToTop(windowEl);
+      resizedEvent(windowEl);
       return windowEl.isMaximize = true;
     } else {
       windowEl.style.height = '500px';
@@ -784,6 +786,7 @@ class Window {
       setDotsPosition(windowEl);
       setLinesPosition(windowEl);
       windowEl.isMaximize = false;
+      resizedEvent(windowEl);
       return windowEl.isMaximize = false;
     }
   }

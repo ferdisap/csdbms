@@ -8,7 +8,7 @@ function defaultsOpts() {
     strokeColor: 'ff0000',
     strokeOpacity: 1,
     strokeWidth: 1,
-    fade: false,
+    fade: true,
     alwaysOn: false,
     neverOn: false,
     groupBy: false,
@@ -220,7 +220,7 @@ function shape_from_area(area) {
 }
 // top.jq = $;
 function options_from_area(area, options) {
-  return Object.assign({}, options, area.dataset['maphilight']);
+  return Object.assign({}, options, area.dataset['maphilight'] ? JSON.parse(area.dataset['maphilight']) : undefined);
   // var $area = $(area);
   // return $.extend({}, options, $.metadata ? $area.metadata() : false, $area.data('maphilight'));
 }
@@ -290,11 +290,10 @@ function _onAlwaysOn(canvas_always, options, img) {
 }
 
 function _onMouseOver(canvas, options, e) {
-  const area = e.target;
+  const area = e.target.tagName === 'MAP' ? e.area : e.target;
   const area_options = options_from_area(area, options);
-  let shape;
   if (!area_options.neverOn && !area_options.alwaysOn) {
-    shape = shape_from_area(area);
+    const shape = shape_from_area(area);
     if (!shape) {
       return;
     }
@@ -344,6 +343,9 @@ function _onMouseOut(canvas) {
  * eg:
  *  <area shape=rect coords="50,50,100,100"> <!-- the hole in the red box -->
  *  <area shape=rect coords="25,25,125,125" href="red.html" alt="Red box.">
+ * 
+ * bisa langsung dispatch event dengan create (Event('mouseover')).area = document.querySelector('area')
+ * 
  * @param {HTMLElement} img 
  * @param {Object} opts 
  * @returns 
@@ -442,6 +444,8 @@ function resizeCoords(map, img) {
   const defaultWidth = parseInt(map.getAttribute('width')) || img.naturalWidth;
   const defaultHeight = parseInt(map.getAttribute('height')) || img.naturalHeight;
   map.querySelectorAll('area[coords]').forEach((area) => {
+    // area.addEventListener('mouseover',map.onMouseOver)
+    // area.addEventListener('xxx',map.onMouseOver)
     // jika shape === circle (x,y,r) maka r/radius di scale sama dengan x
     // let shape = (area.dataset['shape'] || area.getAttribute('shape'));
     area.dataset['prevCoords'] = area.dataset['prevCoords'] ? area.dataset['prevCoords'] : (area.dataset['coords'] || area.getAttribute('coords'));
@@ -482,10 +486,58 @@ function uninstall(map, img) {
     map.removeEventListener('mouseover', map.onMouseOver);
     map.removeEventListener('mouseout', map.onMouseOut);
 
-    delete(map.onAlwaysOn);
-    delete(map.onMouseOver);
-    delete(map.onMouseOut);
+    delete (map.onAlwaysOn);
+    delete (map.onMouseOver);
+    delete (map.onMouseOut);
   }
 }
 
 export { uninstall }
+
+// ##### helper below, using for anchor / internal ref target
+
+function trigger(name, area) {
+  const triggerEvent = new Event(name);
+  triggerEvent.area = area;
+  area.parentElement.dispatchEvent(triggerEvent);
+}
+
+// cara pakai anchor.addEventListener('click', anchorClick.bind(anchor, false));
+function anchorClick(alwaysOn = true, event) {
+  if(alwaysOn instanceof Event) {
+    event = alwaysOn;
+    alwaysOn = true;
+  }
+  if(event.target.tagName === 'A') event.preventDefault();
+  const area = document.querySelector(this.closest('[href]').getAttribute('href'))
+  let newDataSet = area.dataset.maphilight ? JSON.parse(area.dataset.maphilight) : {}
+  newDataSet.alwaysOn = alwaysOn;
+  area.dataset.maphilight = JSON.stringify(newDataSet);
+
+  trigger('mouseover', area);
+
+  newDataSet = JSON.parse(area.dataset.maphilight)
+  newDataSet.alwaysOn = !alwaysOn;
+  area.dataset.maphilight = JSON.stringify(newDataSet);
+
+  this.removeEventListener('mouseout', anchorMouseOut);
+}
+
+function anchorMouseOut(event){
+  trigger('mouseout', document.querySelector(event.target.closest('[href]').getAttribute('href')));
+  event.target.removeEventListener('click', anchorClick);
+}
+
+// cara pakai anchor.addEventListener('mouseover', anchorHover);
+function anchorHover(event) {
+  // displaying hilight area
+  trigger('mouseover', document.querySelector(this.closest('[href]').getAttribute('href')));
+
+  // when anchor on mouseout
+  event.target.addEventListener('mouseout', anchorMouseOut)
+
+  // when anchor on click, will remove on mousout
+  event.target.addEventListener('click', anchorClick)
+}
+
+export { anchorClick, anchorHover, anchorMouseOut, trigger }

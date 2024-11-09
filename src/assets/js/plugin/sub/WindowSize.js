@@ -276,11 +276,17 @@ export default class WindowSize {
       frame.remove();
       setDotsPosition(window);
       setLinesPosition(window);
-      const windowResizedEvent = new Event('window-resized');
-      window.dispatchEvent(windowResizedEvent);      
+      resizedEvent(window);
     },{once:true});
   }
 }
+
+function resizedEvent(target){
+  const windowResizedEvent = new Event('window-resized');
+  target.dispatchEvent(windowResizedEvent);      
+}
+
+export {resizedEvent};
 
 // hw = document.querySelectorAll('*[data-v-app]')[3];
 // const ws = new WindowSize();
