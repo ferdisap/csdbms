@@ -6,10 +6,28 @@ import { addSetLogic } from '../../../js/util/ObjectProperty';
 import { fileTypeFromBuffer } from 'file-type';
 import { useCache } from '../../../js/plugin/sub/WindowCache';
 
+/**
+ * props: title:string, type:string, instruction:string
+ */
+function openAlertUpload(props) {
+  const event = new Event("new-window");
+  event.data = {
+    parent: {
+      type: 'window',
+      app: this.$el.closest('.app-window'),
+    },
+    alert: {
+      props,
+    }
+  }
+  top.dispatchEvent(event);
+}
+
 export default {
   components: { ContinuousLoadingCircle, TitleBar },
   data() {
     return {
+      progress: undefined,
       file: undefined
     }
   },
@@ -19,18 +37,71 @@ export default {
   },
   methods: {
     upload(event) {
+      // const fd = new FormData(event.target);
+      // axios.post("/api/s1000d/icn/upload", fd)
+      //   .then(rsp => {
+      //     this._.props.filename = rsp.csdb.filename;
+      //     this._.props.access_key = '';
+      //   })
+
+      // chunk file
       const fd = new FormData(event.target);
-      axios.post("/api/s1000d/icn/upload", fd)
-        .then(rsp => {
-          this._.props.filename = rsp.csdb.filename;
-          this._.props.access_key = '';
-        })
+      const entity = fd.get('entity')
+      top.fd = fd;
+
+      const CHUNK_SIZE = 1024 * 1000;
+      let start = 0;
+      let end = CHUNK_SIZE;
+
+      let i = 1
+      const length = Math.round(entity.size / CHUNK_SIZE);
+      fd.set('total', length);
+
+      const sent = async () => {
+        if (start < entity.size && length >= i) {
+          fd.set('entity', entity.slice(start, end))
+          fd.set('part', i)
+
+          axios.post("/api/s1000d/icn/upload", fd)
+            .then((rsp) => {
+              console.log(`total: ${i}/${length}`);
+              this.progress = Math.floor((i / length) * 100) + ' %';
+
+              start = end;
+              end = start + CHUNK_SIZE;
+              i++;
+
+              sent();
+
+              if (i-1 >= length) {
+                console.log(i-1, length, top.rsp = rsp)
+                this.progress += ' Upload success';
+                // openAlertUpload.call(this, {
+                //   title: 'Upload File ' + fd.get('filename'),
+                //   type: 'note',
+                //   instruction: 'Uploading ICN success.'
+                // })
+                this._.props.access_key = rsp.data.csdb.access_key.key;
+                this._.props.filename = rsp.data.csdb.filename;
+              };              
+            })
+            // .catch(e => {
+            //   console.log(top.e = e);
+            // })
+            .catch(openAlertUpload.bind(this, {
+              title: 'Upload File ' + fd.get('filename'),
+              type: 'warning',
+              instruction: 'Uploading ICN failed.'
+            }))
+        }
+      };
+      sent();
+
     },
     readEntity(event) {
       const file = event.target.files[0];
-      top.file = file;
       if (file) {
-        if (file.type === 'text/xml') {
+        if (file.type.includes('text')) {
           event.target.value = '';
           // const reader = new FileReader();
           // reader.onload = () => {
@@ -62,10 +133,10 @@ export default {
         }
       }
     },
-    request(filename, access_key) {
+    request(filename) {
       this.clp(true);
       axios({
-        url: "/api/s1000d/csdb/read/" + filename + (access_key ? '?access_key=' + access_key : ''),
+        url: "/api/s1000d/csdb/read/" + filename + (this.$props.access_key ? '?access_key=' + this.$props.access_key : ''),
         method: 'GET',
         responseType: 'arraybuffer'
       })
@@ -79,8 +150,12 @@ export default {
             access_key: '',
             name: filename
           }
+          // if(mime.includes('image')){} 
+          // else if( mime.includes('video')){} 
+          // else if( mime.includes('model')){}
+
         })
-        .finally(()=>this.clp(false));
+        .finally(() => this.clp(false));
     },
   },
   beforeCreate() {
@@ -91,7 +166,7 @@ export default {
       this.request(v)
       return v;
     });
-    if(this.$props.filename) this.request(this.$props.filename);
+    if (this.$props.filename) this.request(this.$props.filename);
     top.icn = this;
   }
 }
@@ -117,17 +192,27 @@ export default {
           <div class="w-full text-center my-2 py-2">
             <button type="submit" name="button"
               class="button text-sm bg-blue-400 text-white hover:bg-blue-600">Upload</button>
+            <span>{{ progress }}</span>
           </div>
         </form>
       </div>
       <div v-if="file" class="p-4 w-full h-full">
         <h1 class="w-full mb-3 mt-2 font-bold text-lg h-12">{{ file.name }}</h1>
-        <div class="flex justify-center h-[calc(100%-3.5rem)] w-full">
-          <!-- <embed class="w-auto max-w-[100%] h-auto max-h-[100%] border-2 p-4" :src="file.src" :type="file.mime" /> -->
-          <embed class="max-w-[100%] h-fit max-h-[100%] border-2 p-4" :src="file.src" :type="file.mime" />
+        <h1 class="w-full mb-3 mt-2 font-bold text-lg h-12">{{ file.type }}</h1>
+        <div class="icn-container flex justify-center h-[calc(100%-3.5rem)] w-full">
+          <embed v-if="file.mime.includes('image')" class="max-w-[100%] h-fit max-h-[100%] border-2 p-4" :src="file.src"
+            :type="file.mime" />
+          <video v-else-if="file.mime.includes('video')" class="max-w-[100%] h-fit max-h-[100%] border-2 p-4"
+            :id="'videojs'" controls data-setup='{}'>
+            <source :src="file.src" :type="file.mime" />
+            <p class="vjs-no-js"> To view this video please enable JavaScript, and consider upgrading to a web browser
+              that
+              <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+            </p>
+          </video>
         </div>
       </div>
-      <ContinuousLoadingCircle/>
+      <ContinuousLoadingCircle />
     </div>
   </div>
 </template>
