@@ -16,7 +16,8 @@ customElements.get('text-editor') || customElements.define('text-editor', TextEd
 
 
 // create app
-top.mainApp = createApp(Main);
+const mainApp = createApp(Main);
+top.mainApp = mainApp;
 
 mainApp.use(cache);
 

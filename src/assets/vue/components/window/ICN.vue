@@ -5,6 +5,7 @@ import ContinuousLoadingCircle from '../sub/ContinuousLoadingCircle.vue';
 import { addSetLogic } from '../../../js/util/ObjectProperty';
 import { fileTypeFromBuffer } from 'file-type';
 import { useCache } from '../../../js/plugin/sub/WindowCache';
+import config from '../../../config.json'
 
 /**
  * props: title:string, type:string, instruction:string
@@ -57,42 +58,61 @@ export default {
       const length = Math.round(entity.size / CHUNK_SIZE);
       fd.set('total', length);
 
+      const onSuccess = (rsp) => {
+        this.progress = '100% Upload success';
+        openAlertUpload.call(this, {
+          title: 'Upload File ' + fd.get('filename'),
+          type: 'note',
+          instruction: 'Uploading ICN success.'
+        })
+        this._.props.access_key = rsp.data.csdb.access_key.key;
+        this._.props.filename = rsp.data.csdb.filename;
+      }
+
+      const onFail = () => {
+        openAlertUpload.call(this, {
+          title: 'Upload File ' + fd.get('filename'),
+          type: 'warning',
+          instruction: 'Uploading ICN failed.'
+        })
+      }
+
+      let req;
+
       const sent = async () => {
         if (start < entity.size && length >= i) {
           fd.set('entity', entity.slice(start, end))
           fd.set('part', i)
 
-          axios.post("/api/s1000d/icn/upload", fd)
-            .then((rsp) => {
-              console.log(`total: ${i}/${length}`);
-              this.progress = Math.floor((i / length) * 100) + ' %';
+          req = axios.post("/api/s1000d/icn/upload", fd);
+          req.then((rsp) => {
+            this.progress = Math.floor((i / length) * 100) + ' %';
 
-              start = end;
-              end = start + CHUNK_SIZE;
-              i++;
+            start = end;
+            end = start + CHUNK_SIZE;
+            i++;
 
-              sent();
+            sent();
 
-              if (i-1 >= length) {
-                console.log(i-1, length, top.rsp = rsp)
-                this.progress += ' Upload success';
-                // openAlertUpload.call(this, {
-                //   title: 'Upload File ' + fd.get('filename'),
-                //   type: 'note',
-                //   instruction: 'Uploading ICN success.'
-                // })
-                this._.props.access_key = rsp.data.csdb.access_key.key;
-                this._.props.filename = rsp.data.csdb.filename;
-              };              
-            })
-            // .catch(e => {
-            //   console.log(top.e = e);
-            // })
-            .catch(openAlertUpload.bind(this, {
-              title: 'Upload File ' + fd.get('filename'),
-              type: 'warning',
-              instruction: 'Uploading ICN failed.'
-            }))
+            if (i - 1 >= length) {
+              onSuccess(rsp);
+              //   this.progress += ' Upload success';
+              //   openAlertUpload.call(this, {
+              //     title: 'Upload File ' + fd.get('filename'),
+              //     type: 'note',
+              //     instruction: 'Uploading ICN success.'
+              //   })
+              //   this._.props.access_key = rsp.data.csdb.access_key.key;
+              //   this._.props.filename = rsp.data.csdb.filename;
+            };
+          })
+          req.catch(onFail)
+        } else {
+          req = req = axios.post("/api/s1000d/icn/upload", fd);
+          req.then(rsp => {
+            onSuccess(rsp);
+          })
+          req.catch(onFail);
         }
       };
       sent();
@@ -134,6 +154,12 @@ export default {
       }
     },
     request(filename) {
+      // this.file = {
+      //   src: "https://ferdisap.github.io/3DViewer#https://ferdisap.github.io/3DViewer/assets/model/as1_pe_203.stp",
+      //   mime: 'application/octet-stream',
+      //   name: filename
+      // }
+      // return;
       this.clp(true);
       axios({
         url: "/api/s1000d/csdb/read/" + filename + (this.$props.access_key ? '?access_key=' + this.$props.access_key : ''),
@@ -141,19 +167,26 @@ export default {
         responseType: 'arraybuffer'
       })
         .then(async (rsp) => {
-          const { mime } = (await fileTypeFromBuffer(rsp.data));
+          // top.rsp = rsp;
+          // top.fileTypeFromBuffer = fileTypeFromBuffer
+          // const { mime } = (await fileTypeFromBuffer(rsp.data));
+          const mime = rsp.headers['content-type']
           const blob = new Blob([rsp.data], { type: mime });
           const url = URL.createObjectURL(blob);
-          this.file = {
-            src: url,
-            mime: mime,
-            access_key: '',
-            name: filename
+          if (mime.includes('image') || mime.includes('video')) {
+            this.file = {
+              src: url,
+              mime: mime,
+              access_key: '',
+              name: filename
+            }
+          } else {
+            this.file = {
+              src: "https://ferdisap.github.io/3DViewer#model=" + config.CSDB_HOST + "/api/s1000d/csdb/read/" + filename + (this.$props.access_key ? '?access_key=' + this.$props.access_key : ''),
+              mime: mime,
+              name: filename
+            }
           }
-          // if(mime.includes('image')){} 
-          // else if( mime.includes('video')){} 
-          // else if( mime.includes('model')){}
-
         })
         .finally(() => this.clp(false));
     },
@@ -167,7 +200,7 @@ export default {
       return v;
     });
     if (this.$props.filename) this.request(this.$props.filename);
-    top.icn = this;
+    // top.icn = this;
   }
 }
 </script>
@@ -198,7 +231,6 @@ export default {
       </div>
       <div v-if="file" class="p-4 w-full h-full">
         <h1 class="w-full mb-3 mt-2 font-bold text-lg h-12">{{ file.name }}</h1>
-        <h1 class="w-full mb-3 mt-2 font-bold text-lg h-12">{{ file.type }}</h1>
         <div class="icn-container flex justify-center h-[calc(100%-3.5rem)] w-full">
           <embed v-if="file.mime.includes('image')" class="max-w-[100%] h-fit max-h-[100%] border-2 p-4" :src="file.src"
             :type="file.mime" />
@@ -210,6 +242,7 @@ export default {
               <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
             </p>
           </video>
+          <iframe v-else :src="file.src" class="w-full h-full border-2 p-4"></iframe>
         </div>
       </div>
       <ContinuousLoadingCircle />

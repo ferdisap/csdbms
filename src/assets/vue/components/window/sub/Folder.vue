@@ -67,6 +67,7 @@ function openFile(props = {},name){
     }
   }
   const event = new Event("new-window");
+  console.log(props);
   event.data = {
     parent: {
       type: 'window',
@@ -199,7 +200,9 @@ export default {
     openTr() {
       const cbHome = this.$el.querySelector('.cb-home');
       if (cbHome.current && cbHome.current.matches(".file-row")) {
-        openFile({filename: cbHome.current.cbWindow.cbValue})
+        const cbWindow = cbHome.current.cbWindow;
+        top.cbWindow = cbWindow;
+        openFile({filename: cbWindow.cbValue, access_key:cbWindow.data('access_key')})
       }
       else this.clickFolder(cbHome.current.cbWindow.cbValue);
     },
@@ -445,7 +448,7 @@ export default {
             </tr>
             <tr v-for="obj in data.csdbs" @dblclick.prevent="clickFilename(obj.filename, obj.path, obj.access_key.key)"
               class="cb-room file-row text-base hover:bg-blue-300 cursor-pointer">
-              <td class="cb-window"><input file type="checkbox" :value="obj.filename"></td>
+              <td class="cb-window"><input file type="checkbox" :value="obj.filename" :data-filename="obj.filename" :data-access_key="obj.access_key.key"></td>
               <td class="leading-3 text-base">
                 <i class="material-symbols-outlined text-slate-400 text-base mr-1">description</i>
                 <span class="text-base"> {{ obj.filename }} </span>

@@ -67,6 +67,9 @@ function setPropertyValue(cbHome) {
             return this.querySelector("input[type=checkbox]").value; // pointing to ".cb-window > input[type='checkbox']"
           }
         })
+        cbWindow.data = function(name){
+          return this.querySelector("input[type=checkbox]").dataset[name];
+        },bind(cbWindow)
       } catch (error) { }
       if (!cbRooms[i].cbWindow) {
         cbRooms[i].cbWindow = new WeakRef(cbWindow);
