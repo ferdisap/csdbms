@@ -67,7 +67,6 @@ function openFile(props = {},name){
     }
   }
   const event = new Event("new-window");
-  console.log(props);
   event.data = {
     parent: {
       type: 'window',
@@ -418,7 +417,7 @@ export default {
     <div class="h-[100%] w-full relative overflow-x-auto">
 
       <div class="h-[50px] mb-3 flex items-center space-x-4">
-        <button @click="back" class="material-symbols-outlined has-tooltip-right hover:bg-gray-100 block"
+        <button @click="back" class="material-symbols-outlined tp-right-2 font-bold hover:bg-gray-100 block"
           data-tooltip="back">keyboard_backspace</button>
         <h1 class="text-2xl inline w-full"><span>#/</span>{{ this.$props.path.toUpperCase() }}</h1>
         <SearchCsdb :path="$props.path" @start="() => clp(true)" @success="onSearchSuccess" />
@@ -464,13 +463,13 @@ export default {
       <!-- pagination -->
       <div class="w-full text-black h-[30px] flex justify-center">
         <div v-if="pagination" class="flex justify-center items-center bg-gray-100 rounded-lg px-2 w-max">
-          <button @click="goto(pageless)" class="material-symbols-outlined">navigate_before</button>
+          <button @click="goto(pageless)" data-tooltip="previous" class="material-symbols-outlined tp-top tp-left-1">navigate_before</button>
           <form @submit.prevent="goto('', pagination['current_page'])" class="flex">
             <input v-model="pagination['current_page']"
-              class="w-2 text-base border-none text-center bg-transparent font-bold" />
-            <span class="font-bold text-base"> of {{ pagination['last_page'] }} </span>
+              class="w-2 text-base border-none mr-1 text-center bg-transparent font-bold" />
+            <span class="font-bold text-base">of {{ pagination['last_page'] }} </span>
           </form>
-          <button @click="goto(pagemore)" class="material-symbols-outlined">navigate_next</button>
+          <button @click="goto(pagemore)" data-tooltip="next" class="material-symbols-outlined tp-top tp-right-1">navigate_next</button>
         </div>
       </div>
     </div>

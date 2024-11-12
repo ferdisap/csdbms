@@ -60,7 +60,7 @@ export default {
 <template>
   <div id="auth-menu"
     :class="[isAuthenticated ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-600 hover:bg-red-700', 'relative h-6 w-6 mr-0 float-end text-center rounded-full hover:cursor-pointer']">
-    <span class="material-symbols-outlined text-base font-bold">account_circle</span>
+    <span class="material-symbols-outlined text-base font-bold tp-top tp-left" data-tooltip="account">account_circle</span>
   </div>
   <FloatMenu :trigger="[{ triggerId: 'auth-menu', on: 'click' }]" :use-copy-btn="false">
     <div class="flex items-center justify-start">

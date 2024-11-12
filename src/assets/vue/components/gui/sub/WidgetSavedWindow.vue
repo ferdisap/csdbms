@@ -77,6 +77,9 @@ export default {
   },
   mounted() {
     this.enableMove(document.getElementById('title-cached-window'));
+    const xdatum = (this.$el.getBoundingClientRect()['width'] / 2) + 'px';
+    this.$el.style.left = `calc(50% - ${xdatum})`
+    this.$el.style.top = '100px'
   }
 }
 </script>
@@ -123,7 +126,7 @@ tr:hover {
 }
 </style>
 <template>
-  <div id="cached-window-list" class="h-96 w-fit fixed bg-white shadow-md overflow-auto" @click="setToTop">
+  <div id="cached-window-list" class="h-96 w-fit fixed bg-white overflow-auto rounded-md shadow-white shadow-sm" @click="setToTop">
     <div id="title-cached-window" class="bg-blue-500">Saved Window <button @click="updateList"
         class="material-symbols-outlined float-end text-base mx-2">replay</button></div>
     <div class="p-2">

@@ -46,7 +46,7 @@ export default {
       <!-- start menu -->
       <div class="flex h-full mr-2 float-start relative">
         <div @click.prevent.stop="startMenu" class="min-w-6 h-full relative flex items-center px-1 hover:bg-gray-700 hover:cursor-pointer">
-          <span class="material-symbols-outlined ">menu</span>
+          <span class="material-symbols-outlined tp-top tp-right" data-tooltip="start menu">menu</span>
           <StartMenu />
         </div>
       </div>

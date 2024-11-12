@@ -81,7 +81,7 @@ export default class WindowMove {
       target.style.width = '100%';
       target.style.height = '100%';
     }
-    // supaya windownya full jika mouse diarahkan ke bawah (dikurang 2 karena tinggi titlebar 48, jadi asumsikan kliknya ditengah2 title bar jadi 24)
+    // supaya windownya full jika mouse diarahkan ke bawah (dikurang 24 karena tinggi titlebar 48, jadi asumsikan kliknya ditengah2 title bar jadi 24)
     else if(target.enableSizing && ( pointerupY + rect.height - 24)  > (this.appRect.height + 5)){
       target.style.left = pleft;
       target.style.top = ptop;

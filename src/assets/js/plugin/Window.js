@@ -267,11 +267,11 @@ class Window {
   enableMoving(windowEl) {
     const triggerElement = windowEl.querySelector(`.${this.windowClassTriggerMove}`);
     if (triggerElement) {
-      if (windowEl.matches(`.${this.windowClassTop}`)) {
+      if (windowEl.matches('.'+this.windowClassTop)) {
         (new WindowMove()).attach(triggerElement,
           () => {
-            if (windowEl.style.height === '100%') windowEl.style.height = '500px';
-            if (windowEl.style.width === '100%') windowEl.style.width = '500px';
+            if (windowEl.style.height === '100%' || (windowEl.style.height === windowEl.closest('#'+this.rootAppContentContainerId).getBoundingClientRect()['height'] + 'px')) windowEl.style.height = '500px';
+            if (windowEl.style.width === '100%' || (windowEl.style.width === windowEl.closest('#'+this.rootAppContentContainerId).getBoundingClientRect()['width'] + 'px')) windowEl.style.width = '500px';
             windowEl.isMaximize = false;
             this.setToTop(windowEl);
           },
@@ -281,7 +281,7 @@ class Window {
             resizedEvent(windowEl);
           });
       }
-      else if (windowEl.matches(`.${this.windowClassDialog}`)) {
+      else if (windowEl.matches('.'+this.windowClassDialog)) {
         (new WindowMove()).attach(triggerElement, () => this.setToTop(windowEl));
       }
       else {

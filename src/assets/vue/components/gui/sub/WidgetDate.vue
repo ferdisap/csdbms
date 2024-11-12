@@ -44,9 +44,7 @@ export default {
 </script>
 <template>
   <div class="w-full text-center fixed bottom-44">
-    <span class="block text-9xl font-bold text-gray-200"
-      style="text-shadow: -1px -2px 0 #fff, 1px -2px 0 #fff, -1px 2px 0 #fff, 1px 2px 0 #fff;" v-html="time"></span>
-    <span class="block text-3xl font-thin text-gray-200"
-      style="text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;" v-html="day"></span>
+    <span class="block text-9xl font-bold text-gray-200" style="text-shadow: -1px -2px 0 #fff, 1px -2px 0 #fff, -1px 2px 0 #fff, 1px 2px 0 #fff;" v-html="time"></span>
+    <span class="block text-3xl font-thin text-gray-200" style="text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;" v-html="day"></span>
   </div>
 </template>

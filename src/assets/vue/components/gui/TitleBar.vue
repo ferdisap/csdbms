@@ -75,10 +75,10 @@ export default {
       <span href="/" class="text-lg float-start ml-3 font-bold">{{ $props.title }}</span>
     </div>
     <div class="py-3 mr-3 flex space-x-2">
-      <div v-if="$props.cacheButton" @click="cache" class="h-6 w-6 shadow-sm outline-double outline-1 bg-orange-400 text-center hover:bg-orange-600 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">save</i></div>
-      <div v-if="$props.hideButton" @click="hide" class="h-6 w-6 shadow-sm outline-double outline-1 bg-green-500 text-center hover:bg-green-600 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">minimize</i></div>
-      <div v-if="$props.sizingButton" @click="sizing" class="h-6 w-6 shadow-sm outline-double outline-1 bg-yellow-500 text-center hover:bg-yellow-700 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">{{ isMaximize ? 'close_fullscreen' : 'expand_content' }}</i></div>
-      <div v-if="$props.closeButton" @click="close" class="h-6 w-6 shadow-sm outline-double outline-1 bg-red-600 text-center hover:bg-red-700 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">close</i></div>
+      <div v-if="$props.cacheButton" @click="cache" data-tooltip="cache" class="tp-left tp-bottom h-6 w-6 shadow-sm outline-double outline-1 bg-orange-400 text-center hover:bg-orange-600 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">save</i></div>
+      <div v-if="$props.hideButton" @click="hide" data-tooltip="hide" class="tp-left tp-bottom h-6 w-6 shadow-sm outline-double outline-1 bg-green-500 text-center hover:bg-green-600 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">minimize</i></div>
+      <div v-if="$props.sizingButton" @click="sizing" data-tooltip="sizing" class="tp-left tp-bottom h-6 w-6 shadow-sm outline-double outline-1 bg-yellow-500 text-center hover:bg-yellow-700 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">{{ isMaximize ? 'close_fullscreen' : 'expand_content' }}</i></div>
+      <div v-if="$props.closeButton" @click="close" data-tooltip="close" class="tp-left tp-bottom h-6 w-6 shadow-sm outline-double outline-1 bg-red-600 text-center hover:bg-red-700 rounded-full hover:cursor-pointer"><i class="material-symbols-outlined text-base font-extrabold">close</i></div>
     </div>
     <FloatMenu :trigger="[{ triggerId: id, on: 'contextmenu' }]">
       <div class="list" @click="cache">
