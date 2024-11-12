@@ -38,13 +38,6 @@ export default {
   },
   methods: {
     upload(event) {
-      // const fd = new FormData(event.target);
-      // axios.post("/api/s1000d/icn/upload", fd)
-      //   .then(rsp => {
-      //     this._.props.filename = rsp.csdb.filename;
-      //     this._.props.access_key = '';
-      //   })
-
       // chunk file
       const fd = new FormData(event.target);
       const entity = fd.get('entity')
@@ -96,14 +89,14 @@ export default {
 
             if (i - 1 >= length) {
               onSuccess(rsp);
-              //   this.progress += ' Upload success';
-              //   openAlertUpload.call(this, {
-              //     title: 'Upload File ' + fd.get('filename'),
-              //     type: 'note',
-              //     instruction: 'Uploading ICN success.'
-              //   })
-              //   this._.props.access_key = rsp.data.csdb.access_key.key;
-              //   this._.props.filename = rsp.data.csdb.filename;
+                this.progress += ' Upload success';
+                openAlertUpload.call(this, {
+                  title: 'Upload File ' + fd.get('filename'),
+                  type: 'note',
+                  instruction: 'Uploading ICN success.'
+                })
+                this._.props.access_key = rsp.data.csdb.access_key.key;
+                this._.props.filename = rsp.data.csdb.filename;
             };
           })
           req.catch(onFail)
@@ -116,20 +109,12 @@ export default {
         }
       };
       sent();
-
     },
     readEntity(event) {
       const file = event.target.files[0];
       if (file) {
         if (file.type.includes('text')) {
           event.target.value = '';
-          // const reader = new FileReader();
-          // reader.onload = () => {
-          // display alert that file is not ICN or open XML editor
-          // this.$parent.readTextFileFromUploadICN(reader.result);
-          // this.emitter.emit('readTextFileFromUploadICN'); // untuk mengoffkan preview dan lain2nya
-          // }
-          // reader.readAsText(file);
           const newWindowEvent = new Event('new-window');
           newWindowEvent.data = {
             parent: {
@@ -146,20 +131,30 @@ export default {
           top.dispatchEvent(newWindowEvent);
         }
         else {
-          this.file = {
-            mime: file.type,
-            src: URL.createObjectURL(file),
+          const ext = file.name.substring(file.name.length - 4);
+          if (ext === '.stp' || ext === 'step') {
+            this.file = {
+              name: file.name,
+              mime: 'application/step',
+              // src: "https://ferdisap.github.io/3DViewer#model=" + URL.createObjectURL(file),
+              src: "https://ferdisap.github.io/3DViewer",
+            }
+            setTimeout(() => {
+              //https://stackoverflow.com/questions/51187305/how-can-i-access-a-blob-from-one-domain-to-other-on-client-side
+              const iframe = this.$el.querySelector('iframe');
+              iframe.contentWindow.postMessage(file, 'https://ferdisap.github.io/');
+            }, 1000) // 1000 for waiting iframe full loaded
+          } else {
+            this.file = {
+              name: file.name,
+              mime: file.type,
+              src: URL.createObjectURL(file),
+            }
           }
         }
       }
     },
     request(filename) {
-      // this.file = {
-      //   src: "https://ferdisap.github.io/3DViewer#https://ferdisap.github.io/3DViewer/assets/model/as1_pe_203.stp",
-      //   mime: 'application/octet-stream',
-      //   name: filename
-      // }
-      // return;
       this.clp(true);
       axios({
         url: "/api/s1000d/csdb/read/" + filename + (this.$props.access_key ? '?access_key=' + this.$props.access_key : ''),
@@ -167,7 +162,6 @@ export default {
         responseType: 'arraybuffer'
       })
         .then(async (rsp) => {
-          // top.rsp = rsp;
           // top.fileTypeFromBuffer = fileTypeFromBuffer
           // const { mime } = (await fileTypeFromBuffer(rsp.data));
           const mime = rsp.headers['content-type']
@@ -182,6 +176,7 @@ export default {
             }
           } else {
             this.file = {
+              // "https://ferdisap.github.io/3DViewer#model=https://ferdisap.github.io/3DViewer/assets/model/as1_pe_203.stp",
               src: "https://ferdisap.github.io/3DViewer#model=" + config.CSDB_HOST + "/api/s1000d/csdb/read/" + filename + (this.$props.access_key ? '?access_key=' + this.$props.access_key : ''),
               mime: mime,
               name: filename
@@ -229,7 +224,7 @@ export default {
           </div>
         </form>
       </div>
-      <div v-if="file" class="p-4 w-full h-full">
+      <div v-if="file" :class="['p-4 w-full', !$props.filename ? 'h-[calc(100%-15rem)]' : 'h-full']">
         <h1 class="w-full mb-3 mt-2 font-bold text-lg h-12">{{ file.name }}</h1>
         <div class="icn-container flex justify-center h-[calc(100%-3.5rem)] w-full">
           <embed v-if="file.mime.includes('image')" class="max-w-[100%] h-fit max-h-[100%] border-2 p-4" :src="file.src"
