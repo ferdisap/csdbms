@@ -84,8 +84,9 @@ function render(stringhtml) {
   container.querySelectorAll("summary > .folder").forEach(el => {
     if (!el.clickFolderListener) {
       // add here listener
-      el.addEventListener('click',function(){
-        this.closest(".listtree").__vnode.ctx.emit('clickFolder', el.closest(".cb-room").getAttribute('path'));
+      el.addEventListener('click',() => {
+        // this.closest(".listtree").__vnode.ctx.emit('clickFolder', el.closest(".cb-room").getAttribute('path'));
+        this.$emit('clickFolder', el.closest(".cb-room").getAttribute('path'));
       })
       el.clickFolderListener = true
     }
@@ -95,8 +96,9 @@ function render(stringhtml) {
     if (!el.clickFilenameListener) {
       // add here listener
       // el.addEventListener('click',() => console.log('click Filename: ', el.closest(".cb-room").cbWindow.cbValue), getCsdbData(el.closest(".cb-room").cbWindow.cbValue))
-      el.addEventListener('click', function(){
-        this.closest(".listtree").__vnode.ctx.emit('clickFilename', el.closest(".cb-room").cbWindow.cbValue);
+      el.addEventListener('click', () => {
+        // this.closest(".listtree").__vnode.ctx.emit('clickFilename', el.closest(".cb-room").cbWindow.cbValue);
+        this.$emit('clickFilename', el.closest(".cb-room").cbWindow.cbValue);
       });
       el.clickFilenameListener = true
     }
