@@ -4,6 +4,7 @@ import {
 } from "../util/helper"
 import axios from 'axios';
 import routes from '../../routes.json';
+import { parseCsdbDataFromUri } from '../util/S1000DHelper';
 
 /**
  * HOW TO USE
@@ -158,11 +159,7 @@ function searching(evtTarget) {
 function setResults(type, data) {
   if(type === 'csdbs'){
     data.csdbs.forEach((csdb,i) => {
-        data.csdbs[i] = {
-        storage: csdb[0],
-        path: csdb[1],
-        filename: csdb[2],
-      }
+      data.csdbs[i] = parseCsdbDataFromUri(csdb,'s1000d:');
     })
   }
   return type ? (

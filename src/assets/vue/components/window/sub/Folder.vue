@@ -100,6 +100,7 @@ export default {
       open: {},
       componentId: Randomstring.generate({ charset: 'alphabetic' }),
       selectionMode: false,
+      validateMenuTriggerId: Randomstring.generate({ charset: 'alphabetic' }),
     }
   },
   props: {
@@ -364,20 +365,16 @@ export default {
       // }
     },
     validate: async function (type) {
-      alert("validate by " + type);
-      // let route;
-      // switch (type) {
-      //   case 'brex':
-      //     route = RoutesWeb.get('api.validate_by_brex', {
-      //       filename: await this.CB.value(),
-      //     });
-      //     break;
-      //   default:
-      //     break;
-      // }
-      // axios({
-      //   route: route
-      // });
+      const cbHome = this.$el.querySelector(".cb-home");
+      let filename = cbHome.cbValues;
+      if (!filename.length) {
+        if (cbHome.current.cbWindow) filename = cbHome.current.cbWindow.cbValue;
+        else return;
+      }
+      switch (type) {
+        case 'brex': axios.get("/api/s1000d/csdb/validatebrex?filename=" + filename.toString()); break;
+        case 'xsi': axios.get("/api/s1000d/csdb/validatexsi?filename=" + filename.toString()); break;
+      }
     },
     // checkbox
     select: select,
@@ -484,6 +481,9 @@ export default {
         <div v-if="!selectionMode" class="list" @click="edit">
           <div>edit</div>
         </div>
+        <div class="list">
+          <div :id="validateMenuTriggerId" class="w-full">validate</div>
+        </div>
         <div class="list" @click="deleteObject">
           <div>delete</div>
         </div>
@@ -507,5 +507,15 @@ export default {
         <div>refresh</div>
       </div>
     </FloatMenu>
+    
+    <FloatMenu level="1" :use-copy-btn="false" :trigger="[{ triggerId: validateMenuTriggerId, on: 'click'}]">
+      <div class="list" @click="validate('xsi')">
+        <div>by xsi</div>
+      </div>
+      <div class="list" @click="validate('brex')">
+        <div>by brex</div>
+      </div>
+    </FloatMenu>
+    
   </div>
 </template>

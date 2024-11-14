@@ -253,17 +253,17 @@ export { installCheckbox };
 // ##### dibawah ini fungsi fungsi untuk mempermudah vue component yang biasa dipaka
 
 function cancel() {
-  const cbHome = top.FloatMenu.anchor.closest(".cb-home");
+  const cbHome = top.FloatMenu.event.target.closest(".cb-home");
   if (cbHome) hideAll(cbHome);
 }
 function select() {
-  const cbHome = top.FloatMenu.anchor.closest(".cb-home");
+  const cbHome = top.FloatMenu.event.target.closest(".cb-home");
   if (cbHome) {
-    const checked = push(top.FloatMenu.anchor);
+    const checked = push(top.FloatMenu.event.target);
     showAll(cbHome);
 
-    if (top.FloatMenu.anchor.closest(".cb-room").querySelector('.cb-window-all')) {
-      const cbWindows = top.FloatMenu.anchor.closest('.cb-home').querySelectorAll(".cb-window input[type=checkbox]");
+    if (top.FloatMenu.event.target.closest(".cb-room").querySelector('.cb-window-all')) {
+      const cbWindows = top.FloatMenu.event.target.closest('.cb-home').querySelectorAll(".cb-window input[type=checkbox]");
       for (let i = 0; i < cbWindows.length; i++) {
         cbWindows[i].checked = checked;
       }

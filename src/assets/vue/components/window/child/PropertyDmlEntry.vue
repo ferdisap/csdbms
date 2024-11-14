@@ -2,6 +2,7 @@
 import Property from './Property.vue'
 import Remarks from '../../sub/Remarks.vue';
 import { addSetLogic } from '../../../../js/util/ObjectProperty';
+import { installDropdown } from '../../../../js/plugin/Dropdown';
 
 function style() {
   const t = ((top.innerHeight / 2) - 400);
@@ -29,6 +30,9 @@ export default {
       }
       return value;
     })
+
+    document.querySelectorAll("[dd-input]").forEach(input => installDropdown(input));
+    installDropdown
   },
 }
 </script>
@@ -47,7 +51,8 @@ export default {
           <div class="relative text-left mb-2 mt-2">
             <label class="block font-semibold ml-1 mb-1">Entry Ident:</label>
             <input placeholder="DMC-..." type="text" class="p-2 w-96 ml-1 inline text-sm rounded-md bg-slate-50 border"
-              name="entryIdent" dd-input="filename,path" dd-type="csdbs" dd-route="api.get_object_csdbs" dd-target="self">
+              name="entryIdent" 
+              dd-input="filename,path" dd-target="self" dd-type="csdbs" dd-route="api.get_csdbs">
           </div>
           <div class="relative text-left mb-2 mt-2">
             <label class="block font-semibold ml-1 mb-1">Entry Type:</label>
@@ -86,7 +91,7 @@ export default {
             <!-- <input dd-input="enterprise,path" dd-type="csdbs" dd-route="api.get_object_csdbs" dd-target="self,modal_enterpriseCode" -->
             <input name="enterpriseName" placeholder="find name" type="text"
               class="ml-1 w-80 p-2 inline bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              dd-input="name,code.name" dd-type="enterprises" dd-route="api.get_enterprises"
+              dd-input="name,code.name" dd-type="enterprises" dd-route="api.lists_enterprise"
               dd-target="self,modal_enterpriseCode">
             <input name="enterpriseCode" id="modal_enterpriseCode" placeholder="find code" type="text"
               class="ml-1 w-32 p-2 inline bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">

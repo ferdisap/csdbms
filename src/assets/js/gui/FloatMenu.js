@@ -39,8 +39,8 @@ export default class FloatMenu {
     // document.addEventListener('pointerdown', ()=> console.log('BB'))
     // document.addEventListener('click', ()=> console.log('cc'))
     
-    // document.addEventListener('click', ()=> this.off())
-    document.addEventListener('click', ()=> this.off(), true);
+    document.addEventListener('click', ()=> this.off())
+    // document.addEventListener('click', ()=> this.off(), true);
     // document.addEventListener('pointerup', ()=> this.off())
     // document.addEventListener('contextmenu', ()=>this.off(),true); // kalau capture artinya akan di listen oleh top to bottom element
     // document.addEventListener('contextmenu', ()=>this.off()); // kalau capture artinya akan di listen oleh top to bottom element
@@ -80,21 +80,25 @@ export default class FloatMenu {
     triggerElement.addEventListener(eventName, (e) => {
       e.stopPropagation();
       e.preventDefault();
-      this.anchor = e.target;
+      // this.anchor = e.target;
       this.event = e;
 
       const previousId = this.active[level];
       let currentMenu = document.getElementById(triggerElement.menu[eventName]);
       let previousMenu = document.getElementById(previousId);
 
-      if(
-        (eventName === 'mouseover' || eventName === 'pointerover')
-        && previousMenu
-        && previousMenu.style.display !== 'none'
-      ){
+      if(!level && previousMenu && previousMenu.style.display !== 'none') {
         previousMenu.style.display = 'none';
         return;
-      } 
+      }
+
+      if(eventName === 'mouseover' || eventName === 'pointerover'){
+        if(!currentMenu.onmouseleave) {
+          currentMenu.onmouseleave = function(event){
+            this.style.display = 'none';
+          }
+        }
+      }
 
       // turn off previous
       if(previousMenu) {
@@ -120,13 +124,13 @@ export default class FloatMenu {
     if ((windowWidth - clickCoordsX) < menuWidth) {
       menu.style.left = windowWidth - menuWidth + "px";
     } else {
-      menu.style.left = clickCoordsX + "px";
+      menu.style.left = (clickCoordsX - 10) + "px";
     }
 
     if ((windowHeight - clickCoordsY) < menuHeight) {
       menu.style.top = windowHeight - menuHeight + "px";
     } else {
-      menu.style.top = clickCoordsY + "px";
+      menu.style.top = (clickCoordsY - 10) + "px";
     }
   }
 
@@ -180,9 +184,6 @@ export default class FloatMenu {
     const menu = document.getElementById(menuId);
     menu.style.display = '';
     this.active[menu.level] = undefined;
-
-    console.log(window.getSelection().type === 'Range');
-
     if(window.getSelection().type === 'Range'){
       menu.copiable = true;
     }

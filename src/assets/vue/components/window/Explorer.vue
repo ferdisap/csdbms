@@ -28,8 +28,8 @@ export default {
     }
   },
   mounted(){
-    // top.exp = this;
-    // top.auth = this.auth;
+    top.exp = this;
+    top.auth = auth;
   }
 }
 </script> 

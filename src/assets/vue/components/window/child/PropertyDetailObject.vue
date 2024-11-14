@@ -4,6 +4,8 @@ import Property from './Property.vue';
 import Comment from '../sub/Comment.vue';
 import axios from 'axios';
 import { openFile } from '../sub/Folder.vue';
+import { auth } from '../../../../js/Auth';
+import config from '../../../../config.json'
 
 function style() {
   const t = ((top.innerHeight / 2) - 400);
@@ -37,10 +39,17 @@ export default {
   },
   methods: {
     requestData(navName) {
+      // const url = new URL(config.CSDB_HOST + "/api/s1000d/ident/" + this.$props.filename);
+      // if(this.$props.access_key) url.searchParams.set('access_key', this.$props.access_key);
+      // if(auth().user.accessKey) url.searchParams.set('user_access_key', auth().user.accessKey.key);
+      let url = "/api/s1000d/ident/" + this.$props.filename;
+      if(this.$props.access_key) url += '?access_key=' + this.$props.access_key; 
+      else if(auth().user.accessKey) url += '?user_access_key=' + auth().user.accessKey.key; 
+
       switch (navName) {
         case 'ident':
           if (!this.data.ident) axios({
-            url: "/api/s1000d/ident/" + this.$props.filename + '?access_key=' + this.$props.access_key, method: 'GET', params: this.$props.route.params
+            url: url, method: 'GET', params: this.$props.route.params
           }).then((response) => {
             if (response.status === 204) {
               this.fetching = 'Not available.'

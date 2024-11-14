@@ -1,9 +1,30 @@
 import jp from 'jsonpath';
 import axios from 'axios';
 
+/**
+ * @deprecated
+ * @param {} fullPath 
+ * @returns 
+ */
 function getCsdbData(fullPath){
   //const fulPath = `CSDB/DML/DML-MALE-0001Z-P-2024-00004_000-01.xml`;
   const m = /([\w\/]+)\/(?<=\/)([\w\-.]+)|([\w\/]+)/.exec(fullPath).filter(v => v);
+  if(m[2] && !m[2].includes(".")) {
+    m[1] += "/" + m[2];
+    m[2] = undefined;
+  }
+  return {
+      path: m[1],
+      filename: m[2]
+      
+  }
+}
+
+function parseCsdbDataFromUri(fullPath, protocol = ''){
+  //fullPath = `CSDB/DML/DML-MALE-0001Z-P-2024-00004_000-01.xml`;
+  //fullPath = `s1000d:CSDB/DML/DML-MALE-0001Z-P-2024-00004_000-01.xml`;
+  const regex = new RegExp(protocol + "([\\w\\/]+)\\/(?<=\\/)([\\w\\-.]+)|([\\w\\/]+)");
+  const m = regex.exec(fullPath).filter(v => v);
   if(m[2] && !m[2].includes(".")) {
     m[1] += "/" + m[2];
     m[2] = undefined;
@@ -171,4 +192,6 @@ export {
   fetchJsonFile, jsonFileGetRemarks,
   resolve_dmIdent, resolve_dmlIdent, resolve_pmIdent, resolve_commentIdent, resolve_infoEntityIdent,
   resolve_pmCode, resolve_dmCode, resolve_dmlCode, resolve_commentCode, resolve_ddnCode,
-  resolve_issueInfo, resolve_issueDate, resolve_language};
+  resolve_issueInfo, resolve_issueDate, resolve_language,
+  parseCsdbDataFromUri
+};

@@ -17,7 +17,7 @@ export default {
     useCopyBtn: {
       type: Boolean,
       default: true
-    }
+    },
   },
   methods: {
     copy: function () {
@@ -63,6 +63,9 @@ export default {
         return value;
       });
     }
+    // this.$el.addEventListener('mouseleave',(e) =>{
+    //   console.log(e.target);
+    // })
   }
 }
 </script>

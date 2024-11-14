@@ -7,6 +7,7 @@ import TitleBar from '../gui/TitleBar.vue';
 import axios from 'axios';
 import { formDataToObject } from "../../../js/util/helper";
 import ContinuousLoadingCircle from "../sub/ContinuousLoadingCircle.vue";
+import { auth } from "../../../js/Auth";
 
 /**
  * cara pakai:
@@ -85,6 +86,9 @@ export default {
     filename: {
       type: String
     },
+    access_key: {
+      type: String
+    },
     path: {
       type: String
     },
@@ -114,8 +118,12 @@ export default {
   },
   mounted() {
     this.editor.attachEditor();
-    if(this.$props.filename) this.editor.fetchRaw(this.$props.filename, this.$props.route.params);
-    top.xmled = this;
+    if(this.$props.filename) this.editor.fetchRaw(this.$props.filename, Object.assign(this.$props.route, {
+      access_key: decodeURIComponent(this.$props.access_key), 
+      user_access_key: auth().user.accessKey.key
+    }));
+    // top.xmled = this;
+    // top.auth = auth;
   },
 }
 </script>
